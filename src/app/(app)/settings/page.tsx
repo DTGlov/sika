@@ -11,14 +11,15 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { useProfile } from '@/hooks/use-profile';
 import { useTransactionStore } from '@/stores/transaction-store';
+import { totalMonthlyIncome } from '@/lib/income';
+import { formatGHS } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CURRENCY_SYMBOL } from '@/lib/constants';
+import { IncomeSourcesSection } from '@/components/settings/income-sources-section';
 import type { Category } from '@/types';
 
 const profileSchema = z.object({
-  monthly_income: z.number().min(1, 'Required'),
   needs_percent: z.number().min(0).max(100),
   wants_percent: z.number().min(0).max(100),
   future_percent: z.number().min(0).max(100),
@@ -31,7 +32,7 @@ type ProfileForm = z.infer<typeof profileSchema>;
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, profile, reset } = useAuthStore();
+  const { user, profile, incomeSources, reset } = useAuthStore();
   const { setCategories, categories } = useTransactionStore();
   const { refetch } = useProfile();
   const supabase = createClient();
@@ -48,7 +49,6 @@ export default function SettingsPage() {
   useEffect(() => {
     if (profile) {
       resetForm({
-        monthly_income: profile.monthly_income,
         needs_percent: profile.needs_percent,
         wants_percent: profile.wants_percent,
         future_percent: profile.future_percent,
@@ -102,29 +102,28 @@ export default function SettingsPage() {
   }
 
   const activeCats = categories.filter((c) => !c.is_archived);
+  const totalIncome = totalMonthlyIncome(incomeSources);
 
   return (
     <div className="max-w-2xl mx-auto pb-24">
       <div className="px-4 pt-6 md:px-8">
         <h1 className="text-2xl font-bold text-[#FAFAFA] mb-6">Settings</h1>
 
+        {/* Income Sources */}
+        <div className="mb-6">
+          <IncomeSourcesSection />
+        </div>
+
         <form onSubmit={handleSubmit(onSaveProfile)} className="space-y-6">
-          {/* Income */}
+          {/* Total Monthly Income (read-only) */}
           <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-            <h2 className="text-[#FAFAFA] font-semibold mb-4">Monthly Income</h2>
-            <div className="space-y-1.5">
-              <Label className="text-[#A1A1AA] text-sm">Income ({CURRENCY_SYMBOL})</Label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono">{CURRENCY_SYMBOL}</span>
-                <Input
-                  type="number"
-                  min="1"
-                  step="0.01"
-                  className="h-12 pl-8 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
-                  {...register('monthly_income', { valueAsNumber: true })}
-                />
-              </div>
-              {errors.monthly_income && <p className="text-[#F43F5E] text-xs">{errors.monthly_income.message}</p>}
+            <h2 className="text-[#FAFAFA] font-semibold mb-1">Total Monthly Income</h2>
+            <p className="text-[#71717A] text-xs mb-3">Computed from your active income sources above</p>
+            <div className="h-12 px-4 bg-[#1C1C1F] border border-[#27272A] rounded-xl flex items-center">
+              <span className="text-[#A1A1AA] font-mono mr-2">₵</span>
+              <span className="text-[#FAFAFA] font-semibold text-base">
+                {totalIncome > 0 ? totalIncome.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
+              </span>
             </div>
           </div>
 
@@ -136,6 +135,7 @@ export default function SettingsPage() {
               {(['needs', 'wants', 'future'] as const).map((bucket) => {
                 const colors = { needs: '#00D9A3', wants: '#FBBF24', future: '#60A5FA' };
                 const labels = { needs: 'Needs', wants: 'Wants', future: 'Future' };
+                const pct = profile ? (profile[`${bucket}_percent`] as number) : 0;
                 return (
                   <div key={bucket} className="space-y-1.5">
                     <Label className="text-xs" style={{ color: colors[bucket] }}>{labels[bucket]}</Label>
@@ -146,6 +146,11 @@ export default function SettingsPage() {
                       className="h-10 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] text-center amount"
                       {...register(`${bucket}_percent`, { valueAsNumber: true })}
                     />
+                    {totalIncome > 0 && (
+                      <p className="text-[#52525B] text-[10px] text-center">
+                        {formatGHS((totalIncome * pct) / 100)}
+                      </p>
+                    )}
                   </div>
                 );
               })}

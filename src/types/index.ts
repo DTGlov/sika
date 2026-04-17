@@ -1,5 +1,19 @@
 export type TransactionType = 'expense' | 'income' | 'transfer';
 export type BucketName = 'needs' | 'wants' | 'future';
+export type IncomeFrequency = 'monthly' | 'weekly' | 'biweekly' | 'irregular';
+
+export interface IncomeSource {
+  id: string;
+  user_id: string;
+  name: string;
+  amount: number;
+  frequency: IncomeFrequency;
+  expected_day: number | null;
+  is_active: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface Profile {
   id: string;

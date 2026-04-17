@@ -4,19 +4,47 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles, ChevronRight, ChevronLeft, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
-import { DEFAULT_MONTHLY_INCOME, CURRENCY_SYMBOL } from '@/lib/constants';
+import { CURRENCY_SYMBOL } from '@/lib/constants';
+import {
+  calculateMonthlyEquivalent,
+  totalMonthlyIncome,
+  FREQUENCY_LABELS,
+  FREQUENCY_COLORS,
+} from '@/lib/income';
+import { formatGHS } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import type { IncomeFrequency, IncomeSource } from '@/types';
 
-const schema = z.object({
-  monthly_income: z.number().min(1, 'Enter a valid income'),
+type TempSource = {
+  _key: string;
+  name: string;
+  amount: number;
+  frequency: IncomeFrequency;
+  expected_day: number | null;
+};
+
+const FREQUENCIES: IncomeFrequency[] = ['monthly', 'weekly', 'biweekly', 'irregular'];
+
+const EXTRA_TEMPLATES: TempSource[] = [
+  { _key: 'weekly-allowance', name: 'Weekly Allowance', amount: 600, frequency: 'weekly', expected_day: 1 },
+  { _key: 'monthly-allowance', name: 'Monthly Allowance', amount: 2600, frequency: 'irregular', expected_day: null },
+  { _key: 'side-hustle', name: 'Side Hustle', amount: 1000, frequency: 'irregular', expected_day: null },
+  { _key: 'benefit', name: 'Benefit / Subsidy', amount: 500, frequency: 'monthly', expected_day: 1 },
+];
+
+const primarySchema = z.object({
+  name: z.string().min(1, 'Required').max(50),
+  amount: z.number().positive('Must be greater than 0'),
+  frequency: z.enum(['monthly', 'weekly', 'biweekly', 'irregular']),
 });
 
-type FormValues = z.infer<typeof schema>;
+type PrimaryForm = z.infer<typeof primarySchema>;
 
 interface OnboardingModalProps {
   open: boolean;
@@ -24,27 +52,93 @@ interface OnboardingModalProps {
 }
 
 export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
-  const { user, setProfile } = useAuthStore();
+  const { user, setProfile, setIncomeSources } = useAuthStore();
   const supabase = createClient();
+
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [primarySource, setPrimarySource] = useState<TempSource | null>(null);
+  const [extraSources, setExtraSources] = useState<TempSource[]>([]);
+  const [saving, setSaving] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting, errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { monthly_income: DEFAULT_MONTHLY_INCOME },
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<PrimaryForm>({
+    resolver: zodResolver(primarySchema),
+    defaultValues: { name: 'Salary', amount: 9000, frequency: 'monthly' },
   });
 
-  async function onSubmit(values: FormValues) {
-    if (!user) return;
-    const { data } = await supabase
+  const frequency = watch('frequency');
+
+  function addTemplate(t: TempSource) {
+    if (!extraSources.find(s => s._key === t._key)) {
+      setExtraSources(prev => [...prev, t]);
+    }
+  }
+
+  function removeExtra(key: string) {
+    setExtraSources(prev => prev.filter(s => s._key !== key));
+  }
+
+  function onPrimarySubmit(values: PrimaryForm) {
+    setPrimarySource({ _key: 'primary', ...values, expected_day: null });
+    setStep(3);
+  }
+
+  async function handleFinish() {
+    if (!user || !primarySource) return;
+    setSaving(true);
+
+    const all = [primarySource, ...extraSources];
+    const toInsert = all.map(s => ({
+      user_id: user.id,
+      name: s.name,
+      amount: s.amount,
+      frequency: s.frequency,
+      expected_day: s.expected_day,
+      is_active: true,
+      notes: null,
+    }));
+
+    const { data: savedSources, error } = await supabase
+      .from('income_sources')
+      .insert(toInsert)
+      .select();
+
+    if (error) {
+      setSaving(false);
+      return;
+    }
+
+    const sources = savedSources as IncomeSource[];
+    const total = totalMonthlyIncome(sources);
+
+    const { data: updatedProfile } = await supabase
       .from('profiles')
-      .update({ monthly_income: values.monthly_income, updated_at: new Date().toISOString() })
+      .update({ monthly_income: total, updated_at: new Date().toISOString() })
       .eq('id', user.id)
       .select()
       .single();
-    if (data) setProfile(data);
+
+    if (updatedProfile) setProfile(updatedProfile);
+    setIncomeSources(sources);
+    setSaving(false);
+    onClose();
+  }
+
+  const allSources = primarySource ? [primarySource, ...extraSources] : [];
+  const totalMonthly = allSources.reduce(
+    (sum, s) => sum + calculateMonthlyEquivalent(s.amount, s.frequency),
+    0
+  );
+
+  function handleClose() {
+    setStep(1);
+    setPrimarySource(null);
+    setExtraSources([]);
     onClose();
   }
 
@@ -59,51 +153,246 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 24 }}
+            key={step}
+            initial={{ opacity: 0, scale: 0.94, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 24 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+            exit={{ opacity: 0, scale: 0.94, y: 16 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
             className="relative z-10 bg-[#141416] border border-[#27272A] rounded-2xl p-6 w-full max-w-sm"
           >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-[#00D9A3]/10 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-[#00D9A3]" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-[#FAFAFA]">One quick thing</h2>
-                <p className="text-[#A1A1AA] text-xs">What&apos;s your monthly income?</p>
-              </div>
+            {/* Step indicator */}
+            <div className="flex items-center gap-1.5 mb-5">
+              {([1, 2, 3, 4] as const).map(s => (
+                <div
+                  key={s}
+                  className="h-1 rounded-full transition-all"
+                  style={{
+                    flex: s === step ? 2 : 1,
+                    backgroundColor: s <= step ? '#00D9A3' : '#27272A',
+                  }}
+                />
+              ))}
             </div>
 
-            <p className="text-[#71717A] text-sm mb-5">
-              This lets Sika calculate your 50/30/20 split and show how you&apos;re tracking.
-            </p>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono font-medium">
-                  {CURRENCY_SYMBOL}
-                </span>
-                <Input
-                  type="number"
-                  min="1"
-                  step="0.01"
-                  className="h-12 pl-8 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] focus-visible:border-[#00D9A3] text-base amount"
-                  {...register('monthly_income', { valueAsNumber: true })}
-                />
+            {/* Step 1: Intro */}
+            {step === 1 && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-[#00D9A3]/10 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-[#00D9A3]" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-[#FAFAFA]">How do you earn?</h2>
+                    <p className="text-[#A1A1AA] text-xs">Let&apos;s set up your income</p>
+                  </div>
+                </div>
+                <p className="text-[#71717A] text-sm mb-6">
+                  Sika tracks multiple income sources — salary, allowances, side income — so your 50/30/20 split always reflects your real situation.
+                </p>
+                <Button
+                  onClick={() => setStep(2)}
+                  className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+                >
+                  Add my income <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+                <button
+                  onClick={handleClose}
+                  className="w-full mt-3 text-[#52525B] text-sm hover:text-[#71717A] transition-colors"
+                >
+                  I&apos;ll do this later
+                </button>
               </div>
-              {errors.monthly_income && (
-                <p className="text-[#F43F5E] text-xs">{errors.monthly_income.message}</p>
-              )}
+            )}
 
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold text-base rounded-xl"
-              >
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Let's go →"}
-              </Button>
-            </form>
+            {/* Step 2: Primary income */}
+            {step === 2 && (
+              <div>
+                <button
+                  onClick={() => setStep(1)}
+                  className="flex items-center gap-1 text-[#71717A] text-sm mb-4 hover:text-[#A1A1AA] transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back
+                </button>
+                <h2 className="text-lg font-bold text-[#FAFAFA] mb-1">Primary income</h2>
+                <p className="text-[#71717A] text-xs mb-5">Your main source of earnings</p>
+
+                <form onSubmit={handleSubmit(onPrimarySubmit)} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[#A1A1AA] text-sm">Source name</Label>
+                    <Input
+                      placeholder="e.g. Salary"
+                      className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#52525B] focus-visible:ring-[#00D9A3]"
+                      {...register('name')}
+                    />
+                    {errors.name && <p className="text-[#F43F5E] text-xs">{errors.name.message}</p>}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-[#A1A1AA] text-sm">Amount ({CURRENCY_SYMBOL})</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">{CURRENCY_SYMBOL}</span>
+                      <Input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        className="h-11 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                        {...register('amount', { valueAsNumber: true })}
+                      />
+                    </div>
+                    {errors.amount && <p className="text-[#F43F5E] text-xs">{errors.amount.message}</p>}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-[#A1A1AA] text-sm">Frequency</Label>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {FREQUENCIES.map(f => (
+                        <button
+                          key={f}
+                          type="button"
+                          onClick={() => setValue('frequency', f)}
+                          className="h-9 rounded-lg text-xs font-medium transition-colors"
+                          style={
+                            frequency === f
+                              ? { backgroundColor: FREQUENCY_COLORS[f] + '22', color: FREQUENCY_COLORS[f], borderWidth: 1, borderColor: FREQUENCY_COLORS[f] }
+                              : { backgroundColor: '#1C1C1F', color: '#71717A', borderWidth: 1, borderColor: '#27272A' }
+                          }
+                        >
+                          {f === 'biweekly' ? 'Bi-wk' : FREQUENCY_LABELS[f]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+                  >
+                    Continue <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </form>
+              </div>
+            )}
+
+            {/* Step 3: Any other income? */}
+            {step === 3 && (
+              <div>
+                <button
+                  onClick={() => setStep(2)}
+                  className="flex items-center gap-1 text-[#71717A] text-sm mb-4 hover:text-[#A1A1AA] transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back
+                </button>
+                <h2 className="text-lg font-bold text-[#FAFAFA] mb-1">Any other income?</h2>
+                <p className="text-[#71717A] text-xs mb-4">Add more sources or skip — you can always add them in Settings</p>
+
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {EXTRA_TEMPLATES.map(t => {
+                    const added = extraSources.some(s => s._key === t._key);
+                    return (
+                      <button
+                        key={t._key}
+                        onClick={() => added ? removeExtra(t._key) : addTemplate(t)}
+                        className="text-left p-3 rounded-xl border transition-all"
+                        style={{
+                          borderColor: added ? '#00D9A3' : '#27272A',
+                          backgroundColor: added ? '#00D9A3' + '11' : '#1C1C1F',
+                        }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <p className="text-[#FAFAFA] text-xs font-medium leading-tight">{t.name}</p>
+                          {added && <Check className="w-3 h-3 text-[#00D9A3] shrink-0 ml-1" />}
+                        </div>
+                        <p className="text-[#71717A] text-xs mt-0.5">{FREQUENCY_LABELS[t.frequency]}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {extraSources.length > 0 && (
+                  <div className="space-y-1.5 mb-4">
+                    {extraSources.map(s => (
+                      <div key={s._key} className="flex items-center justify-between px-3 py-2 bg-[#1C1C1F] rounded-lg">
+                        <div>
+                          <span className="text-[#FAFAFA] text-xs font-medium">{s.name}</span>
+                          <span className="text-[#71717A] text-xs ml-2">{formatGHS(s.amount)} · {FREQUENCY_LABELS[s.frequency]}</span>
+                        </div>
+                        <button onClick={() => removeExtra(s._key)} className="text-[#52525B] hover:text-[#F43F5E] ml-2 transition-colors">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <Button
+                  onClick={() => setStep(4)}
+                  className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+                >
+                  {extraSources.length > 0 ? 'Continue' : 'Skip for now'} <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            )}
+
+            {/* Step 4: Review */}
+            {step === 4 && (
+              <div>
+                <button
+                  onClick={() => setStep(3)}
+                  className="flex items-center gap-1 text-[#71717A] text-sm mb-4 hover:text-[#A1A1AA] transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back
+                </button>
+                <h2 className="text-lg font-bold text-[#FAFAFA] mb-1">Your monthly income</h2>
+                <div className="text-3xl font-bold text-[#00D9A3] mb-5">
+                  {formatGHS(totalMonthly)}
+                </div>
+
+                <div className="space-y-1.5 mb-5">
+                  {allSources.map(s => {
+                    const eq = calculateMonthlyEquivalent(s.amount, s.frequency);
+                    return (
+                      <div key={s._key} className="flex items-center justify-between px-3 py-2 bg-[#1C1C1F] rounded-lg">
+                        <div>
+                          <span className="text-[#FAFAFA] text-xs font-medium">{s.name}</span>
+                          <span className="text-[#71717A] text-xs ml-2">{FREQUENCY_LABELS[s.frequency]}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[#FAFAFA] text-xs">{formatGHS(s.amount)}</span>
+                          {s.frequency !== 'monthly' && s.frequency !== 'irregular' && (
+                            <p className="text-[#52525B] text-[10px]">≈ {formatGHS(eq)}/mo</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Bucket preview */}
+                <div className="bg-[#1C1C1F] rounded-xl p-3 mb-5">
+                  <p className="text-[#71717A] text-xs mb-2">50/30/20 split</p>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    {([
+                      { label: 'Needs', pct: 50, color: '#00D9A3' },
+                      { label: 'Wants', pct: 30, color: '#FBBF24' },
+                      { label: 'Future', pct: 20, color: '#60A5FA' },
+                    ] as const).map(b => (
+                      <div key={b.label}>
+                        <p className="text-[10px]" style={{ color: b.color }}>{b.label}</p>
+                        <p className="text-[#FAFAFA] text-xs font-semibold">{formatGHS((totalMonthly * b.pct) / 100)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleFinish}
+                  disabled={saving}
+                  className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Looks good, let's start →"}
+                </Button>
+              </div>
+            )}
           </motion.div>
         </div>
       )}

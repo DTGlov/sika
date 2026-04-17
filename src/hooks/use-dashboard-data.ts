@@ -4,9 +4,10 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { startOfMonth, endOfMonth, subMonths, subDays, format } from 'date-fns';
 import type { DashboardStats, Transaction, BucketName } from '@/types';
+import { totalMonthlyIncome } from '@/lib/income';
 
 export function useDashboardData() {
-  const { user, profile } = useAuthStore();
+  const { user, profile, incomeSources } = useAuthStore();
   const { setDashboardStats, setCategories } = useTransactionStore();
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
@@ -66,10 +67,13 @@ export function useDashboardData() {
       .reduce((s, t) => s + t.amount, 0);
 
     const bucketSpend: Record<BucketName, number> = { needs: 0, wants: 0, future: 0 };
+    const monthlyIncome = incomeSources.length > 0
+      ? totalMonthlyIncome(incomeSources)
+      : profile.monthly_income;
     const bucketLimits: Record<BucketName, number> = {
-      needs: (profile.monthly_income * profile.needs_percent) / 100,
-      wants: (profile.monthly_income * profile.wants_percent) / 100,
-      future: (profile.monthly_income * profile.future_percent) / 100,
+      needs: (monthlyIncome * profile.needs_percent) / 100,
+      wants: (monthlyIncome * profile.wants_percent) / 100,
+      future: (monthlyIncome * profile.future_percent) / 100,
     };
 
     const bucketMap = new Map((buckets ?? []).map((b) => [b.id, b.name as BucketName]));
@@ -107,7 +111,7 @@ export function useDashboardData() {
 
     setDashboardStats(stats);
     setLoading(false);
-  }, [user, profile, supabase, setDashboardStats, setCategories]);
+  }, [user, profile, incomeSources, supabase, setDashboardStats, setCategories]);
 
   useEffect(() => {
     fetchData();

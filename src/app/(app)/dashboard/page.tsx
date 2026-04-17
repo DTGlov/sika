@@ -12,29 +12,69 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { useDashboardData } from '@/hooks/use-dashboard-data';
 import { useProfile } from '@/hooks/use-profile';
+import { totalMonthlyIncome, FREQUENCY_LABELS } from '@/lib/income';
+import { formatGHS, formatGHSCompact } from '@/lib/utils';
 import type { BucketName } from '@/types';
 
 const BUCKETS: BucketName[] = ['needs', 'wants', 'future'];
 
 export default function DashboardPage() {
-  const { profile } = useAuthStore();
+  const { profile, incomeSources } = useAuthStore();
   const { dashboardStats } = useTransactionStore();
   const { loading } = useDashboardData();
   useProfile();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showIncomeBreakdown, setShowIncomeBreakdown] = useState(false);
 
   useEffect(() => {
-    if (profile && profile.monthly_income === 0) {
+    if (profile && profile.monthly_income === 0 && incomeSources.length === 0) {
       setShowOnboarding(true);
     }
-  }, [profile]);
+  }, [profile, incomeSources]);
+
+  const monthlyIncome = incomeSources.length > 0
+    ? totalMonthlyIncome(incomeSources)
+    : profile?.monthly_income ?? 0;
+
+  const activeSources = incomeSources.filter(s => s.is_active);
 
   return (
     <div className="max-w-2xl mx-auto pb-24">
       <TopBar />
 
       <div className="px-4 md:px-8 space-y-4">
+        {/* Income summary row */}
+        {monthlyIncome > 0 && (
+          <div className="relative">
+            <button
+              onClick={() => setShowIncomeBreakdown(v => !v)}
+              className="flex items-center gap-2 text-sm text-[#71717A] hover:text-[#A1A1AA] transition-colors"
+            >
+              <span className="text-[#FAFAFA] font-semibold">{formatGHS(monthlyIncome)}</span>
+              <span>/mo</span>
+              {activeSources.length > 1 && (
+                <span className="text-[#52525B] text-xs">▾</span>
+              )}
+            </button>
+
+            {showIncomeBreakdown && activeSources.length > 1 && (
+              <div className="absolute top-full left-0 mt-1 z-20 bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 shadow-xl">
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  {activeSources.map(s => (
+                    <span key={s.id} className="text-[#A1A1AA] text-xs whitespace-nowrap">
+                      {s.name} <span className="text-[#FAFAFA]">{formatGHSCompact(s.amount)}</span>
+                      {s.frequency !== 'monthly' && (
+                        <span className="text-[#52525B]"> {FREQUENCY_LABELS[s.frequency].toLowerCase()}</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Bucket rings */}
         <div className="grid grid-cols-3 gap-3">
           {loading
