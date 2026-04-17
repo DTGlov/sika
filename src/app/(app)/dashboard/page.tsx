@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { format, parse, addMonths, startOfMonth } from 'date-fns';
+import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { TopBar } from '@/components/layout/top-bar';
 import { BucketRing } from '@/components/dashboard/bucket-ring';
@@ -17,6 +17,8 @@ import { useDashboardData } from '@/hooks/use-dashboard-data';
 import { useProfile } from '@/hooks/use-profile';
 import { totalMonthlyIncome, FREQUENCY_LABELS } from '@/lib/income';
 import { formatGHS, formatGHSCompact } from '@/lib/utils';
+import { ACCOUNT_TYPE_CONFIG } from '@/lib/accounts';
+import { getCycleForDate, getCycleAtOffset, parseCycleParam, getCycleFromStartDate } from '@/lib/cycle';
 import type { BucketName } from '@/types';
 
 const BUCKETS: BucketName[] = ['needs', 'wants', 'future'];
@@ -26,24 +28,23 @@ function DashboardContent() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const currentMonthStr = format(new Date(), 'yyyy-MM');
-  const rawParam = searchParams.get('month') ?? '';
-  const selectedMonthStr = /^\d{4}-\d{2}$/.test(rawParam) ? rawParam : currentMonthStr;
-  const isCurrentMonth = selectedMonthStr === currentMonthStr;
+  const { profile, incomeSources, accounts } = useAuthStore();
+  const { dashboardStats } = useTransactionStore();
+  const cycleStartDay = profile?.cycle_start_day ?? 1;
 
-  const selectedMonthDate = parse(selectedMonthStr, 'yyyy-MM', new Date());
-  const monthLabel = format(startOfMonth(selectedMonthDate), 'MMMM yyyy');
+  const rawParam = searchParams.get('cycle') ?? '';
+  const parsedParam = parseCycleParam(rawParam);
+  const cycle = parsedParam
+    ? getCycleFromStartDate(parsedParam, cycleStartDay)
+    : getCycleForDate(new Date(), cycleStartDay);
 
-  function navigateMonth(delta: -1 | 1) {
-    const next = addMonths(selectedMonthDate, delta);
-    const nextStr = format(next, 'yyyy-MM');
-    if (delta === 1 && nextStr > currentMonthStr) return;
-    router.push(`${pathname}?month=${nextStr}`);
+  function navigateCycle(delta: -1 | 1) {
+    const next = getCycleAtOffset(cycle.start, cycleStartDay, delta);
+    if (delta === 1 && next.start > new Date()) return;
+    router.push(`${pathname}?cycle=${next.startDateStr}`);
   }
 
-  const { profile, incomeSources } = useAuthStore();
-  const { dashboardStats } = useTransactionStore();
-  const { loading } = useDashboardData(selectedMonthStr);
+  const { loading } = useDashboardData(cycle.startDateStr);
   useProfile();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -66,11 +67,11 @@ function DashboardContent() {
       <TopBar />
 
       <div className="px-4 md:px-8 space-y-4">
-        {/* Month navigation */}
+        {/* Cycle navigation */}
         <div className="flex items-center justify-between">
           <button
-            onClick={() => navigateMonth(-1)}
-            aria-label="Previous month"
+            onClick={() => navigateCycle(-1)}
+            aria-label="Previous cycle"
             className="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -78,21 +79,21 @@ function DashboardContent() {
 
           <div className="text-center">
             <h2 className="text-[#FAFAFA] font-bold text-lg leading-tight tabular-nums">
-              {monthLabel}
+              {cycle.label}
             </h2>
-            {!isCurrentMonth && (
+            {!cycle.isCurrent && (
               <span className="text-[#71717A] text-[10px] font-medium uppercase tracking-wider">
-                Viewing past month
+                Past cycle
               </span>
             )}
           </div>
 
           <button
-            onClick={() => navigateMonth(1)}
-            disabled={isCurrentMonth}
-            aria-label="Next month"
+            onClick={() => navigateCycle(1)}
+            disabled={cycle.isCurrent}
+            aria-label="Next cycle"
             className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
-            style={{ color: isCurrentMonth ? '#3F3F46' : '#71717A' }}
+            style={{ color: cycle.isCurrent ? '#3F3F46' : '#71717A' }}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -159,20 +160,54 @@ function DashboardContent() {
           ) : (
             <>
               <SpendCard
-                title={isCurrentMonth ? 'Today' : 'Last day'}
+                title={cycle.isCurrent ? 'Today' : 'Last day'}
                 amount={dashboardStats?.totalSpentToday ?? 0}
                 index={0}
               />
               <SpendCard
-                title={isCurrentMonth ? 'This Month' : monthLabel.split(' ')[0]}
+                title={cycle.isCurrent ? 'This Cycle' : cycle.label.split(' ')[0]}
                 amount={dashboardStats?.totalSpentThisMonth ?? 0}
                 compareAmount={dashboardStats?.totalSpentLastMonth}
-                compareLabel="prev month"
+                compareLabel="prev cycle"
                 index={1}
               />
             </>
           )}
         </div>
+
+        {/* Account strip */}
+        {accounts.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">Accounts</p>
+              <Link href="/accounts" className="text-[#00D9A3] text-xs hover:text-[#00F5B8] transition-colors">
+                See all
+              </Link>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {accounts.map(acc => {
+                const cfg = ACCOUNT_TYPE_CONFIG[acc.type];
+                const balance = dashboardStats?.accountBalances[acc.id] ?? acc.opening_balance;
+                return (
+                  <Link
+                    key={acc.id}
+                    href="/accounts"
+                    className="flex-shrink-0 bg-[#141416] border border-[#27272A] rounded-2xl p-3 min-w-[120px] hover:border-[#3F3F46] transition-colors"
+                    style={{ borderLeftColor: cfg.color, borderLeftWidth: 3 }}
+                  >
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <span className="text-base">{cfg.emoji}</span>
+                      <span className="text-[#A1A1AA] text-xs truncate">{acc.name}</span>
+                    </div>
+                    <p className="text-sm font-bold tabular-nums" style={{ color: cfg.color }}>
+                      {formatGHSCompact(balance)}
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Weekly chart */}
         {loading ? (

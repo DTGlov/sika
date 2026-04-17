@@ -2,12 +2,18 @@ import { useEffect, useCallback, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
-import { startOfMonth, endOfMonth, subMonths, subDays, format, parse } from 'date-fns';
+import { subDays, format } from 'date-fns';
 import type { DashboardStats, Transaction, BucketName } from '@/types';
 import { totalMonthlyIncome } from '@/lib/income';
+import {
+  getCycleForDate,
+  getCycleFromStartDate,
+  parseCycleParam,
+} from '@/lib/cycle';
+import { computeAccountBalances } from '@/lib/accounts';
 
-export function useDashboardData(selectedMonthStr?: string) {
-  const { user, profile, incomeSources } = useAuthStore();
+export function useDashboardData(cycleStartDateStr?: string) {
+  const { user, profile, incomeSources, accounts } = useAuthStore();
   const { setDashboardStats, setCategories, mutationCount } = useTransactionStore();
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
@@ -16,69 +22,77 @@ export function useDashboardData(selectedMonthStr?: string) {
     if (!user || !profile) return;
     setLoading(true);
 
-    const currentMonthStr = format(new Date(), 'yyyy-MM');
-    const monthStr = selectedMonthStr ?? currentMonthStr;
-    const isCurrentMonth = monthStr === currentMonthStr;
+    const cycleStartDay = profile.cycle_start_day ?? 1;
+    const today = new Date();
 
-    // For the current month use today as the reference point;
-    // for past months use the last day of that month so weekly charts
-    // and "today" totals reflect the end of that period.
-    const monthDate = parse(monthStr, 'yyyy-MM', new Date());
-    const now = isCurrentMonth ? new Date() : endOfMonth(monthDate);
+    // Determine the cycle window to display
+    const cycle = cycleStartDateStr
+      ? (() => {
+          const parsed = parseCycleParam(cycleStartDateStr);
+          return parsed
+            ? getCycleFromStartDate(parsed, cycleStartDay)
+            : getCycleForDate(today, cycleStartDay);
+        })()
+      : getCycleForDate(today, cycleStartDay);
 
-    const monthStart = format(startOfMonth(now), 'yyyy-MM-dd');
-    const monthEnd = format(endOfMonth(now), 'yyyy-MM-dd');
-    const today = format(now, 'yyyy-MM-dd');
-    const lastMonthStart = format(startOfMonth(subMonths(now, 1)), 'yyyy-MM-dd');
-    const lastMonthEnd = format(endOfMonth(subMonths(now, 1)), 'yyyy-MM-dd');
+    const now = cycle.isCurrent ? today : cycle.end;
+
+    const cycleStart = format(cycle.start, 'yyyy-MM-dd');
+    const cycleEnd = format(cycle.end, 'yyyy-MM-dd');
+    const todayStr = format(now, 'yyyy-MM-dd');
+    const prevCycleStart = format(getCycleAtOffsetStart(cycle.start, -1), 'yyyy-MM-dd');
+    const prevCycleEnd = format(getCycleAtOffsetEnd(cycle.start), 'yyyy-MM-dd');
     const weekAgo = format(subDays(now, 6), 'yyyy-MM-dd');
 
     const [
-      { data: monthTxns },
-      { data: lastMonthTxns },
+      { data: cycleTxns },
+      { data: prevTxns },
       { data: buckets },
       { data: cats },
+      { data: allTxnsForBalance },
     ] = await Promise.all([
       supabase
         .from('transactions')
-        .select('*, category:categories(*, bucket:budget_buckets(*))')
+        .select('*, category:categories(*, bucket:budget_buckets(*)), account:accounts!account_id(id,name,type,color,icon), to_account:accounts!to_account_id(id,name,type,color,icon)')
         .eq('user_id', user.id)
-        .gte('transaction_date', monthStart)
-        .lte('transaction_date', monthEnd)
+        .gte('transaction_date', cycleStart)
+        .lte('transaction_date', cycleEnd)
         .order('transaction_date', { ascending: false }),
       supabase
         .from('transactions')
         .select('amount, type')
         .eq('user_id', user.id)
-        .gte('transaction_date', lastMonthStart)
-        .lte('transaction_date', lastMonthEnd)
+        .gte('transaction_date', prevCycleStart)
+        .lte('transaction_date', prevCycleEnd)
         .eq('type', 'expense'),
-      supabase
-        .from('budget_buckets')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('sort_order'),
+      supabase.from('budget_buckets').select('*').eq('user_id', user.id).order('sort_order'),
       supabase
         .from('categories')
         .select('*, bucket:budget_buckets(*)')
         .or(`user_id.eq.${user.id},user_id.is.null`)
         .eq('is_archived', false)
         .order('name'),
+      supabase
+        .from('transactions')
+        .select('account_id, to_account_id, amount, type')
+        .eq('user_id', user.id),
     ]);
 
     if (cats) setCategories(cats);
 
-    const expenses = (monthTxns ?? []).filter((t) => t.type === 'expense') as Transaction[];
+    const expenses = (cycleTxns ?? []).filter((t) => t.type === 'expense') as Transaction[];
     const totalSpentThisMonth = expenses.reduce((s, t) => s + t.amount, 0);
-    const totalSpentLastMonth = (lastMonthTxns ?? []).reduce((s: number, t: { amount: number }) => s + t.amount, 0);
+    const totalSpentLastMonth = (prevTxns ?? []).reduce(
+      (s: number, t: { amount: number }) => s + t.amount,
+      0
+    );
     const totalSpentToday = expenses
-      .filter((t) => t.transaction_date === today)
+      .filter((t) => t.transaction_date === todayStr)
       .reduce((s, t) => s + t.amount, 0);
 
     const bucketSpend: Record<BucketName, number> = { needs: 0, wants: 0, future: 0 };
-    const monthlyIncome = incomeSources.length > 0
-      ? totalMonthlyIncome(incomeSources)
-      : profile.monthly_income;
+    const monthlyIncome =
+      incomeSources.length > 0 ? totalMonthlyIncome(incomeSources) : profile.monthly_income;
     const bucketLimits: Record<BucketName, number> = {
       needs: (monthlyIncome * profile.needs_percent) / 100,
       wants: (monthlyIncome * profile.wants_percent) / 100,
@@ -86,7 +100,6 @@ export function useDashboardData(selectedMonthStr?: string) {
     };
 
     const bucketMap = new Map((buckets ?? []).map((b) => [b.id, b.name as BucketName]));
-
     for (const txn of expenses) {
       const bucketId = txn.category?.bucket_id;
       if (bucketId) {
@@ -97,16 +110,16 @@ export function useDashboardData(selectedMonthStr?: string) {
 
     const weeklyMap = new Map<string, number>();
     for (let i = 6; i >= 0; i--) {
-      const d = format(subDays(now, i), 'yyyy-MM-dd');
-      weeklyMap.set(d, 0);
+      weeklyMap.set(format(subDays(now, i), 'yyyy-MM-dd'), 0);
     }
     for (const txn of expenses) {
       if (txn.transaction_date >= weekAgo) {
-        const cur = weeklyMap.get(txn.transaction_date) ?? 0;
-        weeklyMap.set(txn.transaction_date, cur + txn.amount);
+        weeklyMap.set(txn.transaction_date, (weeklyMap.get(txn.transaction_date) ?? 0) + txn.amount);
       }
     }
     const weeklySpend = Array.from(weeklyMap.entries()).map(([date, amount]) => ({ date, amount }));
+
+    const accountBalances = computeAccountBalances(accounts, allTxnsForBalance ?? []);
 
     const stats: DashboardStats = {
       totalSpentToday,
@@ -115,16 +128,31 @@ export function useDashboardData(selectedMonthStr?: string) {
       bucketSpend,
       bucketLimits,
       weeklySpend,
-      recentTransactions: (monthTxns ?? []).slice(0, 5) as Transaction[],
+      recentTransactions: (cycleTxns ?? []).slice(0, 5) as Transaction[],
+      accountBalances,
     };
 
     setDashboardStats(stats);
     setLoading(false);
-  }, [user, profile, incomeSources, selectedMonthStr, supabase, setDashboardStats, setCategories]);
+  }, [user, profile, incomeSources, accounts, cycleStartDateStr, supabase, setDashboardStats, setCategories]);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData, mutationCount]); // mutationCount triggers re-fetch after any transaction/income mutation
+  }, [fetchData, mutationCount]);
 
   return { loading, refetch: fetchData };
+}
+
+// Helpers — avoid importing addMonths just for this tiny offset calc
+function getCycleAtOffsetStart(cycleStart: Date, offset: number): Date {
+  const d = new Date(cycleStart);
+  d.setMonth(d.getMonth() + offset);
+  return d;
+}
+
+function getCycleAtOffsetEnd(cycleStart: Date): Date {
+  // Previous cycle end = day before cycleStart
+  const d = new Date(cycleStart);
+  d.setDate(d.getDate() - 1);
+  return d;
 }
