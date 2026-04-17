@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { Loader2, TrendingUp } from 'lucide-react';
+import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +39,11 @@ export default function LoginPage() {
       password: values.password,
     });
     if (error) {
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        toast.info('Please verify your email first');
+        router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
+        return;
+      }
       setServerError(error.message);
       return;
     }

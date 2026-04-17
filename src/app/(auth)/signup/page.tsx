@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { Loader2, TrendingUp } from 'lucide-react';
+import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,7 +35,7 @@ export default function SignupPage() {
 
   async function onSubmit(values: FormValues) {
     setServerError('');
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: {
@@ -43,6 +44,11 @@ export default function SignupPage() {
     });
     if (error) {
       setServerError(error.message);
+      return;
+    }
+    if (data.user && !data.session) {
+      toast.success('Account created — check your email');
+      router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
       return;
     }
     router.push('/dashboard');
@@ -125,6 +131,9 @@ export default function SignupPage() {
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create account'}
           </Button>
+          <p className="text-center text-xs text-[#71717A]">
+            We&apos;ll send you a verification email
+          </p>
         </form>
 
         <p className="mt-4 text-center text-sm text-[#71717A]">

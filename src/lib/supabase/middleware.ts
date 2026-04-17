@@ -36,7 +36,8 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/settings');
 
   const isAuthRoute = pathname.startsWith('/login') ||
-    pathname.startsWith('/signup');
+    pathname.startsWith('/signup') ||
+    pathname.startsWith('/verify-email');
 
   if (isAppRoute && !user) {
     const url = request.nextUrl.clone();
