@@ -1,5 +1,6 @@
 export type TransactionType = 'expense' | 'income' | 'transfer';
 export type BucketName = 'needs' | 'wants' | 'future';
+export type CategoryType = 'expense' | 'income' | 'adjustment' | 'transfer' | 'system';
 export type IncomeFrequency = 'monthly' | 'weekly' | 'biweekly' | 'irregular';
 
 export type { AccountType, Account, AccountRef } from './account';
@@ -49,6 +50,7 @@ export interface Category {
   icon: string | null;
   is_default: boolean;
   is_archived: boolean;
+  category_type: CategoryType;
   created_at: string;
   bucket?: BudgetBucket | null;
 }

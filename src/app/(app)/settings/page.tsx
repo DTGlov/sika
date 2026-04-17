@@ -1,36 +1,58 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Loader2, LogOut, Plus, Archive } from 'lucide-react';
-import { toast } from 'sonner';
-import { createClient } from '@/lib/supabase/client';
-import { useAuthStore } from '@/stores/auth-store';
-import { useProfile } from '@/hooks/use-profile';
-import { useTransactionStore } from '@/stores/transaction-store';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Loader2,
+  LogOut,
+  Plus,
+  Archive,
+  Pencil,
+  ChevronDown,
+} from "lucide-react";
+import { toast } from "sonner";
+import { createClient } from "@/lib/supabase/client";
+import { useAuthStore } from "@/stores/auth-store";
+import { useProfile } from "@/hooks/use-profile";
+import { useTransactionStore } from "@/stores/transaction-store";
+import { totalMonthlyIncome } from "@/lib/income";
+import { formatGHS } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { IncomeSourcesSection } from "@/components/settings/income-sources-section";
+import {
+  CategoryModal,
+  ICON_OPTIONS,
+} from "@/components/settings/category-modal";
+import type { Category } from "@/types";
 
-import { totalMonthlyIncome } from '@/lib/income';
-import { formatGHS } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { IncomeSourcesSection } from '@/components/settings/income-sources-section';
-import type { Category } from '@/types';
-
-const profileSchema = z.object({
-  needs_percent: z.number().min(0).max(100),
-  wants_percent: z.number().min(0).max(100),
-  future_percent: z.number().min(0).max(100),
-  cycle_start_day: z.number().int().min(1).max(28),
-}).refine(
-  (d) => d.needs_percent + d.wants_percent + d.future_percent === 100,
-  { message: 'Percentages must sum to 100', path: ['needs_percent'] }
-);
+const profileSchema = z
+  .object({
+    needs_percent: z.number().min(0).max(100),
+    wants_percent: z.number().min(0).max(100),
+    future_percent: z.number().min(0).max(100),
+    cycle_start_day: z.number().int().min(1).max(28),
+  })
+  .refine((d) => d.needs_percent + d.wants_percent + d.future_percent === 100, {
+    message: "Percentages must sum to 100",
+    path: ["needs_percent"],
+  });
 
 type ProfileForm = z.infer<typeof profileSchema>;
+
+const BUCKET_COLORS: Record<string, string> = {
+  needs: "#00D9A3",
+  wants: "#FBBF24",
+  future: "#60A5FA",
+};
+
+function getIconEmoji(icon: string | null): string {
+  return ICON_OPTIONS.find((o) => o.key === icon)?.emoji ?? "💸";
+}
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -38,8 +60,10 @@ export default function SettingsPage() {
   const { setCategories, categories, bumpMutation } = useTransactionStore();
   const { refetch } = useProfile();
   const supabase = createClient();
-  const [newCatName, setNewCatName] = useState('');
-  const [addingCat, setAddingCat] = useState(false);
+
+  const [catModalOpen, setCatModalOpen] = useState(false);
+  const [editingCat, setEditingCat] = useState<Category | undefined>();
+  const [showArchived, setShowArchived] = useState(false);
 
   const {
     register,
@@ -62,51 +86,96 @@ export default function SettingsPage() {
   async function onSaveProfile(values: ProfileForm) {
     if (!user) return;
     const { error } = await supabase
-      .from('profiles')
+      .from("profiles")
       .update({ ...values, updated_at: new Date().toISOString() })
-      .eq('id', user.id);
+      .eq("id", user.id);
     if (error) {
-      toast.error('Failed to save');
+      toast.error("Failed to save");
       return;
     }
     await refetch();
     bumpMutation();
-    toast.success('Settings saved');
+    toast.success("Settings saved");
   }
 
   async function handleSignOut() {
     await supabase.auth.signOut();
     reset();
-    router.push('/login');
+    router.push("/login");
   }
 
-  async function handleAddCategory() {
-    if (!user || !newCatName.trim()) return;
-    setAddingCat(true);
-    const { data, error } = await supabase
-      .from('categories')
-      .insert({ user_id: user.id, name: newCatName.trim(), is_default: false })
-      .select('*, bucket:budget_buckets(*)')
-      .single();
-    setAddingCat(false);
-    if (error) { toast.error('Failed to add category'); return; }
-    setCategories([...categories, data as Category]);
-    setNewCatName('');
-    toast.success('Category added');
+  function handleCategorySaved(cat: Category) {
+    setCategories(
+      editingCat
+        ? categories.map((c) => (c.id === cat.id ? cat : c))
+        : [...categories, cat],
+    );
+    bumpMutation();
+    setCatModalOpen(false);
+    setEditingCat(undefined);
   }
 
   async function handleArchiveCategory(id: string) {
     const { error } = await supabase
-      .from('categories')
+      .from("categories")
       .update({ is_archived: true })
-      .eq('id', id);
-    if (error) { toast.error('Failed to archive'); return; }
-    setCategories(categories.map((c) => c.id === id ? { ...c, is_archived: true } : c));
-    toast.success('Category archived');
+      .eq("id", id);
+    if (error) {
+      toast.error("Failed to archive");
+      return;
+    }
+    setCategories(
+      categories.map((c) => (c.id === id ? { ...c, is_archived: true } : c)),
+    );
+    bumpMutation();
+    toast.success("Category archived");
+  }
+
+  async function handleRestoreCategory(id: string) {
+    const { error } = await supabase
+      .from("categories")
+      .update({ is_archived: false })
+      .eq("id", id);
+    if (error) {
+      toast.error("Failed to restore");
+      return;
+    }
+    setCategories(
+      categories.map((c) => (c.id === id ? { ...c, is_archived: false } : c)),
+    );
+    toast.success("Category restored");
   }
 
   const activeCats = categories.filter((c) => !c.is_archived);
+  const archivedCats = categories.filter((c) => c.is_archived);
   const totalIncome = totalMonthlyIncome(incomeSources);
+
+  const expenseCats = activeCats.filter((c) => {
+    const ct = c.category_type ?? (c.bucket_id ? "expense" : "income");
+    return ct === "expense";
+  });
+  const incomeCats = activeCats.filter((c) => {
+    const ct = c.category_type ?? (c.bucket_id ? "expense" : "income");
+    return ct === "income";
+  });
+  const adjustmentCats = activeCats.filter((c) => {
+    const ct = c.category_type ?? (c.bucket_id ? "expense" : "income");
+    return ct === "adjustment";
+  });
+
+  // Group expense categories by bucket
+  const expenseByBucket: Record<string, Category[]> = {};
+  const expenseNoBucket: Category[] = [];
+  for (const cat of expenseCats) {
+    if (cat.bucket?.name) {
+      expenseByBucket[cat.bucket.name] = [
+        ...(expenseByBucket[cat.bucket.name] ?? []),
+        cat,
+      ];
+    } else {
+      expenseNoBucket.push(cat);
+    }
+  }
 
   return (
     <div className="max-w-2xl mx-auto pb-24">
@@ -121,12 +190,21 @@ export default function SettingsPage() {
         <form onSubmit={handleSubmit(onSaveProfile)} className="space-y-6">
           {/* Total Monthly Income (read-only) */}
           <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-            <h2 className="text-[#FAFAFA] font-semibold mb-1">Total Monthly Income</h2>
-            <p className="text-[#71717A] text-xs mb-3">Computed from your active income sources above</p>
+            <h2 className="text-[#FAFAFA] font-semibold mb-1">
+              Total Monthly Income
+            </h2>
+            <p className="text-[#71717A] text-xs mb-3">
+              Computed from your active income sources above
+            </p>
             <div className="h-12 px-4 bg-[#1C1C1F] border border-[#27272A] rounded-xl flex items-center">
               <span className="text-[#A1A1AA] font-mono mr-2">₵</span>
               <span className="text-[#FAFAFA] font-semibold text-base">
-                {totalIncome > 0 ? totalIncome.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
+                {totalIncome > 0
+                  ? totalIncome.toLocaleString("en-GH", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
+                  : "—"}
               </span>
             </div>
           </div>
@@ -134,7 +212,9 @@ export default function SettingsPage() {
           {/* Budget Cycle */}
           <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
             <h2 className="text-[#FAFAFA] font-semibold mb-1">Budget Cycle</h2>
-            <p className="text-[#71717A] text-xs mb-4">Which day of the month does your cycle start? (1–28)</p>
+            <p className="text-[#71717A] text-xs mb-4">
+              Which day of the month does your cycle start? (1–28)
+            </p>
             <div className="space-y-1.5">
               <Label className="text-[#A1A1AA] text-sm">Cycle start day</Label>
               <Input
@@ -142,30 +222,52 @@ export default function SettingsPage() {
                 min="1"
                 max="28"
                 className="h-11 w-28 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
-                {...register('cycle_start_day', { valueAsNumber: true })}
+                {...register("cycle_start_day", { valueAsNumber: true })}
               />
-              <p className="text-[#52525B] text-[11px]">Tip: set this to your salary day so your budget resets when you get paid.</p>
+              <p className="text-[#52525B] text-[11px]">
+                Tip: set this to your salary day so your budget resets when you
+                get paid.
+              </p>
             </div>
           </div>
 
-          {/* Buckets */}
+          {/* Budget Split */}
           <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-            <h2 className="text-[#FAFAFA] font-semibold mb-1">Budget Split (%)</h2>
+            <h2 className="text-[#FAFAFA] font-semibold mb-1">
+              Budget Split (%)
+            </h2>
             <p className="text-[#71717A] text-xs mb-4">Must add up to 100</p>
             <div className="grid grid-cols-3 gap-3">
-              {(['needs', 'wants', 'future'] as const).map((bucket) => {
-                const colors = { needs: '#00D9A3', wants: '#FBBF24', future: '#60A5FA' };
-                const labels = { needs: 'Needs', wants: 'Wants', future: 'Future' };
-                const pct = profile ? (profile[`${bucket}_percent`] as number) : 0;
+              {(["needs", "wants", "future"] as const).map((bucket) => {
+                const colors = {
+                  needs: "#00D9A3",
+                  wants: "#FBBF24",
+                  future: "#60A5FA",
+                };
+                const labels = {
+                  needs: "Needs",
+                  wants: "Wants",
+                  future: "Future",
+                };
+                const pct = profile
+                  ? (profile[`${bucket}_percent`] as number)
+                  : 0;
                 return (
                   <div key={bucket} className="space-y-1.5">
-                    <Label className="text-xs" style={{ color: colors[bucket] }}>{labels[bucket]}</Label>
+                    <Label
+                      className="text-xs"
+                      style={{ color: colors[bucket] }}
+                    >
+                      {labels[bucket]}
+                    </Label>
                     <Input
                       type="number"
                       min="0"
                       max="100"
                       className="h-10 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] text-center amount"
-                      {...register(`${bucket}_percent`, { valueAsNumber: true })}
+                      {...register(`${bucket}_percent`, {
+                        valueAsNumber: true,
+                      })}
                     />
                     {totalIncome > 0 && (
                       <p className="text-[#52525B] text-[10px] text-center">
@@ -176,7 +278,11 @@ export default function SettingsPage() {
                 );
               })}
             </div>
-            {errors.needs_percent && <p className="text-[#F43F5E] text-xs mt-2">{errors.needs_percent.message}</p>}
+            {errors.needs_percent && (
+              <p className="text-[#F43F5E] text-xs mt-2">
+                {errors.needs_percent.message}
+              </p>
+            )}
           </div>
 
           <Button
@@ -184,46 +290,189 @@ export default function SettingsPage() {
             disabled={isSubmitting || !isDirty}
             className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
           >
-            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save changes'}
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              "Save changes"
+            )}
           </Button>
         </form>
 
         {/* Categories */}
         <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5 mt-6">
-          <h2 className="text-[#FAFAFA] font-semibold mb-4">Categories</h2>
-
-          <div className="flex gap-2 mb-4">
-            <Input
-              placeholder="New category name"
-              value={newCatName}
-              onChange={(e) => setNewCatName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
-              className="h-10 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#71717A] focus-visible:ring-[#00D9A3]"
-            />
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[#FAFAFA] font-semibold">Categories</h2>
             <Button
-              onClick={handleAddCategory}
-              disabled={addingCat || !newCatName.trim()}
-              className="h-10 px-3 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] rounded-xl"
+              onClick={() => {
+                setEditingCat(undefined);
+                setCatModalOpen(true);
+              }}
+              className="h-8 px-3 text-xs bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-medium rounded-xl gap-1"
             >
-              {addingCat ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              <Plus className="w-3.5 h-3.5" /> Add
             </Button>
           </div>
 
-          <div className="space-y-1.5 max-h-64 overflow-y-auto">
-            {activeCats.map((cat) => (
-              <div
-                key={cat.id}
-                className="flex items-center justify-between px-3 py-2.5 bg-[#1C1C1F] rounded-xl"
-              >
-                <span className="text-[#FAFAFA] text-sm">{cat.name}</span>
-                <button
-                  onClick={() => handleArchiveCategory(cat.id)}
-                  className="w-7 h-7 rounded-lg text-[#71717A] hover:text-[#FBBF24] flex items-center justify-center transition-colors"
-                >
-                  <Archive className="w-3.5 h-3.5" />
-                </button>
+          <div className="space-y-5">
+            {/* Spending categories grouped by bucket */}
+            {(["needs", "wants", "future"] as const).map((bName) => {
+              const bCats = expenseByBucket[bName] ?? [];
+              if (bCats.length === 0) return null;
+              const color = BUCKET_COLORS[bName];
+              const label = {
+                needs: "Needs",
+                wants: "Wants",
+                future: "Future",
+              }[bName];
+              return (
+                <div key={bName}>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: color }}
+                    />
+                    <p
+                      className="text-xs font-medium uppercase tracking-wider"
+                      style={{ color }}
+                    >
+                      {label}
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    {bCats.map((cat) => (
+                      <CategoryRow
+                        key={cat.id}
+                        cat={cat}
+                        onEdit={() => {
+                          setEditingCat(cat);
+                          setCatModalOpen(true);
+                        }}
+                        onArchive={() => handleArchiveCategory(cat.id)}
+                        getIconEmoji={getIconEmoji}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Expense categories without a bucket */}
+            {expenseNoBucket.length > 0 && (
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider text-[#71717A] mb-2">
+                  Spending (no bucket)
+                </p>
+                <div className="space-y-1">
+                  {expenseNoBucket.map((cat) => (
+                    <CategoryRow
+                      key={cat.id}
+                      cat={cat}
+                      onEdit={() => {
+                        setEditingCat(cat);
+                        setCatModalOpen(true);
+                      }}
+                      onArchive={() => handleArchiveCategory(cat.id)}
+                      getIconEmoji={getIconEmoji}
+                    />
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
+
+            {/* Income categories */}
+            {incomeCats.length > 0 && (
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-[#00D9A3] text-xs font-bold">+</span>
+                  <p className="text-xs font-medium uppercase tracking-wider text-[#00D9A3]">
+                    Income
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  {incomeCats.map((cat) => (
+                    <CategoryRow
+                      key={cat.id}
+                      cat={cat}
+                      onEdit={() => {
+                        setEditingCat(cat);
+                        setCatModalOpen(true);
+                      }}
+                      onArchive={() => handleArchiveCategory(cat.id)}
+                      getIconEmoji={getIconEmoji}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Adjustment categories */}
+            {adjustmentCats.length > 0 && (
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-[#A1A1AA] text-xs">⚖️</span>
+                  <p className="text-xs font-medium uppercase tracking-wider text-[#A1A1AA]">
+                    Adjustments
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  {adjustmentCats.map((cat) => (
+                    <CategoryRow
+                      key={cat.id}
+                      cat={cat}
+                      onEdit={() => {
+                        setEditingCat(cat);
+                        setCatModalOpen(true);
+                      }}
+                      onArchive={() => handleArchiveCategory(cat.id)}
+                      getIconEmoji={getIconEmoji}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Archived toggle */}
+            {archivedCats.length > 0 && (
+              <div>
+                <button
+                  onClick={() => setShowArchived((v) => !v)}
+                  className="flex items-center gap-1.5 text-xs text-[#52525B] hover:text-[#71717A] transition-colors"
+                >
+                  <ChevronDown
+                    className="w-3.5 h-3.5 transition-transform"
+                    style={{
+                      transform: showArchived ? "rotate(180deg)" : "none",
+                    }}
+                  />
+                  {archivedCats.length} archived
+                </button>
+                {showArchived && (
+                  <div className="space-y-1 mt-2">
+                    {archivedCats.map((cat) => (
+                      <div
+                        key={cat.id}
+                        className="flex items-center justify-between px-3 py-2 bg-[#1C1C1F] rounded-xl opacity-50"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">
+                            {getIconEmoji(cat.icon)}
+                          </span>
+                          <span className="text-[#A1A1AA] text-sm">
+                            {cat.name}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleRestoreCategory(cat.id)}
+                          className="text-xs text-[#00D9A3] hover:text-[#00F5B8] transition-colors"
+                        >
+                          Restore
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -237,6 +486,53 @@ export default function SettingsPage() {
             <LogOut className="w-4 h-4 mr-2" /> Sign out
           </Button>
         </div>
+      </div>
+
+      <CategoryModal
+        open={catModalOpen}
+        onClose={() => {
+          setCatModalOpen(false);
+          setEditingCat(undefined);
+        }}
+        editCategory={editingCat}
+        onSaved={handleCategorySaved}
+      />
+    </div>
+  );
+}
+
+interface CategoryRowProps {
+  cat: Category;
+  onEdit: () => void;
+  onArchive: () => void;
+  getIconEmoji: (icon: string | null) => string;
+}
+
+function CategoryRow({
+  cat,
+  onEdit,
+  onArchive,
+  getIconEmoji,
+}: CategoryRowProps) {
+  return (
+    <div className="flex items-center justify-between px-3 py-2 bg-[#1C1C1F] rounded-xl group">
+      <div className="flex items-center gap-2">
+        <span className="text-base">{getIconEmoji(cat.icon)}</span>
+        <span className="text-[#FAFAFA] text-sm">{cat.name}</span>
+      </div>
+      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={onEdit}
+          className="w-7 h-7 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
+        >
+          <Pencil className="w-3.5 h-3.5" />
+        </button>
+        <button
+          onClick={onArchive}
+          className="w-7 h-7 rounded-lg text-[#71717A] hover:text-[#FBBF24] flex items-center justify-center transition-colors"
+        >
+          <Archive className="w-3.5 h-3.5" />
+        </button>
       </div>
     </div>
   );
