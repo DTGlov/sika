@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { useProfile } from '@/hooks/use-profile';
 import { useTransactionStore } from '@/stores/transaction-store';
+
 import { totalMonthlyIncome } from '@/lib/income';
 import { formatGHS } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,7 @@ type ProfileForm = z.infer<typeof profileSchema>;
 export default function SettingsPage() {
   const router = useRouter();
   const { user, profile, incomeSources, reset } = useAuthStore();
-  const { setCategories, categories } = useTransactionStore();
+  const { setCategories, categories, bumpMutation } = useTransactionStore();
   const { refetch } = useProfile();
   const supabase = createClient();
   const [newCatName, setNewCatName] = useState('');
@@ -67,6 +68,7 @@ export default function SettingsPage() {
       return;
     }
     await refetch();
+    bumpMutation();
     toast.success('Settings saved');
   }
 

@@ -8,6 +8,7 @@ import { Plus, Pencil, Trash2, Wallet, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
+import { useTransactionStore } from '@/stores/transaction-store';
 import {
   calculateMonthlyEquivalent,
   totalMonthlyIncome,
@@ -77,6 +78,7 @@ interface IncomeSourceModalProps {
 
 function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceModalProps) {
   const { user, incomeSources, setIncomeSources, profile, setProfile } = useAuthStore();
+  const { bumpMutation } = useTransactionStore();
   const supabase = createClient();
 
   const {
@@ -144,6 +146,7 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
       setProfile({ ...profile, monthly_income: totalMonthlyIncome(updatedSources) });
     }
 
+    bumpMutation();
     onSaved(updatedSources);
     reset();
     onClose();
@@ -291,6 +294,7 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
 
 export function IncomeSourcesSection() {
   const { user, incomeSources, setIncomeSources, profile, setProfile } = useAuthStore();
+  const { bumpMutation } = useTransactionStore();
   const supabase = createClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editSource, setEditSource] = useState<IncomeSource | undefined>();
@@ -316,6 +320,7 @@ export function IncomeSourcesSection() {
     setIncomeSources(updated);
     await syncMonthlyIncome(supabase, user.id, updated);
     if (profile) setProfile({ ...profile, monthly_income: totalMonthlyIncome(updated) });
+    bumpMutation();
     toast.success('Income source removed');
   }
 

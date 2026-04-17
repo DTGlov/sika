@@ -7,6 +7,7 @@ interface TransactionState {
   dashboardStats: DashboardStats | null;
   isLogSheetOpen: boolean;
   editingTransaction: Transaction | null;
+  mutationCount: number;
   setTransactions: (txns: Transaction[]) => void;
   setCategories: (cats: Category[]) => void;
   setDashboardStats: (stats: DashboardStats) => void;
@@ -15,6 +16,7 @@ interface TransactionState {
   addTransaction: (txn: Transaction) => void;
   updateTransaction: (txn: Transaction) => void;
   removeTransaction: (id: string) => void;
+  bumpMutation: () => void;
 }
 
 export const useTransactionStore = create<TransactionState>((set) => ({
@@ -23,6 +25,7 @@ export const useTransactionStore = create<TransactionState>((set) => ({
   dashboardStats: null,
   isLogSheetOpen: false,
   editingTransaction: null,
+  mutationCount: 0,
   setTransactions: (transactions) => set({ transactions }),
   setCategories: (categories) => set({ categories }),
   setDashboardStats: (dashboardStats) => set({ dashboardStats }),
@@ -36,4 +39,5 @@ export const useTransactionStore = create<TransactionState>((set) => ({
     })),
   removeTransaction: (id) =>
     set((s) => ({ transactions: s.transactions.filter((t) => t.id !== id) })),
+  bumpMutation: () => set((s) => ({ mutationCount: s.mutationCount + 1 })),
 }));

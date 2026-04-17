@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Loader2, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
@@ -17,7 +17,15 @@ import type { TransactionType } from '@/types';
 type Step = 'amount' | 'category' | 'details';
 
 export function TransactionSheet() {
-  const { isLogSheetOpen, closeLogSheet, categories, addTransaction } = useTransactionStore();
+  const {
+    isLogSheetOpen,
+    closeLogSheet,
+    categories,
+    addTransaction,
+    updateTransaction,
+    editingTransaction,
+    bumpMutation,
+  } = useTransactionStore();
   const { user } = useAuthStore();
   const supabase = createClient();
 
@@ -28,6 +36,18 @@ export function TransactionSheet() {
   const [note, setNote] = useState('');
   const [txDate, setTxDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [saving, setSaving] = useState(false);
+
+  // Pre-fill form when editing an existing transaction
+  useEffect(() => {
+    if (isLogSheetOpen && editingTransaction) {
+      setAmount(editingTransaction.amount.toString());
+      setTxType(editingTransaction.type);
+      setCategoryId(editingTransaction.category_id);
+      setNote(editingTransaction.note ?? '');
+      setTxDate(editingTransaction.transaction_date);
+      setStep('amount');
+    }
+  }, [isLogSheetOpen, editingTransaction]);
 
   function handleClose() {
     closeLogSheet();
@@ -45,28 +65,46 @@ export function TransactionSheet() {
     if (!user || parseFloat(amount) <= 0) return;
     setSaving(true);
 
-    const { data, error } = await supabase
-      .from('transactions')
-      .insert({
-        user_id: user.id,
-        amount: parseFloat(amount),
-        type: txType,
-        category_id: categoryId,
-        note: note || null,
-        transaction_date: txDate,
-      })
-      .select('*, category:categories(*, bucket:budget_buckets(*))')
-      .single();
+    if (editingTransaction) {
+      const { data, error } = await supabase
+        .from('transactions')
+        .update({
+          amount: parseFloat(amount),
+          type: txType,
+          category_id: categoryId,
+          note: note || null,
+          transaction_date: txDate,
+        })
+        .eq('id', editingTransaction.id)
+        .select('*, category:categories(*, bucket:budget_buckets(*))')
+        .single();
 
-    setSaving(false);
+      setSaving(false);
+      if (error) { toast.error('Failed to update transaction'); return; }
+      updateTransaction(data);
+      bumpMutation();
+      toast.success('Transaction updated');
+    } else {
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: user.id,
+          amount: parseFloat(amount),
+          type: txType,
+          category_id: categoryId,
+          note: note || null,
+          transaction_date: txDate,
+        })
+        .select('*, category:categories(*, bucket:budget_buckets(*))')
+        .single();
 
-    if (error) {
-      toast.error('Failed to save transaction');
-      return;
+      setSaving(false);
+      if (error) { toast.error('Failed to save transaction'); return; }
+      addTransaction(data);
+      bumpMutation();
+      toast.success(`${txType === 'income' ? 'Income' : 'Expense'} logged!`);
     }
 
-    addTransaction(data);
-    toast.success(`${txType === 'income' ? 'Income' : 'Expense'} logged!`);
     handleClose();
   }
 
@@ -74,7 +112,7 @@ export function TransactionSheet() {
   const canProceedAmount = numAmount > 0;
 
   const stepTitles: Record<Step, string> = {
-    amount: 'How much?',
+    amount: editingTransaction ? 'Edit amount' : 'How much?',
     category: 'What for?',
     details: 'Any details?',
   };
@@ -181,7 +219,7 @@ export function TransactionSheet() {
                 disabled={saving || !canProceedAmount}
                 className="flex-1 h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
               >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editingTransaction ? 'Update' : 'Save'}
               </Button>
             </div>
           </div>
