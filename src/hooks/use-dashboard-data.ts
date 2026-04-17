@@ -2,13 +2,13 @@ import { useEffect, useCallback, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
-import { startOfMonth, endOfMonth, subMonths, subDays, format } from 'date-fns';
+import { startOfMonth, endOfMonth, subMonths, subDays, format, parse } from 'date-fns';
 import type { DashboardStats, Transaction, BucketName } from '@/types';
 import { totalMonthlyIncome } from '@/lib/income';
 
-export function useDashboardData() {
+export function useDashboardData(selectedMonthStr?: string) {
   const { user, profile, incomeSources } = useAuthStore();
-  const { setDashboardStats, setCategories } = useTransactionStore();
+  const { setDashboardStats, setCategories, mutationCount } = useTransactionStore();
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
@@ -16,7 +16,16 @@ export function useDashboardData() {
     if (!user || !profile) return;
     setLoading(true);
 
-    const now = new Date();
+    const currentMonthStr = format(new Date(), 'yyyy-MM');
+    const monthStr = selectedMonthStr ?? currentMonthStr;
+    const isCurrentMonth = monthStr === currentMonthStr;
+
+    // For the current month use today as the reference point;
+    // for past months use the last day of that month so weekly charts
+    // and "today" totals reflect the end of that period.
+    const monthDate = parse(monthStr, 'yyyy-MM', new Date());
+    const now = isCurrentMonth ? new Date() : endOfMonth(monthDate);
+
     const monthStart = format(startOfMonth(now), 'yyyy-MM-dd');
     const monthEnd = format(endOfMonth(now), 'yyyy-MM-dd');
     const today = format(now, 'yyyy-MM-dd');
@@ -111,11 +120,11 @@ export function useDashboardData() {
 
     setDashboardStats(stats);
     setLoading(false);
-  }, [user, profile, incomeSources, supabase, setDashboardStats, setCategories]);
+  }, [user, profile, incomeSources, selectedMonthStr, supabase, setDashboardStats, setCategories]);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, mutationCount]); // mutationCount triggers re-fetch after any transaction/income mutation
 
   return { loading, refetch: fetchData };
 }

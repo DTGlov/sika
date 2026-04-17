@@ -14,8 +14,12 @@ export function AddTransactionFab() {
       transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.6 }}
       whileTap={{ scale: 0.92 }}
       onClick={() => openLogSheet()}
-      className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-[#00D9A3] text-[#0A0A0B] shadow-lg flex items-center justify-center"
-      style={{ boxShadow: '0 0 0 0 rgba(0,217,163,0.4)' }}
+      aria-label="Log a transaction"
+      // Mobile: centered horizontally, lifted above the 64px bottom nav with a 16px gap
+      // Desktop: fixed bottom-right corner
+      className="fixed z-40 w-14 h-14 rounded-full bg-[#00D9A3] text-[#0A0A0B] shadow-lg flex items-center justify-center
+        bottom-20 left-1/2 -translate-x-1/2
+        md:bottom-6 md:left-auto md:right-6 md:translate-x-0"
     >
       <motion.div
         animate={{ boxShadow: ['0 0 0 0 rgba(0,217,163,0.4)', '0 0 0 12px rgba(0,217,163,0)'] }}

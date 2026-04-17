@@ -26,7 +26,7 @@ interface TransactionItemProps {
 }
 
 export function TransactionItem({ transaction: txn }: TransactionItemProps) {
-  const { removeTransaction, openLogSheet } = useTransactionStore();
+  const { removeTransaction, openLogSheet, bumpMutation } = useTransactionStore();
   const supabase = createClient();
   const [deleting, setDeleting] = useState(false);
 
@@ -40,6 +40,7 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
       return;
     }
     removeTransaction(txn.id);
+    bumpMutation();
     toast.success('Deleted');
   }
 
