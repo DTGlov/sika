@@ -1,0 +1,67 @@
+export type TransactionType = 'expense' | 'income' | 'transfer';
+export type BucketName = 'needs' | 'wants' | 'future';
+
+export interface Profile {
+  id: string;
+  full_name: string | null;
+  monthly_income: number;
+  currency: string;
+  needs_percent: number;
+  wants_percent: number;
+  future_percent: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BudgetBucket {
+  id: string;
+  user_id: string;
+  name: BucketName;
+  display_name: string;
+  color: string;
+  icon: string | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface Category {
+  id: string;
+  user_id: string | null;
+  bucket_id: string | null;
+  name: string;
+  icon: string | null;
+  is_default: boolean;
+  is_archived: boolean;
+  created_at: string;
+  bucket?: BudgetBucket | null;
+}
+
+export interface Transaction {
+  id: string;
+  user_id: string;
+  category_id: string | null;
+  amount: number;
+  type: TransactionType;
+  note: string | null;
+  transaction_date: string;
+  created_at: string;
+  category?: Category | null;
+}
+
+export interface DashboardStats {
+  totalSpentToday: number;
+  totalSpentThisMonth: number;
+  totalSpentLastMonth: number;
+  bucketSpend: Record<BucketName, number>;
+  bucketLimits: Record<BucketName, number>;
+  weeklySpend: { date: string; amount: number }[];
+  recentTransactions: Transaction[];
+}
+
+export interface TransactionFormValues {
+  amount: number;
+  type: TransactionType;
+  category_id: string | null;
+  note: string;
+  transaction_date: string;
+}
