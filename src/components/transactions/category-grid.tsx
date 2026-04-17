@@ -24,8 +24,10 @@ interface CategoryGridProps {
 
 export function CategoryGrid({ categories, selectedId, onSelect, transactionType }: CategoryGridProps) {
   const filtered = categories.filter((c) => {
-    if (transactionType === 'income') return !c.bucket_id;
-    return !!c.bucket_id;
+    // Fallback for categories loaded before the migration ran
+    const ctype = c.category_type ?? (c.bucket_id ? 'expense' : 'income');
+    if (transactionType === 'income') return ctype === 'income' || ctype === 'adjustment';
+    return ctype === 'expense' || ctype === 'adjustment';
   });
 
   return (
