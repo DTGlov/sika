@@ -24,6 +24,7 @@ const profileSchema = z.object({
   needs_percent: z.number().min(0).max(100),
   wants_percent: z.number().min(0).max(100),
   future_percent: z.number().min(0).max(100),
+  cycle_start_day: z.number().int().min(1).max(28),
 }).refine(
   (d) => d.needs_percent + d.wants_percent + d.future_percent === 100,
   { message: 'Percentages must sum to 100', path: ['needs_percent'] }
@@ -53,6 +54,7 @@ export default function SettingsPage() {
         needs_percent: profile.needs_percent,
         wants_percent: profile.wants_percent,
         future_percent: profile.future_percent,
+        cycle_start_day: profile.cycle_start_day ?? 1,
       });
     }
   }, [profile, resetForm]);
@@ -126,6 +128,23 @@ export default function SettingsPage() {
               <span className="text-[#FAFAFA] font-semibold text-base">
                 {totalIncome > 0 ? totalIncome.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
               </span>
+            </div>
+          </div>
+
+          {/* Budget Cycle */}
+          <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
+            <h2 className="text-[#FAFAFA] font-semibold mb-1">Budget Cycle</h2>
+            <p className="text-[#71717A] text-xs mb-4">Which day of the month does your cycle start? (1–28)</p>
+            <div className="space-y-1.5">
+              <Label className="text-[#A1A1AA] text-sm">Cycle start day</Label>
+              <Input
+                type="number"
+                min="1"
+                max="28"
+                className="h-11 w-28 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                {...register('cycle_start_day', { valueAsNumber: true })}
+              />
+              <p className="text-[#52525B] text-[11px]">Tip: set this to your salary day so your budget resets when you get paid.</p>
             </div>
           </div>
 

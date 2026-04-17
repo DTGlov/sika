@@ -67,16 +67,23 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
             </div>
             <div>
               <p className="text-[#FAFAFA] text-sm font-medium">
-                {txn.category?.name ?? 'Uncategorized'}
+                {txn.type === 'transfer'
+                  ? `${txn.account?.name ?? '?'} → ${txn.to_account?.name ?? '?'}`
+                  : (txn.category?.name ?? 'Uncategorized')}
               </p>
-              {txn.note && <p className="text-[#71717A] text-xs">{txn.note}</p>}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {txn.type !== 'transfer' && txn.account && (
+                  <span className="text-[#52525B] text-xs">{txn.account.name}</span>
+                )}
+                {txn.note && <p className="text-[#71717A] text-xs">{txn.note}</p>}
+              </div>
               <p className="text-[#71717A] text-xs">{formatTransactionDate(txn.transaction_date)}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <p className={`amount text-sm font-semibold ${txn.type === 'income' ? 'text-[#00D9A3]' : 'text-[#FAFAFA]'}`}>
-              {txn.type === 'income' ? '+' : '-'}{formatGHS(txn.amount)}
+            <p className={`amount text-sm font-semibold ${txn.type === 'income' ? 'text-[#00D9A3]' : txn.type === 'transfer' ? 'text-[#A1A1AA]' : 'text-[#FAFAFA]'}`}>
+              {txn.type === 'income' ? '+' : txn.type === 'transfer' ? '' : '-'}{formatGHS(txn.amount)}
             </p>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
