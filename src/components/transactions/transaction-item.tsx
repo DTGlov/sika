@@ -92,6 +92,11 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
                     Auto
                   </span>
                 )}
+                {txn.paid_from_goal_id && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#00D9A318] text-[#00D9A3] font-medium">
+                    🎯 From fund
+                  </span>
+                )}
                 {txn.note && <p className="text-[#71717A] text-xs">{txn.note}</p>}
               </div>
               <p className="text-[#71717A] text-xs">{formatTransactionDate(txn.transaction_date)}</p>

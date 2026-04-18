@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, ChevronRight, ArrowRight, Scale } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
@@ -16,7 +17,10 @@ import { ACCOUNT_TYPE_CONFIG } from '@/lib/accounts';
 import { formatGHS } from '@/lib/utils';
 import { revalidateForEntity } from '@/lib/revalidation';
 import { HintCard } from '@/components/hint-card';
+import { NextCycleModal } from '@/components/goals/next-cycle-modal';
+import { fetchGoals, fetchGoalAmounts } from '@/lib/goals';
 import type { TransactionType } from '@/types';
+import type { Goal } from '@/types/goal';
 
 type Step = 'amount' | 'category' | 'accounts' | 'details' | 'reconcile';
 
@@ -46,6 +50,13 @@ export function TransactionSheet() {
   const [txDate, setTxDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [saving, setSaving] = useState(false);
 
+  // Sinking fund payment
+  const [sinkingFundGoals, setSinkingFundGoals] = useState<Goal[]>([]);
+  const [paidFromGoalId, setPaidFromGoalId] = useState<string | null>(null);
+  const [sfExpanded, setSfExpanded] = useState(false);
+  const [sfHintDismissed, setSfHintDismissed] = useState(false);
+  const [nextCycleGoal, setNextCycleGoal] = useState<Goal | null>(null);
+
   // Reconcile-specific state
   const [reconcileActual, setReconcileActual] = useState('');
 
@@ -55,6 +66,15 @@ export function TransactionSheet() {
 
   const reconcileDiff = (parseFloat(reconcileActual) || 0) - sikaBalance;
   const reconcileIsPositive = reconcileDiff >= 0;
+
+  // Fetch active sinking fund goals when sheet opens
+  useEffect(() => {
+    if (!isLogSheetOpen || !user) return;
+    fetchGoals(supabase, user.id).then(goals => {
+      setSinkingFundGoals(goals.filter(g => g.goal_type === 'sinking_fund' && !g.completed_at && !g.is_archived));
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLogSheetOpen, user]);
 
   // Pre-fill form when opening
   useEffect(() => {
@@ -98,6 +118,8 @@ export function TransactionSheet() {
       setNote('');
       setTxDate(format(new Date(), 'yyyy-MM-dd'));
       setReconcileActual('');
+      setPaidFromGoalId(null);
+      setSfExpanded(false);
     }, 300);
   }
 
@@ -148,6 +170,7 @@ export function TransactionSheet() {
       to_account_id: txType === 'transfer' ? toAccountId : null,
       note: note || null,
       transaction_date: txDate,
+      paid_from_goal_id: txType === 'expense' ? paidFromGoalId : null,
     };
 
     const selectClause = '*, category:categories(*, bucket:budget_buckets(*)), account:accounts!account_id(id,name,type,color,icon), to_account:accounts!to_account_id(id,name,type,color,icon)';
@@ -173,8 +196,36 @@ export function TransactionSheet() {
       setSaving(false);
       if (error) { toast.error('Failed to save transaction'); return; }
       addTransaction(data);
-      revalidateForEntity('transaction');
-      toast.success(txType === 'income' ? 'Income logged!' : txType === 'transfer' ? 'Transfer recorded!' : 'Expense logged!');
+
+      if (paidFromGoalId && txType === 'expense') {
+        revalidateForEntity('sinking_fund_payment');
+        // Check if sinking fund is now fulfilled
+        const goal = sinkingFundGoals.find(g => g.id === paidFromGoalId);
+        if (goal && goal.target_amount != null && !goal.completed_at) {
+          const { contributions } = await fetchGoalAmounts(supabase, goal.id);
+          const paymentsRes = await supabase
+            .from('transactions')
+            .select('amount')
+            .eq('paid_from_goal_id', goal.id)
+            .eq('type', 'expense');
+          const totalPaid = (paymentsRes.data ?? []).reduce((s: number, r: { amount: number }) => s + r.amount, 0);
+          if (contributions >= goal.target_amount && totalPaid >= goal.target_amount) {
+            await supabase
+              .from('goals')
+              .update({ completed_at: new Date().toISOString() })
+              .eq('id', goal.id);
+            toast.success(`${goal.name} is complete! 🎉`);
+            setNextCycleGoal({ ...goal, completed_at: new Date().toISOString() });
+          } else {
+            toast.success('Expense logged');
+          }
+        } else {
+          toast.success('Expense logged');
+        }
+      } else {
+        revalidateForEntity('transaction');
+        toast.success(txType === 'income' ? 'Income logged!' : txType === 'transfer' ? 'Transfer recorded!' : 'Expense logged!');
+      }
     }
 
     handleClose();
@@ -240,6 +291,7 @@ export function TransactionSheet() {
   };
 
   return (
+    <>
     <Sheet open={isLogSheetOpen} onOpenChange={(open) => !open && handleClose()}>
       <SheetContent
         side="bottom"
@@ -536,6 +588,62 @@ export function TransactionSheet() {
                 className="h-12 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3]"
               />
             </div>
+
+            {/* Sinking fund payment — only for expense with active sinking funds */}
+            {txType === 'expense' && sinkingFundGoals.length > 0 && (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSfExpanded(v => !v);
+                    setSfHintDismissed(false);
+                  }}
+                  className="flex items-center gap-1.5 text-xs text-[#71717A] hover:text-[#A1A1AA] transition-colors"
+                >
+                  <span className="text-[#52525B]">{sfExpanded ? '▾' : '▸'}</span>
+                  Paid from a sinking fund?
+                </button>
+
+                <AnimatePresence>
+                  {sfExpanded && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="mt-2 space-y-2 overflow-hidden"
+                    >
+                      {!sfHintDismissed && (
+                        <HintCard
+                          hintId="sinking_fund_intro"
+                          title="What's a sinking fund?"
+                          body="For big recurring expenses like rent. You save monthly toward the target. When you actually pay, flag it here so Sika doesn't double-count — the saving already accounted for it."
+                          cta="Got it"
+                        />
+                      )}
+                      <select
+                        value={paidFromGoalId ?? ''}
+                        onChange={e => setPaidFromGoalId(e.target.value || null)}
+                        className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#00D9A3] transition-colors"
+                      >
+                        <option value="">— Not from a sinking fund</option>
+                        {sinkingFundGoals.map(g => (
+                          <option key={g.id} value={g.id}>
+                            {g.name}
+                          </option>
+                        ))}
+                      </select>
+                      {paidFromGoalId && (
+                        <p className="text-[#71717A] text-xs leading-relaxed">
+                          This expense won't count against your buckets — the monthly saving already did.
+                        </p>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleBack}
                 className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
@@ -550,5 +658,14 @@ export function TransactionSheet() {
         )}
       </SheetContent>
     </Sheet>
+
+    {nextCycleGoal && (
+      <NextCycleModal
+        open={!!nextCycleGoal}
+        onClose={() => setNextCycleGoal(null)}
+        completedGoal={nextCycleGoal}
+      />
+    )}
+  </>
   );
 }

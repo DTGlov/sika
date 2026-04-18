@@ -29,7 +29,7 @@ import { getDueIncomeNudges, recordNudgeDismissal } from '@/lib/income-nudges';
 import { confirmPendingRecurring, skipPendingRecurring } from '@/lib/recurring';
 import { revalidateForEntity } from '@/lib/revalidation';
 import { createClient } from '@/lib/supabase/client';
-import { fetchGoals, fetchGoalContributions, computeGoalProgress } from '@/lib/goals';
+import { fetchGoals, fetchGoalAmounts, computeGoalProgress } from '@/lib/goals';
 import type { BucketName, IncomeNudge, RecurringTransaction } from '@/types';
 import type { GoalProgress } from '@/types/goal';
 
@@ -85,7 +85,7 @@ function DashboardContent() {
       const top3 = goals.slice(0, 3);
       const progresses = await Promise.all(
         top3.map(async goal => {
-          const amt = await fetchGoalContributions(supabase, goal.id);
+          const { net: amt } = await fetchGoalAmounts(supabase, goal.id);
           const acct = accounts.find(a => a.id === goal.funding_account_id) ?? accounts[0];
           return computeGoalProgress(goal, amt, acct);
         })
@@ -262,19 +262,25 @@ function DashboardContent() {
           <BucketsTooltip />
         </div>
         <div className="grid grid-cols-3 gap-3">
-          {loading
-            ? Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-40 rounded-2xl bg-[#141416]" />
-              ))
-            : BUCKETS.map((bucket, i) => (
-                <BucketRing
-                  key={bucket}
-                  bucket={bucket}
-                  spent={dashboardStats?.bucketSpend[bucket] ?? 0}
-                  limit={dashboardStats?.bucketLimits[bucket] ?? 0}
-                  index={i}
-                />
-              ))}
+          {(() => {
+            const sinkingFundEarmarked = goalProgresses
+              .filter(gp => gp.goal.goal_type === 'sinking_fund' && !gp.goal.completed_at && gp.required_monthly_pace != null)
+              .reduce((s, gp) => s + (gp.required_monthly_pace ?? 0), 0);
+            return loading
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-40 rounded-2xl bg-[#141416]" />
+                ))
+              : BUCKETS.map((bucket, i) => (
+                  <BucketRing
+                    key={bucket}
+                    bucket={bucket}
+                    spent={dashboardStats?.bucketSpend[bucket] ?? 0}
+                    limit={dashboardStats?.bucketLimits[bucket] ?? 0}
+                    index={i}
+                    earmarked={bucket === 'future' ? sinkingFundEarmarked : undefined}
+                  />
+                ));
+          })()}
         </div>
         </div>
 
