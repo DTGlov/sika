@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ChevronRight, ArrowRight, Scale } from 'lucide-react';
+import { Loader2, ChevronRight, ArrowRight, Scale, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useTransactionStore } from '@/stores/transaction-store';
@@ -55,6 +55,8 @@ export function TransactionSheet() {
   const [paidFromGoalId, setPaidFromGoalId] = useState<string | null>(null);
   const [sfExpanded, setSfExpanded] = useState(false);
   const [sfHintDismissed, setSfHintDismissed] = useState(false);
+  const [sfBalance, setSfBalance] = useState<number | null>(null);
+  const [sfBalanceLoading, setSfBalanceLoading] = useState(false);
   const [nextCycleGoal, setNextCycleGoal] = useState<Goal | null>(null);
 
   // Reconcile-specific state
@@ -75,6 +77,17 @@ export function TransactionSheet() {
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLogSheetOpen, user]);
+
+  // Fetch effective balance whenever the selected sinking fund changes
+  useEffect(() => {
+    if (!paidFromGoalId) { setSfBalance(null); return; }
+    setSfBalanceLoading(true);
+    fetchGoalAmounts(supabase, paidFromGoalId).then(({ net }) => {
+      setSfBalance(net);
+      setSfBalanceLoading(false);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paidFromGoalId]);
 
   // Pre-fill form when opening
   useEffect(() => {
@@ -120,6 +133,7 @@ export function TransactionSheet() {
       setReconcileActual('');
       setPaidFromGoalId(null);
       setSfExpanded(false);
+      setSfBalance(null);
     }, 300);
   }
 
@@ -276,6 +290,11 @@ export function TransactionSheet() {
 
   const numAmount = parseFloat(amount) || 0;
   const canProceedAmount = numAmount > 0;
+
+  // Sinking fund validation
+  const sfOverpayment = paidFromGoalId && sfBalance !== null && numAmount > sfBalance;
+  const sfAfterBalance = sfBalance !== null ? sfBalance - numAmount : null;
+  const sfWillFulfill = sfAfterBalance !== null && sfAfterBalance <= 0 && numAmount > 0 && sfBalance !== null && sfBalance > 0;
   const stepList: Step[] = txType === 'transfer'
     ? ['amount', 'accounts', 'details']
     : txType === 'adjustment'
@@ -623,7 +642,7 @@ export function TransactionSheet() {
                       )}
                       <select
                         value={paidFromGoalId ?? ''}
-                        onChange={e => setPaidFromGoalId(e.target.value || null)}
+                        onChange={e => { setPaidFromGoalId(e.target.value || null); setSfBalance(null); }}
                         className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#00D9A3] transition-colors"
                       >
                         <option value="">— Not from a sinking fund</option>
@@ -633,10 +652,67 @@ export function TransactionSheet() {
                           </option>
                         ))}
                       </select>
-                      {paidFromGoalId && (
-                        <p className="text-[#71717A] text-xs leading-relaxed">
-                          This expense won't count against your buckets — the monthly saving already did.
-                        </p>
+
+                      {/* Live balance preview */}
+                      {paidFromGoalId && !sfBalanceLoading && sfBalance !== null && (
+                        sfOverpayment ? (
+                          <div className="rounded-xl bg-[#F43F5E]/10 border border-[#F43F5E]/30 px-3 py-2.5 space-y-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <AlertTriangle className="w-3.5 h-3.5 text-[#F43F5E] shrink-0" />
+                              <p className="text-[#F43F5E] text-xs font-medium">
+                                Not enough in this sinking fund yet
+                              </p>
+                            </div>
+                            <p className="text-[#A1A1AA] text-xs leading-relaxed">
+                              Goal has{' '}
+                              <span className="text-[#FAFAFA] font-medium">{formatGHS(sfBalance)}</span>{' '}
+                              saved. You can either:
+                            </p>
+                            <ul className="text-[#71717A] text-xs space-y-0.5 ml-2">
+                              <li>• Reduce this payment to {formatGHS(sfBalance)} or less</li>
+                              <li>• Contribute {formatGHS(numAmount - sfBalance)} more to the goal first</li>
+                              <li>• Uncheck &ldquo;Paid from sinking fund&rdquo; and log as a regular expense</li>
+                            </ul>
+                          </div>
+                        ) : sfBalance === 0 ? (
+                          <div className="rounded-xl bg-[#F43F5E]/10 border border-[#F43F5E]/30 px-3 py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <AlertTriangle className="w-3.5 h-3.5 text-[#F43F5E] shrink-0" />
+                              <p className="text-[#F43F5E] text-xs font-medium">
+                                This goal has no saved amount yet — contribute first.
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="rounded-xl bg-[#1C1C1F] border border-[#27272A] px-3 py-2.5 space-y-1">
+                            <div className="flex justify-between text-xs">
+                              <span className="text-[#71717A]">Goal balance</span>
+                              <span className="text-[#FAFAFA] tabular-nums">{formatGHS(sfBalance)}</span>
+                            </div>
+                            {numAmount > 0 && (
+                              <div className="flex justify-between text-xs">
+                                <span className="text-[#71717A]">After this payment</span>
+                                <span
+                                  className="tabular-nums font-medium"
+                                  style={{ color: sfWillFulfill ? '#00D9A3' : '#FAFAFA' }}
+                                >
+                                  {sfWillFulfill
+                                    ? '₵0 — goal will be fulfilled'
+                                    : formatGHS(Math.max(0, sfAfterBalance ?? 0)) + ' remaining'}
+                                </span>
+                              </div>
+                            )}
+                            {!sfWillFulfill && (
+                              <p className="text-[#71717A] text-xs pt-0.5">
+                                This expense won't count against your buckets.
+                              </p>
+                            )}
+                          </div>
+                        )
+                      )}
+
+                      {paidFromGoalId && sfBalanceLoading && (
+                        <p className="text-[#52525B] text-xs">Checking goal balance…</p>
                       )}
                     </motion.div>
                   )}
@@ -649,7 +725,7 @@ export function TransactionSheet() {
                 className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
                 Back
               </Button>
-              <Button onClick={handleSave} disabled={saving || !canProceedAmount}
+              <Button onClick={handleSave} disabled={saving || !canProceedAmount || !!sfOverpayment}
                 className="flex-1 h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editingTransaction ? 'Update' : 'Save'}
               </Button>
