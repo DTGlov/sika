@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, Star, Scale, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Star, Scale, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
@@ -13,10 +13,11 @@ import { revalidateForEntity } from '@/lib/revalidation';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AccountModal } from '@/components/accounts/account-modal';
+import { HintCard } from '@/components/hint-card';
 import type { Account } from '@/types/account';
 
 export default function AccountsPage() {
-  const { user, profile, accounts, setAccounts, setProfile } = useAuthStore();
+  const { user, accounts, setAccounts } = useAuthStore();
   const { mutationCount, openReconcileSheet } = useTransactionStore();
   const supabase = createClient();
   useProfile();
@@ -52,13 +53,8 @@ export default function AccountsPage() {
 
   const totalBalance = accounts.reduce((sum, a) => sum + (balances[a.id] ?? a.opening_balance), 0);
 
-  const showBanner = profile && !profile.accounts_banner_dismissed;
-
-  async function dismissBanner() {
-    if (!user) return;
-    await supabase.from('profiles').update({ accounts_banner_dismissed: true }).eq('id', user.id);
-    setProfile({ ...profile!, accounts_banner_dismissed: true });
-  }
+  // Show accounts_intro hint only when all accounts still have the default 0 opening balance
+  const allBalancesAreZero = accounts.length > 0 && accounts.every(a => a.opening_balance === 0);
 
   async function startDelete(acc: Account) {
     const { count } = await supabase
@@ -123,24 +119,16 @@ export default function AccountsPage() {
         </Button>
       </div>
 
-      {/* Opening balance onboarding banner */}
-      {showBanner && (
-        <div className="bg-[#FBBF24]/10 border border-[#FBBF24]/30 rounded-2xl p-4 mb-4 flex items-start gap-3">
-          <div className="text-xl shrink-0">💡</div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[#FAFAFA] text-sm font-semibold mb-0.5">Set your real balances</p>
-            <p className="text-[#A1A1AA] text-xs">
-              The default accounts have ₵0 as their opening balance. Tap the pencil on each
-              account and enter your actual current balance so Sika tracks correctly.
-            </p>
-          </div>
-          <button
-            onClick={dismissBanner}
-            className="text-[#71717A] hover:text-[#FAFAFA] transition-colors shrink-0 mt-0.5"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+      {/* Accounts intro hint — only when all accounts are still at ₵0 opening balance */}
+      {allBalancesAreZero && (
+        <HintCard
+          hintId="accounts_intro"
+          title="Set your real balances"
+          body="These accounts represent where your money physically lives. Set the actual current balance for each (your bank, MoMo, cash) so Sika tracks your money accurately. Tap any account → Edit → Opening balance."
+          icon={Wallet}
+          variant="banner"
+          className="mb-4"
+        />
       )}
 
       {/* Total balance */}

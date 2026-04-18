@@ -15,6 +15,7 @@ import { CategoryGrid } from './category-grid';
 import { ACCOUNT_TYPE_CONFIG } from '@/lib/accounts';
 import { formatGHS } from '@/lib/utils';
 import { revalidateForEntity } from '@/lib/revalidation';
+import { HintCard } from '@/components/hint-card';
 import type { TransactionType } from '@/types';
 
 type Step = 'amount' | 'category' | 'accounts' | 'details' | 'reconcile';
@@ -410,6 +411,12 @@ export function TransactionSheet() {
         {/* STEP: Reconcile */}
         {step === 'reconcile' && (
           <div className="space-y-4">
+            <HintCard
+              hintId="transaction_sheet_reconcile"
+              title="What is Reconcile?"
+              body="Use Reconcile when Sika's account balance doesn't match your real account. Enter the actual balance and Sika logs an adjustment to match reality. Doesn't affect your buckets."
+              variant="inline"
+            />
             {/* Account selector */}
             {!reconcileContext && (
               <div>

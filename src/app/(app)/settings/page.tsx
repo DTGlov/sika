@@ -12,6 +12,9 @@ import {
   Archive,
   Pencil,
   ChevronDown,
+  Briefcase,
+  Tag,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -24,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IncomeSourcesSection } from "@/components/settings/income-sources-section";
+import { HintCard } from "@/components/hint-card";
 import {
   CategoryModal,
   ICON_OPTIONS,
@@ -150,6 +154,18 @@ export default function SettingsPage() {
   const archivedCats = categories.filter((c) => c.is_archived);
   const totalIncome = totalMonthlyIncome(incomeSources);
 
+  // Conditions for contextual hints
+  const hasNoIncomeSources = incomeSources.length === 0;
+  const hasOnlyDefaultCats = activeCats.every(c => c.is_default || c.user_id === null);
+
+  async function handleResetHints() {
+    if (!user) return;
+    const { setDismissedHints } = useAuthStore.getState();
+    await supabase.from('dismissed_hints').delete().eq('user_id', user.id);
+    setDismissedHints([]);
+    toast.success('Hints will appear again');
+  }
+
   const expenseCats = activeCats.filter((c) => {
     const ct = c.category_type ?? (c.bucket_id ? "expense" : "income");
     return ct === "expense";
@@ -184,6 +200,16 @@ export default function SettingsPage() {
 
         {/* Income Sources */}
         <div className="mb-6">
+          {hasNoIncomeSources && (
+            <HintCard
+              hintId="settings_income_sources"
+              title="Income sources vs logged income"
+              body="Income sources tell Sika what you expect to earn each month (salary, allowances, side hustles). They power your budget. Logged income transactions are the actual money that hits your account — those happen via the + button when income arrives."
+              icon={Briefcase}
+              variant="inline"
+              className="mb-4"
+            />
+          )}
           <IncomeSourcesSection />
         </div>
 
@@ -299,6 +325,16 @@ export default function SettingsPage() {
         </form>
 
         {/* Categories */}
+        {hasOnlyDefaultCats && (
+          <HintCard
+            hintId="settings_categories"
+            title="Categories explained"
+            body="Categories organize your transactions. Expense categories belong to a bucket (Needs/Wants/Future). Income and adjustment categories don't — they exist outside the budget split."
+            icon={Tag}
+            variant="inline"
+            className="mt-4"
+          />
+        )}
         <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5 mt-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-[#FAFAFA] font-semibold">Categories</h2>
@@ -476,8 +512,22 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* App preferences */}
+        <div className="mt-6 bg-[#141416] border border-[#27272A] rounded-2xl p-5">
+          <h2 className="text-[#FAFAFA] font-semibold mb-1">App preferences</h2>
+          <p className="text-[#71717A] text-xs mb-4">Show all dismissed hints again. Useful if you want a refresher.</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleResetHints}
+            className="h-10 px-4 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] hover:text-[#FAFAFA] rounded-xl text-sm gap-2"
+          >
+            <RotateCcw className="w-3.5 h-3.5" /> Reset onboarding hints
+          </Button>
+        </div>
+
         {/* Sign out */}
-        <div className="mt-6">
+        <div className="mt-4">
           <Button
             variant="outline"
             onClick={handleSignOut}
