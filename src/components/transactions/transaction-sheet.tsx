@@ -50,7 +50,7 @@ export function TransactionSheet() {
   const [txDate, setTxDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [saving, setSaving] = useState(false);
 
-  // Sinking fund payment
+  // Target goal payment
   const [sinkingFundGoals, setSinkingFundGoals] = useState<Goal[]>([]);
   const [paidFromGoalId, setPaidFromGoalId] = useState<string | null>(null);
   const [sfExpanded, setSfExpanded] = useState(false);
@@ -69,16 +69,16 @@ export function TransactionSheet() {
   const reconcileDiff = (parseFloat(reconcileActual) || 0) - sikaBalance;
   const reconcileIsPositive = reconcileDiff >= 0;
 
-  // Fetch active sinking fund goals when sheet opens
+  // Fetch active target-type goals when sheet opens
   useEffect(() => {
     if (!isLogSheetOpen || !user) return;
     fetchGoals(supabase, user.id).then(goals => {
-      setSinkingFundGoals(goals.filter(g => g.goal_type === 'sinking_fund' && !g.completed_at && !g.is_archived));
+      setSinkingFundGoals(goals.filter(g => g.goal_type === 'target' && !g.completed_at && !g.is_archived));
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLogSheetOpen, user]);
 
-  // Fetch effective balance whenever the selected sinking fund changes
+  // Fetch effective balance whenever the selected target goal changes
   useEffect(() => {
     if (!paidFromGoalId) { setSfBalance(null); return; }
     setSfBalanceLoading(true);
@@ -213,7 +213,7 @@ export function TransactionSheet() {
 
       if (paidFromGoalId && txType === 'expense') {
         revalidateForEntity('sinking_fund_payment');
-        // Check if sinking fund is now fulfilled
+        // Check if target goal is now fulfilled
         const goal = sinkingFundGoals.find(g => g.id === paidFromGoalId);
         if (goal && goal.target_amount != null && !goal.completed_at) {
           const { contributions } = await fetchGoalAmounts(supabase, goal.id);
@@ -291,7 +291,7 @@ export function TransactionSheet() {
   const numAmount = parseFloat(amount) || 0;
   const canProceedAmount = numAmount > 0;
 
-  // Sinking fund validation
+  // Target goal payment validation
   const sfOverpayment = paidFromGoalId && sfBalance !== null && numAmount > sfBalance;
   const sfAfterBalance = sfBalance !== null ? sfBalance - numAmount : null;
   const sfWillFulfill = sfAfterBalance !== null && sfAfterBalance <= 0 && numAmount > 0 && sfBalance !== null && sfBalance > 0;
@@ -608,7 +608,7 @@ export function TransactionSheet() {
               />
             </div>
 
-            {/* Sinking fund payment — only for expense with active sinking funds */}
+            {/* Target goal payment — only for expense with active target-type goals */}
             {txType === 'expense' && sinkingFundGoals.length > 0 && (
               <div>
                 <button
@@ -620,7 +620,7 @@ export function TransactionSheet() {
                   className="flex items-center gap-1.5 text-xs text-[#71717A] hover:text-[#A1A1AA] transition-colors"
                 >
                   <span className="text-[#52525B]">{sfExpanded ? '▾' : '▸'}</span>
-                  Paid from a sinking fund?
+                  Paid from a target?
                 </button>
 
                 <AnimatePresence>
@@ -634,9 +634,9 @@ export function TransactionSheet() {
                     >
                       {!sfHintDismissed && (
                         <HintCard
-                          hintId="sinking_fund_intro"
-                          title="What's a sinking fund?"
-                          body="For big recurring expenses like rent. You save monthly toward the target. When you actually pay, flag it here so Sika doesn't double-count — the saving already accounted for it."
+                          hintId="target_intro"
+                          title="What's a target?"
+                          body="For big expenses you're saving toward — trips, electronics, rent. Save monthly toward the target amount. When you actually pay, flag it here so Sika doesn't double-count — the saving already accounted for it."
                           cta="Got it"
                         />
                       )}
@@ -645,7 +645,7 @@ export function TransactionSheet() {
                         onChange={e => { setPaidFromGoalId(e.target.value || null); setSfBalance(null); }}
                         className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#00D9A3] transition-colors"
                       >
-                        <option value="">— Not from a sinking fund</option>
+                        <option value="">— Not from a target</option>
                         {sinkingFundGoals.map(g => (
                           <option key={g.id} value={g.id}>
                             {g.name}
@@ -660,7 +660,7 @@ export function TransactionSheet() {
                             <div className="flex items-center gap-1.5">
                               <AlertTriangle className="w-3.5 h-3.5 text-[#F43F5E] shrink-0" />
                               <p className="text-[#F43F5E] text-xs font-medium">
-                                Not enough in this sinking fund yet
+                                Not enough in this target yet
                               </p>
                             </div>
                             <p className="text-[#A1A1AA] text-xs leading-relaxed">
@@ -671,7 +671,7 @@ export function TransactionSheet() {
                             <ul className="text-[#71717A] text-xs space-y-0.5 ml-2">
                               <li>• Reduce this payment to {formatGHS(sfBalance)} or less</li>
                               <li>• Contribute {formatGHS(numAmount - sfBalance)} more to the goal first</li>
-                              <li>• Uncheck &ldquo;Paid from sinking fund&rdquo; and log as a regular expense</li>
+                              <li>• Uncheck &ldquo;Paid from target&rdquo; and log as a regular expense</li>
                             </ul>
                           </div>
                         ) : sfBalance === 0 ? (

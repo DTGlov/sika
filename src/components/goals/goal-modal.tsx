@@ -17,9 +17,8 @@ interface GoalModalProps {
 }
 
 const GOAL_TYPE_OPTIONS: { value: GoalType; label: string; description: string }[] = [
-  { value: 'savings', label: 'Savings', description: 'Save toward a target with a deadline' },
-  { value: 'perpetual', label: 'Perpetual', description: 'Ongoing goal with no target (e.g. Life Savings)' },
-  { value: 'sinking_fund', label: 'Sinking Fund', description: 'Save for a recurring expense' },
+  { value: 'target', label: 'Target', description: 'Save toward a specific goal with a target and deadline (trips, purchases, rent).' },
+  { value: 'perpetual', label: 'Perpetual', description: 'Grows indefinitely — for emergency funds or long-term savings.' },
 ];
 
 const ICON_OPTIONS = ['🎯', '⭐', '🏠', '🚗', '✈️', '💼', '❤️', '🛡️', '⚡', '🎁', '📚', '🎵'];
@@ -30,7 +29,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [goalType, setGoalType] = useState<GoalType>('savings');
+  const [goalType, setGoalType] = useState<GoalType>('target');
   const [targetAmount, setTargetAmount] = useState('');
   const [deadline, setDeadline] = useState('');
   const [fundingAccountId, setFundingAccountId] = useState('');
@@ -53,7 +52,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
     } else {
       setName('');
       setDescription('');
-      setGoalType('savings');
+      setGoalType('target');
       setTargetAmount('');
       setDeadline('');
       setFundingAccountId(accounts[0]?.id ?? '');
@@ -63,7 +62,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
     }
   }, [goal, accounts, open]);
 
-  const needsTarget = goalType === 'savings' || goalType === 'sinking_fund';
+  const needsTarget = goalType === 'target';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

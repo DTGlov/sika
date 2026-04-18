@@ -115,7 +115,7 @@ export default function GoalDetailPage() {
   const { goal, current_amount, progress_percent, days_remaining, required_monthly_pace, is_on_track } = goalProgress;
   const accentColor = goal.color ?? '#00D9A3';
   const isPerpetual = goal.goal_type === 'perpetual';
-  const isSinkingFund = goal.goal_type === 'sinking_fund';
+  const isTarget = goal.goal_type === 'target';
   const totalContributions = contributions.reduce((s, t) => s + t.amount, 0);
   const totalPayments = payments.reduce((s, t) => s + t.amount, 0);
 
@@ -191,7 +191,7 @@ export default function GoalDetailPage() {
               {goal.description && (
                 <p className="text-[#A1A1AA] text-sm mt-0.5">{goal.description}</p>
               )}
-              {isSinkingFund && goal.cycle_count > 1 && (
+              {isTarget && goal.cycle_count > 1 && (
                 <p className="text-[#71717A] text-xs mt-0.5">Cycle {goal.cycle_count}</p>
               )}
             </div>
@@ -210,8 +210,8 @@ export default function GoalDetailPage() {
               )}
             </div>
 
-            {/* For sinking funds: show contribution / payment breakdown */}
-            {isSinkingFund && (totalContributions > 0 || totalPayments > 0) && (
+            {/* For target goals: show contribution / payment breakdown */}
+            {isTarget && (totalContributions > 0 || totalPayments > 0) && (
               <div className="flex gap-3 text-xs">
                 <span className="text-[#71717A]">
                   <span style={{ color: accentColor }}>+{formatGHSCompact(totalContributions)}</span> saved
@@ -268,7 +268,7 @@ export default function GoalDetailPage() {
               <StatTile label="Completed" value={format(parseISO(goal.completed_at), 'MMM d, yyyy')} color={accentColor} />
             )}
             <StatTile label="Contributions" value={`${contributions.length}`} color={accentColor} />
-            {isSinkingFund && (
+            {isTarget && (
               <StatTile label="Payments" value={`${payments.length}`} color={accentColor} />
             )}
             {goalProgress.funding_account && (
@@ -290,7 +290,7 @@ export default function GoalDetailPage() {
               + Add Contribution
             </button>
           )}
-          {goal.completed_at && isSinkingFund && (
+          {goal.completed_at && isTarget && (
             <button
               onClick={() => setShowNextCycle(true)}
               className="w-full h-11 rounded-xl font-semibold text-sm transition-colors hover:opacity-90"
@@ -318,8 +318,8 @@ export default function GoalDetailPage() {
           </div>
         )}
 
-        {/* Payments section (sinking fund only) */}
-        {isSinkingFund && payments.length > 0 && (
+        {/* Payments section (target goals only) */}
+        {isTarget && payments.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
               <ArrowDownLeft className="w-3.5 h-3.5 text-[#F97316]" />
