@@ -1,9 +1,9 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { subDays, format } from 'date-fns';
-import type { DashboardStats, Transaction, BucketName } from '@/types';
+import type { DashboardStats, Transaction, BucketName, RecurringTransaction } from '@/types';
 import { totalMonthlyIncome } from '@/lib/income';
 import {
   getCycleForDate,
@@ -11,12 +11,25 @@ import {
   parseCycleParam,
 } from '@/lib/cycle';
 import { computeAccountBalances } from '@/lib/accounts';
+import { generateDueTransactions } from '@/lib/recurring';
 
 export function useDashboardData(cycleStartDateStr?: string) {
   const { user, profile, incomeSources, accounts } = useAuthStore();
   const { setDashboardStats, setCategories, mutationCount } = useTransactionStore();
   const [loading, setLoading] = useState(true);
+  const [pendingRecurring, setPendingRecurring] = useState<{ recurring: RecurringTransaction; dueDates: string[] }[]>([]);
+  const generatedRef = useRef(false);
   const supabase = createClient();
+
+  // Run recurring generation once per session on first load
+  useEffect(() => {
+    if (!user || generatedRef.current) return;
+    generatedRef.current = true;
+    generateDueTransactions(supabase, user.id).then(({ pending }) => {
+      setPendingRecurring(pending);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const fetchData = useCallback(async () => {
     if (!user || !profile) return;
@@ -140,7 +153,7 @@ export function useDashboardData(cycleStartDateStr?: string) {
     fetchData();
   }, [fetchData, mutationCount]);
 
-  return { loading, refetch: fetchData };
+  return { loading, refetch: fetchData, pendingRecurring, setPendingRecurring };
 }
 
 // Helpers — avoid importing addMonths just for this tiny offset calc

@@ -87,6 +87,11 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
                 {txn.type !== 'transfer' && txn.account && (
                   <span className="text-[#52525B] text-xs">{txn.account.name}</span>
                 )}
+                {txn.generated_from_recurring && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#60A5FA18] text-[#60A5FA] font-medium">
+                    Auto
+                  </span>
+                )}
                 {txn.note && <p className="text-[#71717A] text-xs">{txn.note}</p>}
               </div>
               <p className="text-[#71717A] text-xs">{formatTransactionDate(txn.transaction_date)}</p>
