@@ -2,6 +2,7 @@ export type TransactionType = 'expense' | 'income' | 'transfer' | 'adjustment';
 export type BucketName = 'needs' | 'wants' | 'future';
 export type CategoryType = 'expense' | 'income' | 'adjustment' | 'transfer' | 'system';
 export type IncomeFrequency = 'monthly' | 'weekly' | 'biweekly' | 'irregular';
+export type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly';
 
 export type { AccountType, Account, AccountRef } from './account';
 
@@ -26,7 +27,7 @@ export interface Profile {
   needs_percent: number;
   wants_percent: number;
   future_percent: number;
-  cycle_start_day?: number; // 1-28, default 1; optional until migration runs
+  cycle_start_day?: number;
   accounts_banner_dismissed?: boolean;
   created_at: string;
   updated_at: string;
@@ -69,9 +70,37 @@ export interface Transaction {
   note: string | null;
   transaction_date: string;
   created_at: string;
+  generated_from_recurring?: string | null;
   category?: Category | null;
   account?: AccountRef | null;
   to_account?: AccountRef | null;
+}
+
+export interface RecurringTransaction {
+  id: string;
+  user_id: string;
+  account_id: string;
+  category_id: string | null;
+  type: 'expense' | 'income';
+  amount: number;
+  note: string | null;
+  frequency: RecurringFrequency;
+  start_date: string; // YYYY-MM-DD
+  end_date: string | null;
+  schedule_day: number | null;
+  auto_log: boolean;
+  last_generated_date: string | null;
+  is_active: boolean;
+  is_paused: boolean;
+  created_at: string;
+  updated_at: string;
+  account?: AccountRef | null;
+  category?: Category | null;
+}
+
+export interface IncomeNudge {
+  incomeSource: IncomeSource;
+  dueDate: string; // YYYY-MM-DD
 }
 
 export interface DashboardStats {

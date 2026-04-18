@@ -4,12 +4,16 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
 import { TopBar } from '@/components/layout/top-bar';
 import { BucketRing } from '@/components/dashboard/bucket-ring';
 import { SpendCard } from '@/components/dashboard/spend-card';
 import { WeeklyChart } from '@/components/dashboard/weekly-chart';
 import { RecentTransactions } from '@/components/dashboard/recent-transactions';
 import { OnboardingModal } from '@/components/dashboard/onboarding-modal';
+import { IncomeNudgeCard, PendingRecurringCard } from '@/components/dashboard/income-nudge-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
@@ -19,7 +23,11 @@ import { totalMonthlyIncome, FREQUENCY_LABELS } from '@/lib/income';
 import { formatGHS, formatGHSCompact } from '@/lib/utils';
 import { ACCOUNT_TYPE_CONFIG } from '@/lib/accounts';
 import { getCycleForDate, getCycleAtOffset, parseCycleParam, getCycleFromStartDate } from '@/lib/cycle';
-import type { BucketName } from '@/types';
+import { getDueIncomeNudges, recordNudgeDismissal } from '@/lib/income-nudges';
+import { confirmPendingRecurring, skipPendingRecurring } from '@/lib/recurring';
+import { revalidateForEntity } from '@/lib/revalidation';
+import { createClient } from '@/lib/supabase/client';
+import type { BucketName, IncomeNudge, RecurringTransaction } from '@/types';
 
 const BUCKETS: BucketName[] = ['needs', 'wants', 'future'];
 
@@ -27,8 +35,9 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const supabase = createClient();
 
-  const { profile, incomeSources, accounts } = useAuthStore();
+  const { profile, incomeSources, accounts, user } = useAuthStore();
   const { dashboardStats } = useTransactionStore();
   const cycleStartDay = profile?.cycle_start_day ?? 1;
 
@@ -44,11 +53,12 @@ function DashboardContent() {
     router.push(`${pathname}?cycle=${next.startDateStr}`);
   }
 
-  const { loading } = useDashboardData(cycle.startDateStr);
+  const { loading, pendingRecurring, setPendingRecurring } = useDashboardData(cycle.startDateStr);
   useProfile();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showIncomeBreakdown, setShowIncomeBreakdown] = useState(false);
+  const [nudges, setNudges] = useState<IncomeNudge[]>([]);
 
   useEffect(() => {
     if (profile && profile.monthly_income === 0 && incomeSources.length === 0) {
@@ -56,11 +66,66 @@ function DashboardContent() {
     }
   }, [profile, incomeSources]);
 
+  // Fetch income nudges once profile + income sources are available
+  useEffect(() => {
+    if (!user || incomeSources.length === 0) return;
+    getDueIncomeNudges(supabase, user.id, incomeSources).then(setNudges);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, incomeSources]);
+
+  async function handleLogNudge(nudge: IncomeNudge) {
+    if (!user) return;
+    const defaultAccount = accounts.find(a => a.is_default) ?? accounts[0];
+    if (!defaultAccount) { toast.error('No account found'); return; }
+
+    const today = format(new Date(), 'yyyy-MM-dd');
+    await supabase.from('transactions').insert({
+      user_id: user.id,
+      account_id: defaultAccount.id,
+      category_id: null,
+      amount: nudge.incomeSource.amount,
+      type: 'income',
+      note: nudge.incomeSource.name,
+      transaction_date: today,
+    });
+    await recordNudgeDismissal(supabase, user.id, nudge.incomeSource.id, nudge.dueDate, 'logged');
+    setNudges(prev => prev.filter(n => n.incomeSource.id !== nudge.incomeSource.id));
+    revalidateForEntity('transaction');
+    toast.success(`Logged ${formatGHS(nudge.incomeSource.amount)} income`);
+  }
+
+  async function handleSnoozeNudge(nudge: IncomeNudge) {
+    if (!user) return;
+    await recordNudgeDismissal(supabase, user.id, nudge.incomeSource.id, nudge.dueDate, 'snoozed');
+    setNudges(prev => prev.filter(n => n.incomeSource.id !== nudge.incomeSource.id));
+    toast('Reminder snoozed — we\'ll check again tomorrow');
+  }
+
+  async function handleDismissNudge(nudge: IncomeNudge) {
+    if (!user) return;
+    await recordNudgeDismissal(supabase, user.id, nudge.incomeSource.id, nudge.dueDate, 'dismissed');
+    setNudges(prev => prev.filter(n => n.incomeSource.id !== nudge.incomeSource.id));
+  }
+
+  async function handleConfirmPending(item: RecurringTransaction, dueDate: string) {
+    if (!user) return;
+    await confirmPendingRecurring(supabase, user.id, item, dueDate);
+    setPendingRecurring(prev => prev.filter(p => p.recurring.id !== item.id));
+    revalidateForEntity('transaction');
+    toast.success('Transaction logged');
+  }
+
+  async function handleSkipPending(item: RecurringTransaction, dueDate: string) {
+    await skipPendingRecurring(supabase, item.id, dueDate);
+    setPendingRecurring(prev => prev.filter(p => p.recurring.id !== item.id));
+  }
+
   const monthlyIncome = incomeSources.length > 0
     ? totalMonthlyIncome(incomeSources)
     : profile?.monthly_income ?? 0;
 
   const activeSources = incomeSources.filter(s => s.is_active);
+  const hasNudges = nudges.length > 0 || pendingRecurring.length > 0;
 
   return (
     <div className="max-w-2xl mx-auto pb-8">
@@ -130,6 +195,33 @@ function DashboardContent() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Income nudge + pending recurring cards */}
+        {hasNudges && (
+          <div className="space-y-2">
+            <AnimatePresence mode="popLayout">
+              {nudges.map(nudge => (
+                <IncomeNudgeCard
+                  key={nudge.incomeSource.id}
+                  nudge={nudge}
+                  onLog={handleLogNudge}
+                  onSnooze={handleSnoozeNudge}
+                  onDismiss={handleDismissNudge}
+                />
+              ))}
+              {pendingRecurring.map(({ recurring, dueDates }) => (
+                <PendingRecurringCard
+                  key={recurring.id}
+                  name={recurring.note ?? recurring.category?.name ?? 'Recurring'}
+                  amount={recurring.amount}
+                  dueDate={dueDates[dueDates.length - 1]}
+                  onConfirm={() => handleConfirmPending(recurring, dueDates[dueDates.length - 1])}
+                  onSkip={() => handleSkipPending(recurring, dueDates[dueDates.length - 1])}
+                />
+              ))}
+            </AnimatePresence>
           </div>
         )}
 

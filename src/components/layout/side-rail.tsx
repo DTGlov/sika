@@ -3,15 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, Receipt, Wallet, Settings, TrendingUp } from 'lucide-react';
+import { Home, Receipt, Wallet, RefreshCw, Settings, TrendingUp } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/transactions', label: 'Transactions', icon: Receipt },
   { href: '/accounts', label: 'Accounts', icon: Wallet },
+  { href: '/recurring', label: 'Recurring', icon: RefreshCw },
   { href: '/settings', label: 'Settings', icon: Settings },
-  // TODO(phase-2): Goals tab
-  // TODO(phase-3): Invest tab
 ] as const;
 
 export function SideRail() {
