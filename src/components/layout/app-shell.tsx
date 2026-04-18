@@ -28,7 +28,10 @@ export function AppShell({ user, children }: AppShellProps) {
       <SideRail />
 
       {/* Main content — indented right to clear the side rail on md+ */}
-      <div className="md:pl-16 lg:pl-60 pb-20 md:pb-0">
+      <div
+        className="md:pl-16 lg:pl-60 md:pb-0"
+        style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
+      >
         <motion.div
           key={pathname}
           initial={{ opacity: 0, y: 6 }}

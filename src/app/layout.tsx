@@ -1,6 +1,7 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
+import { PwaRegister } from '@/components/pwa-register';
 import './globals.css';
 
 const geistSans = Geist({
@@ -16,6 +17,26 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Sika — Track Your Money',
   description: 'Bold personal finance for Ghana. Track spending, savings, and investments.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Sika',
+  },
+  icons: {
+    icon: [
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#0A0A0B',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full bg-[#0A0A0B] text-[#FAFAFA] antialiased">
         {children}
         <Toaster richColors position="top-center" />
+        <PwaRegister />
       </body>
     </html>
   );
