@@ -14,6 +14,7 @@ import { WeeklyChart } from '@/components/dashboard/weekly-chart';
 import { RecentTransactions } from '@/components/dashboard/recent-transactions';
 import { OnboardingModal } from '@/components/dashboard/onboarding-modal';
 import { IncomeNudgeCard, PendingRecurringCard } from '@/components/dashboard/income-nudge-card';
+import { HintCard, BucketsTooltip } from '@/components/hint-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
@@ -225,7 +226,20 @@ function DashboardContent() {
           </div>
         )}
 
+        {/* Buckets intro — shown once until dismissed */}
+        <HintCard
+          hintId="dashboard_buckets_intro"
+          title="How buckets work"
+          body="Your income is split 50/30/20 by default: Needs (must-haves like rent, food, transport), Wants (eating out, entertainment, gym), Future (savings, investments, emergency fund). Customize the split in Settings."
+          cta="Got it"
+        />
+
         {/* Bucket rings */}
+        <div>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">Buckets</p>
+          <BucketsTooltip />
+        </div>
         <div className="grid grid-cols-3 gap-3">
           {loading
             ? Array.from({ length: 3 }).map((_, i) => (
@@ -240,6 +254,7 @@ function DashboardContent() {
                   index={i}
                 />
               ))}
+        </div>
         </div>
 
         {/* Spend summary cards */}

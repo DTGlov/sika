@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RecurringModal } from '@/components/recurring/recurring-modal';
+import { HintCard } from '@/components/hint-card';
 import type { RecurringTransaction, RecurringFrequency } from '@/types';
 
 type TabValue = 'expense' | 'income' | 'paused';
@@ -310,6 +311,16 @@ function RecurringContent() {
           </Button>
         </div>
       </div>
+
+      {/* Intro hint — shown until dismissed */}
+      <HintCard
+        hintId="recurring_intro"
+        title="Automate your money rhythm"
+        body="Recurring transactions auto-log on a schedule — set up subscriptions, salary, and bills once and Sika handles the rest. Use nudges for variable amounts (utilities, side hustles)."
+        icon={RefreshCw}
+        variant="banner"
+        className="mb-4"
+      />
 
       {/* Tabs */}
       <div className="flex gap-1 mb-5 bg-[#141416] border border-[#27272A] rounded-xl p-1 overflow-x-auto scrollbar-none">
