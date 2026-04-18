@@ -1,4 +1,4 @@
-export type TransactionType = 'expense' | 'income' | 'transfer';
+export type TransactionType = 'expense' | 'income' | 'transfer' | 'adjustment';
 export type BucketName = 'needs' | 'wants' | 'future';
 export type CategoryType = 'expense' | 'income' | 'adjustment' | 'transfer' | 'system';
 export type IncomeFrequency = 'monthly' | 'weekly' | 'biweekly' | 'irregular';
@@ -27,6 +27,7 @@ export interface Profile {
   wants_percent: number;
   future_percent: number;
   cycle_start_day?: number; // 1-28, default 1; optional until migration runs
+  accounts_banner_dismissed?: boolean;
   created_at: string;
   updated_at: string;
 }

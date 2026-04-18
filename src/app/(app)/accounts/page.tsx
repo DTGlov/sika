@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, Star } from 'lucide-react';
+import { Plus, Pencil, Trash2, Star, Scale, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
@@ -9,14 +9,15 @@ import { useProfile } from '@/hooks/use-profile';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { ACCOUNT_TYPE_CONFIG, computeAccountBalances } from '@/lib/accounts';
 import { formatGHS } from '@/lib/utils';
+import { revalidateForEntity } from '@/lib/revalidation';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AccountModal } from '@/components/accounts/account-modal';
 import type { Account } from '@/types/account';
 
 export default function AccountsPage() {
-  const { user, accounts, setAccounts } = useAuthStore();
-  const { bumpMutation } = useTransactionStore();
+  const { user, profile, accounts, setAccounts, setProfile } = useAuthStore();
+  const { mutationCount, openReconcileSheet } = useTransactionStore();
   const supabase = createClient();
   useProfile();
 
@@ -31,7 +32,7 @@ export default function AccountsPage() {
   const [reassignToId, setReassignToId] = useState<string>('');
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Compute balances from all transactions
+  // Compute balances — re-runs on any mutation (transfers, new transactions, etc.)
   useEffect(() => {
     if (!user || accounts.length === 0) return;
 
@@ -45,9 +46,19 @@ export default function AccountsPage() {
       setBalancesLoading(false);
     }
     loadBalances();
-  }, [user, accounts, supabase]);
+  // mutationCount ensures balances re-fetch after any transaction mutation
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, accounts, mutationCount]);
 
   const totalBalance = accounts.reduce((sum, a) => sum + (balances[a.id] ?? a.opening_balance), 0);
+
+  const showBanner = profile && !profile.accounts_banner_dismissed;
+
+  async function dismissBanner() {
+    if (!user) return;
+    await supabase.from('profiles').update({ accounts_banner_dismissed: true }).eq('id', user.id);
+    setProfile({ ...profile!, accounts_banner_dismissed: true });
+  }
 
   async function startDelete(acc: Account) {
     const { count } = await supabase
@@ -65,7 +76,6 @@ export default function AccountsPage() {
     if (!deletingId || !user) return;
     setDeleteLoading(true);
 
-    // If there are transactions, reassign them first
     if (txnCountForDelete > 0 && reassignToId) {
       const { error: reassignErr } = await supabase
         .from('transactions')
@@ -87,7 +97,7 @@ export default function AccountsPage() {
 
     const updated = accounts.filter(a => a.id !== deletingId);
     setAccounts(updated);
-    bumpMutation();
+    revalidateForEntity('account');
     setDeletingId(null);
     setDeleteLoading(false);
     toast.success('Account deleted');
@@ -96,7 +106,6 @@ export default function AccountsPage() {
   function handleSaved(all: Account[]) {
     const active = all.filter(a => a.is_active);
     setAccounts(active);
-    bumpMutation();
   }
 
   const deletingAcc = accounts.find(a => a.id === deletingId);
@@ -104,7 +113,7 @@ export default function AccountsPage() {
 
   return (
     <div className="max-w-2xl mx-auto pb-8 px-4 pt-6 md:px-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-[#FAFAFA]">Accounts</h1>
         <Button
           onClick={() => { setEditAccount(undefined); setModalOpen(true); }}
@@ -113,6 +122,26 @@ export default function AccountsPage() {
           <Plus className="w-4 h-4" /> Add
         </Button>
       </div>
+
+      {/* Opening balance onboarding banner */}
+      {showBanner && (
+        <div className="bg-[#FBBF24]/10 border border-[#FBBF24]/30 rounded-2xl p-4 mb-4 flex items-start gap-3">
+          <div className="text-xl shrink-0">💡</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[#FAFAFA] text-sm font-semibold mb-0.5">Set your real balances</p>
+            <p className="text-[#A1A1AA] text-xs">
+              The default accounts have ₵0 as their opening balance. Tap the pencil on each
+              account and enter your actual current balance so Sika tracks correctly.
+            </p>
+          </div>
+          <button
+            onClick={dismissBanner}
+            className="text-[#71717A] hover:text-[#FAFAFA] transition-colors shrink-0 mt-0.5"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Total balance */}
       <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5 mb-4">
@@ -164,6 +193,13 @@ export default function AccountsPage() {
 
                   <div className="flex items-center gap-1">
                     <button
+                      onClick={() => openReconcileSheet({ accountId: acc.id, sikaBalance: balance })}
+                      className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#A1A1AA] flex items-center justify-center transition-colors"
+                      title="Reconcile balance"
+                    >
+                      <Scale className="w-3.5 h-3.5" />
+                    </button>
+                    <button
                       onClick={() => { setEditAccount(acc); setModalOpen(true); }}
                       className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
                     >
@@ -200,6 +236,7 @@ export default function AccountsPage() {
         open={modalOpen}
         onClose={() => { setModalOpen(false); setEditAccount(undefined); }}
         editAccount={editAccount}
+        currentBalance={editAccount ? (balances[editAccount.id] ?? editAccount.opening_balance) : undefined}
         onSaved={handleSaved}
       />
 
@@ -208,7 +245,7 @@ export default function AccountsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDeletingId(null)} />
           <div className="relative z-10 bg-[#141416] border border-[#27272A] rounded-2xl p-6 w-full max-w-sm">
-            <h3 className="text-[#FAFAFA] font-bold text-base mb-2">Delete "{deletingAcc.name}"?</h3>
+            <h3 className="text-[#FAFAFA] font-bold text-base mb-2">Delete &quot;{deletingAcc.name}&quot;?</h3>
             {txnCountForDelete > 0 ? (
               <>
                 <p className="text-[#A1A1AA] text-sm mb-4">
@@ -236,18 +273,13 @@ export default function AccountsPage() {
               <p className="text-[#71717A] text-sm mb-4">This account has no transactions. It will be permanently deleted.</p>
             )}
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setDeletingId(null)}
-                className="flex-1 h-11 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl"
-              >
+              <Button variant="outline" onClick={() => setDeletingId(null)}
+                className="flex-1 h-11 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
                 Cancel
               </Button>
-              <Button
-                onClick={confirmDelete}
+              <Button onClick={confirmDelete}
                 disabled={deleteLoading || (txnCountForDelete > 0 && !reassignToId)}
-                className="flex-1 h-11 bg-[#F43F5E] hover:bg-[#E03354] text-white font-semibold rounded-xl"
-              >
+                className="flex-1 h-11 bg-[#F43F5E] hover:bg-[#E03354] text-white font-semibold rounded-xl">
                 {deleteLoading ? 'Deleting…' : 'Delete'}
               </Button>
             </div>

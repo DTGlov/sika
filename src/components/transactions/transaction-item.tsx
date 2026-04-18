@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Pencil } from 'lucide-react';
+import { Trash2, Pencil, Scale } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { formatGHS, formatTransactionDate } from '@/lib/utils';
+import { revalidateForEntity } from '@/lib/revalidation';
 import type { Transaction } from '@/types';
 
 function getIconEmoji(icon: string | null): string {
@@ -26,7 +27,7 @@ interface TransactionItemProps {
 }
 
 export function TransactionItem({ transaction: txn }: TransactionItemProps) {
-  const { removeTransaction, openLogSheet, bumpMutation } = useTransactionStore();
+  const { removeTransaction, openLogSheet } = useTransactionStore();
   const supabase = createClient();
   const [deleting, setDeleting] = useState(false);
 
@@ -40,7 +41,7 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
       return;
     }
     removeTransaction(txn.id);
-    bumpMutation();
+    revalidateForEntity('transaction');
     toast.success('Deleted');
   }
 
@@ -58,19 +59,30 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
               style={{
-                background: txn.category?.bucket
+                background: txn.type === 'adjustment'
+                  ? '#A1A1AA18'
+                  : txn.category?.bucket
                   ? `${txn.category.bucket.color}22`
                   : '#1C1C1F',
               }}
             >
-              {getIconEmoji(txn.category?.icon ?? null)}
+              {txn.type === 'adjustment' ? <Scale className="w-5 h-5 text-[#A1A1AA]" /> : getIconEmoji(txn.category?.icon ?? null)}
             </div>
             <div>
-              <p className="text-[#FAFAFA] text-sm font-medium">
-                {txn.type === 'transfer'
-                  ? `${txn.account?.name ?? '?'} → ${txn.to_account?.name ?? '?'}`
-                  : (txn.category?.name ?? 'Uncategorized')}
-              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-[#FAFAFA] text-sm font-medium">
+                  {txn.type === 'transfer'
+                    ? `${txn.account?.name ?? '?'} → ${txn.to_account?.name ?? '?'}`
+                    : txn.type === 'adjustment'
+                    ? 'Balance Adjustment'
+                    : (txn.category?.name ?? 'Uncategorized')}
+                </p>
+                {txn.type === 'adjustment' && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#A1A1AA18] text-[#A1A1AA] font-medium">
+                    adj
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {txn.type !== 'transfer' && txn.account && (
                   <span className="text-[#52525B] text-xs">{txn.account.name}</span>
@@ -82,8 +94,16 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <p className={`amount text-sm font-semibold ${txn.type === 'income' ? 'text-[#00D9A3]' : txn.type === 'transfer' ? 'text-[#A1A1AA]' : 'text-[#FAFAFA]'}`}>
-              {txn.type === 'income' ? '+' : txn.type === 'transfer' ? '' : '-'}{formatGHS(txn.amount)}
+            <p className={`amount text-sm font-semibold ${
+              txn.type === 'income' ? 'text-[#00D9A3]' :
+              txn.type === 'transfer' ? 'text-[#A1A1AA]' :
+              txn.type === 'adjustment' ? (txn.amount >= 0 ? 'text-[#00D9A3]' : 'text-[#F43F5E]') :
+              'text-[#FAFAFA]'
+            }`}>
+              {txn.type === 'income' ? '+' :
+               txn.type === 'transfer' ? '' :
+               txn.type === 'adjustment' ? (txn.amount >= 0 ? '+' : '') :
+               '-'}{formatGHS(Math.abs(txn.amount))}
             </p>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
