@@ -15,6 +15,7 @@ import { RecentTransactions } from '@/components/dashboard/recent-transactions';
 import { OnboardingModal } from '@/components/dashboard/onboarding-modal';
 import { IncomeNudgeCard, PendingRecurringCard } from '@/components/dashboard/income-nudge-card';
 import { HintCard, BucketsTooltip } from '@/components/hint-card';
+import { GoalsWidget } from '@/components/dashboard/goals-widget';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
@@ -28,7 +29,9 @@ import { getDueIncomeNudges, recordNudgeDismissal } from '@/lib/income-nudges';
 import { confirmPendingRecurring, skipPendingRecurring } from '@/lib/recurring';
 import { revalidateForEntity } from '@/lib/revalidation';
 import { createClient } from '@/lib/supabase/client';
+import { fetchGoals, fetchGoalContributions, computeGoalProgress } from '@/lib/goals';
 import type { BucketName, IncomeNudge, RecurringTransaction } from '@/types';
+import type { GoalProgress } from '@/types/goal';
 
 const BUCKETS: BucketName[] = ['needs', 'wants', 'future'];
 
@@ -60,6 +63,7 @@ function DashboardContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showIncomeBreakdown, setShowIncomeBreakdown] = useState(false);
   const [nudges, setNudges] = useState<IncomeNudge[]>([]);
+  const [goalProgresses, setGoalProgresses] = useState<GoalProgress[]>([]);
 
   useEffect(() => {
     if (profile && profile.monthly_income === 0 && incomeSources.length === 0) {
@@ -73,6 +77,23 @@ function DashboardContent() {
     getDueIncomeNudges(supabase, user.id, incomeSources).then(setNudges);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, incomeSources]);
+
+  // Fetch top goals for widget
+  useEffect(() => {
+    if (!user || accounts.length === 0) return;
+    fetchGoals(supabase, user.id).then(async goals => {
+      const top3 = goals.slice(0, 3);
+      const progresses = await Promise.all(
+        top3.map(async goal => {
+          const amt = await fetchGoalContributions(supabase, goal.id);
+          const acct = accounts.find(a => a.id === goal.funding_account_id) ?? accounts[0];
+          return computeGoalProgress(goal, amt, acct);
+        })
+      );
+      setGoalProgresses(progresses);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, accounts]);
 
   async function handleLogNudge(nudge: IncomeNudge) {
     if (!user) return;
@@ -315,6 +336,9 @@ function DashboardContent() {
             </div>
           </div>
         )}
+
+        {/* Goals widget */}
+        {goalProgresses.length > 0 && <GoalsWidget goals={goalProgresses} />}
 
         {/* Weekly chart */}
         {loading ? (

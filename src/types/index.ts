@@ -5,6 +5,7 @@ export type IncomeFrequency = 'monthly' | 'weekly' | 'biweekly' | 'irregular';
 export type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly';
 
 export type { AccountType, Account, AccountRef } from './account';
+export type { GoalType, Goal, GoalProgress } from './goal';
 
 export interface IncomeSource {
   id: string;
@@ -71,6 +72,7 @@ export interface Transaction {
   transaction_date: string;
   created_at: string;
   generated_from_recurring?: string | null;
+  goal_id?: string | null;
   category?: Category | null;
   account?: AccountRef | null;
   to_account?: AccountRef | null;
