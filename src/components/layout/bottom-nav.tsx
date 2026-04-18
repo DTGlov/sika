@@ -20,9 +20,10 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed bottom-0 left-0 right-0 z-30 h-16 bg-[#141416] border-t border-[#27272A] md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-30 bg-[#141416] border-t border-[#27272A] md:hidden"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="flex h-full">
+      <div className="flex h-16">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + '?');
           return (
