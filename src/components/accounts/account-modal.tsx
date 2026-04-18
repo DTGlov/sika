@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Scale } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
+import { useTransactionStore } from '@/stores/transaction-store';
 import { ACCOUNT_TYPE_CONFIG } from '@/lib/accounts';
 import { formatGHS } from '@/lib/utils';
+import { revalidateForEntity } from '@/lib/revalidation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,12 +40,17 @@ interface AccountModalProps {
   open: boolean;
   onClose: () => void;
   editAccount?: Account;
+  currentBalance?: number; // computed balance (opening + transactions) — passed when editing
   onSaved: (accounts: Account[]) => void;
 }
 
-export function AccountModal({ open, onClose, editAccount, onSaved }: AccountModalProps) {
+export function AccountModal({ open, onClose, editAccount, currentBalance, onSaved }: AccountModalProps) {
   const { user, accounts, setAccounts } = useAuthStore();
+  const { addTransaction, openReconcileSheet } = useTransactionStore();
   const supabase = createClient();
+  const [reconcileMode, setReconcileMode] = useState(false);
+  const [reconcileActual, setReconcileActual] = useState('');
+  const [reconcileSaving, setReconcileSaving] = useState(false);
 
   const {
     register,
@@ -77,8 +84,10 @@ export function AccountModal({ open, onClose, editAccount, onSaved }: AccountMod
               is_default: editAccount.is_default,
               is_active: editAccount.is_active,
             }
-          : { name: '', type: 'bank', opening_balance: 0, is_default: false, is_active: true }
+          : { name: '', type: 'bank', opening_balance: undefined as unknown as number, is_default: false, is_active: true }
       );
+      setReconcileMode(false);
+      setReconcileActual('');
     }
   }, [open, editAccount, reset]);
 
@@ -145,9 +154,39 @@ export function AccountModal({ open, onClose, editAccount, onSaved }: AccountMod
 
     setAccounts(updatedAccounts.filter(a => a.is_active));
     onSaved(updatedAccounts);
+    revalidateForEntity('account');
     reset();
     onClose();
     toast.success(editAccount ? 'Account updated' : 'Account created');
+  }
+
+  async function handleReconcileFromModal() {
+    if (!user || !editAccount || reconcileActual === '') return;
+    const sikaBalance = currentBalance ?? editAccount.opening_balance;
+    const diff = (parseFloat(reconcileActual) || 0) - sikaBalance;
+    if (diff === 0) { toast.error('Balance already matches'); return; }
+    setReconcileSaving(true);
+    const { data, error } = await supabase
+      .from('transactions')
+      .insert({
+        user_id: user.id,
+        amount: diff,
+        type: 'adjustment',
+        category_id: null,
+        account_id: editAccount.id,
+        to_account_id: null,
+        note: `Reconciled to ${formatGHS(parseFloat(reconcileActual) || 0)}`,
+        transaction_date: new Date().toISOString().slice(0, 10),
+      })
+      .select('*, category:categories(*, bucket:budget_buckets(*)), account:accounts!account_id(id,name,type,color,icon), to_account:accounts!to_account_id(id,name,type,color,icon)')
+      .single();
+    setReconcileSaving(false);
+    if (error) { toast.error('Failed to reconcile'); return; }
+    addTransaction(data);
+    revalidateForEntity('adjustment');
+    toast.success(`Reconciled to ${formatGHS(parseFloat(reconcileActual) || 0)}`);
+    reset();
+    onClose();
   }
 
   return (
@@ -199,23 +238,31 @@ export function AccountModal({ open, onClose, editAccount, onSaved }: AccountMod
           </div>
 
           {/* Opening balance */}
-          <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Opening balance</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">{CURRENCY_SYMBOL}</span>
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                className="h-11 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
-                {...register('opening_balance', { valueAsNumber: true })}
-              />
+          {!reconcileMode && (
+            <div className="space-y-1.5">
+              <Label className="text-[#A1A1AA] text-sm">
+                {editAccount ? 'Opening balance' : 'Current balance — RIGHT NOW'}
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">{CURRENCY_SYMBOL}</span>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  className="h-11 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                  {...register('opening_balance', { valueAsNumber: true })}
+                />
+              </div>
+              {!editAccount && (
+                <p className="text-[#52525B] text-[11px]">
+                  Enter the actual balance in this account today — not zero, unless it's empty.
+                  Sika adds/subtracts from this as you log transactions.
+                </p>
+              )}
+              {errors.opening_balance && <p className="text-[#F43F5E] text-xs">{errors.opening_balance.message}</p>}
             </div>
-            <p className="text-[#52525B] text-[11px]">
-              Current balance at time of setup. After this, Sika tracks all changes.
-            </p>
-            {errors.opening_balance && <p className="text-[#F43F5E] text-xs">{errors.opening_balance.message}</p>}
-          </div>
+          )}
 
           {/* Set as default */}
           <div className="flex items-center justify-between">
@@ -254,13 +301,72 @@ export function AccountModal({ open, onClose, editAccount, onSaved }: AccountMod
             </div>
           )}
 
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full h-11 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
-          >
-            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editAccount ? 'Save changes' : 'Add account'}
-          </Button>
+          {/* Reconcile section — editing only */}
+          {editAccount && currentBalance !== undefined && (
+            <div className="border border-[#27272A] rounded-xl p-3 space-y-3">
+              <button
+                type="button"
+                onClick={() => { setReconcileMode(v => !v); setReconcileActual(''); }}
+                className="flex items-center gap-2 text-sm text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors w-full"
+              >
+                <Scale className="w-4 h-4" />
+                <span className="font-medium">Reconcile to real balance</span>
+                <span className="ml-auto text-[#52525B] text-xs">{reconcileMode ? '▴' : '▾'}</span>
+              </button>
+
+              {reconcileMode && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-[#71717A]">Sika shows</span>
+                    <span className="text-[#FAFAFA] font-semibold tabular-nums">{formatGHS(currentBalance)}</span>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">{CURRENCY_SYMBOL}</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="Actual current balance"
+                      value={reconcileActual}
+                      onChange={(e) => setReconcileActual(e.target.value)}
+                      className="h-10 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                    />
+                  </div>
+                  {reconcileActual !== '' && (() => {
+                    const diff = (parseFloat(reconcileActual) || 0) - currentBalance;
+                    const isPos = diff >= 0;
+                    return (
+                      <div className="flex items-center justify-between text-sm rounded-lg px-3 py-2"
+                        style={{ backgroundColor: isPos ? '#00D9A318' : '#F43F5E18' }}>
+                        <span className="text-[#A1A1AA]">Adjustment</span>
+                        <span style={{ color: isPos ? '#00D9A3' : '#F43F5E' }} className="font-semibold tabular-nums">
+                          {isPos ? '+' : ''}{formatGHS(diff)}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                  <Button
+                    type="button"
+                    onClick={handleReconcileFromModal}
+                    disabled={reconcileSaving || reconcileActual === '' || (parseFloat(reconcileActual) || 0) === currentBalance}
+                    className="w-full h-10 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl text-sm"
+                  >
+                    {reconcileSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create adjustment & close'}
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!reconcileMode && (
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full h-11 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editAccount ? 'Save changes' : 'Add account'}
+            </Button>
+          )}
         </form>
       </DialogContent>
     </Dialog>

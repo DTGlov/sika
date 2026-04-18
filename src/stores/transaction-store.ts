@@ -1,17 +1,24 @@
 import { create } from 'zustand';
 import type { Transaction, Category, DashboardStats } from '@/types';
 
+interface ReconcileContext {
+  accountId: string;
+  sikaBalance: number;
+}
+
 interface TransactionState {
   transactions: Transaction[];
   categories: Category[];
   dashboardStats: DashboardStats | null;
   isLogSheetOpen: boolean;
   editingTransaction: Transaction | null;
+  reconcileContext: ReconcileContext | null;
   mutationCount: number;
   setTransactions: (txns: Transaction[]) => void;
   setCategories: (cats: Category[]) => void;
   setDashboardStats: (stats: DashboardStats) => void;
   openLogSheet: (txn?: Transaction) => void;
+  openReconcileSheet: (context: ReconcileContext) => void;
   closeLogSheet: () => void;
   addTransaction: (txn: Transaction) => void;
   updateTransaction: (txn: Transaction) => void;
@@ -25,12 +32,14 @@ export const useTransactionStore = create<TransactionState>((set) => ({
   dashboardStats: null,
   isLogSheetOpen: false,
   editingTransaction: null,
+  reconcileContext: null,
   mutationCount: 0,
   setTransactions: (transactions) => set({ transactions }),
   setCategories: (categories) => set({ categories }),
   setDashboardStats: (dashboardStats) => set({ dashboardStats }),
-  openLogSheet: (txn) => set({ isLogSheetOpen: true, editingTransaction: txn ?? null }),
-  closeLogSheet: () => set({ isLogSheetOpen: false, editingTransaction: null }),
+  openLogSheet: (txn) => set({ isLogSheetOpen: true, editingTransaction: txn ?? null, reconcileContext: null }),
+  openReconcileSheet: (context) => set({ isLogSheetOpen: true, editingTransaction: null, reconcileContext: context }),
+  closeLogSheet: () => set({ isLogSheetOpen: false, editingTransaction: null, reconcileContext: null }),
   addTransaction: (txn) =>
     set((s) => ({ transactions: [txn, ...s.transactions] })),
   updateTransaction: (txn) =>

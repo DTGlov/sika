@@ -37,6 +37,11 @@ export function computeAccountBalances(
       if (txn.to_account_id && txn.to_account_id in balances) {
         balances[txn.to_account_id] += txn.amount;
       }
+    } else if (txn.type === 'adjustment') {
+      // Signed amount: positive = balance increases, negative = balance decreases
+      if (txn.account_id && txn.account_id in balances) {
+        balances[txn.account_id] += txn.amount;
+      }
     }
   }
 
