@@ -16,7 +16,7 @@
 //   bucket     (update)              → /dashboard, /settings
 
 export const REVALIDATION_MAP = {
-  transaction:       ['/dashboard', '/transactions', '/accounts'],
+  transaction:       ['/dashboard', '/transactions', '/accounts', '/streaks'],
   account:           ['/accounts', '/dashboard', '/transactions', '/settings'],
   transfer:          ['/dashboard', '/transactions', '/accounts'],
   adjustment:        ['/dashboard', '/transactions', '/accounts'],
@@ -25,7 +25,7 @@ export const REVALIDATION_MAP = {
   profile:           ['/dashboard', '/settings'],
   bucket:            ['/dashboard', '/settings'],
   goal:                  ['/goals', '/dashboard'],
-  goal_contribution:     ['/goals', '/dashboard', '/accounts', '/transactions'],
+  goal_contribution:     ['/goals', '/dashboard', '/accounts', '/transactions', '/streaks'],
   sinking_fund_payment:  ['/goals', '/dashboard', '/accounts', '/transactions'],
 } as const;
 

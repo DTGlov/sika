@@ -6,6 +6,7 @@ export type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | '
 
 export type { AccountType, Account, AccountRef } from './account';
 export type { GoalType, Goal, GoalProgress } from './goal';
+export type { Streaks, StreakUpdateResult } from './streak';
 
 export interface IncomeSource {
   id: string;

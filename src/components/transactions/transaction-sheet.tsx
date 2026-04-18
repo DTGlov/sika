@@ -19,6 +19,7 @@ import { revalidateForEntity } from '@/lib/revalidation';
 import { HintCard } from '@/components/hint-card';
 import { NextCycleModal } from '@/components/goals/next-cycle-modal';
 import { fetchGoals, fetchGoalAmounts } from '@/lib/goals';
+import { updateLoggingStreak, loggingMilestoneMessage } from '@/lib/streaks';
 import type { TransactionType } from '@/types';
 import type { Goal } from '@/types/goal';
 
@@ -35,7 +36,7 @@ export function TransactionSheet() {
     reconcileContext,
     dashboardStats,
   } = useTransactionStore();
-  const { user, accounts } = useAuthStore();
+  const { user, accounts, setStreaks } = useAuthStore();
   const supabase = createClient();
 
   const defaultAccountId = accounts.find(a => a.is_default)?.id ?? accounts[0]?.id ?? null;
@@ -210,6 +211,16 @@ export function TransactionSheet() {
       setSaving(false);
       if (error) { toast.error('Failed to save transaction'); return; }
       addTransaction(data);
+
+      // Update logging streak for user-initiated transactions
+      updateLoggingStreak(supabase, user.id).then(result => {
+        if (result.streaks) setStreaks(result.streaks);
+        if (result.milestone_hit) {
+          toast.success(loggingMilestoneMessage(result.milestone_hit), { duration: 5000 });
+        } else if (result.freeze_earned) {
+          toast(`❄️ Streak freeze earned! ${result.streaks.freezes_banked} banked.`);
+        }
+      });
 
       if (paidFromGoalId && txType === 'expense') {
         revalidateForEntity('sinking_fund_payment');
