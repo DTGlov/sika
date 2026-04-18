@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -8,10 +8,11 @@ import { MailCheck, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const COOLDOWN_SECONDS = 60;
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email') ?? '';
   const supabase = createClient();
@@ -93,5 +94,34 @@ export default function VerifyEmailPage() {
         </p>
       </div>
     </motion.div>
+  );
+}
+
+function VerifyEmailSkeleton() {
+  return (
+    <div className="w-full max-w-sm">
+      <div className="mb-8 text-center">
+        <div className="inline-flex items-center gap-2 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-[#00D9A3] flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-[#0A0A0B]" />
+          </div>
+          <span className="text-2xl font-bold tracking-tight">Sika</span>
+        </div>
+      </div>
+      <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-6 text-center space-y-4">
+        <Skeleton className="w-16 h-16 rounded-2xl mx-auto bg-[#27272A]" />
+        <Skeleton className="h-6 w-40 rounded-lg mx-auto bg-[#27272A]" />
+        <Skeleton className="h-4 w-64 rounded-lg mx-auto bg-[#27272A]" />
+        <Skeleton className="h-12 w-full rounded-xl bg-[#27272A]" />
+      </div>
+    </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<VerifyEmailSkeleton />}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
