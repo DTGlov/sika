@@ -1,7 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { clampPercent, formatGHS, getProgressColor } from '@/lib/utils';
+import { AlertTriangle } from 'lucide-react';
+import { clampPercent, formatGHS, formatGHSCompact, getProgressColor } from '@/lib/utils';
 import type { BucketName } from '@/types';
 import { BUCKET_CONFIG } from '@/lib/constants';
 
@@ -10,12 +11,14 @@ interface BucketRingProps {
   spent: number;
   limit: number;
   index: number;
+  /** Only used for the Future bucket — sum of required monthly pace across active sinking funds. */
+  earmarked?: number;
 }
 
 const RADIUS = 36;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-export function BucketRing({ bucket, spent, limit, index }: BucketRingProps) {
+export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRingProps) {
   const config = BUCKET_CONFIG[bucket];
   const rawPercent = limit > 0 ? (spent / limit) * 100 : 0;
   const percent = clampPercent(rawPercent);
@@ -66,6 +69,31 @@ export function BucketRing({ bucket, spent, limit, index }: BucketRingProps) {
         </p>
         <p className="amount text-xs text-[#FAFAFA] font-medium">{formatGHS(spent)}</p>
         <p className="text-xs text-[#71717A]">of {formatGHS(limit)}</p>
+
+        {/* Sinking fund earmarked breakdown — Future bucket only */}
+        {bucket === 'future' && earmarked != null && earmarked > 0 && (
+          <div className="mt-2 pt-2 border-t border-[#27272A] space-y-0.5 text-left">
+            <div className="flex justify-between text-[10px]">
+              <span className="text-[#71717A]">Earmarked</span>
+              <span className="text-[#A1A1AA] tabular-nums">{formatGHSCompact(earmarked)}/mo</span>
+            </div>
+            <div className="flex justify-between text-[10px]">
+              <span className="text-[#71717A]">Uncommitted</span>
+              <span
+                className="tabular-nums"
+                style={{ color: limit - earmarked < 0 ? '#F97316' : '#A1A1AA' }}
+              >
+                {formatGHSCompact(limit - earmarked)}/mo
+              </span>
+            </div>
+            {limit - earmarked < 0 && (
+              <div className="flex items-center gap-1 pt-0.5">
+                <AlertTriangle className="w-2.5 h-2.5 text-[#F97316] shrink-0" />
+                <span className="text-[10px] text-[#F97316] leading-tight">Over budget</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </motion.div>
   );

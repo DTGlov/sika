@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Goal, GoalProgress } from '@/types/goal';
 import type { Account } from '@/types/account';
-import { differenceInDays } from 'date-fns';
+import { differenceInDays, addMonths, format } from 'date-fns';
 
 export const GOAL_COLORS = [
   '#00D9A3',
@@ -50,7 +50,6 @@ export function computeGoalProgress(
       required_monthly_pace = remaining / (days_remaining / 30);
       required_weekly_pace = remaining / (days_remaining / 7);
     }
-    // On track: current amount >= what we should have saved linearly by now
     const totalDays = differenceInDays(deadline, new Date(goal.created_at));
     if (totalDays > 0) {
       const elapsed = totalDays - days_remaining;
@@ -96,9 +95,9 @@ export async function contributeToGoal(
     goal_id: goal.id,
   });
 
-  // Mark goal completed if target reached
+  // For savings goals, mark complete when target is reached via contributions
   if (
-    goal.goal_type !== 'perpetual' &&
+    goal.goal_type === 'savings' &&
     goal.target_amount != null &&
     !goal.completed_at &&
     currentAmount + amount >= goal.target_amount
@@ -124,14 +123,87 @@ export async function fetchGoals(
   return data ?? [];
 }
 
+/** Returns contribution sum (transfers in with goal_id) and payment sum (expenses with paid_from_goal_id). */
+export async function fetchGoalAmounts(
+  supabase: SupabaseClient,
+  goalId: string
+): Promise<{ contributions: number; payments: number; net: number }> {
+  const [contribRes, paymentRes] = await Promise.all([
+    supabase
+      .from('transactions')
+      .select('amount')
+      .eq('goal_id', goalId)
+      .eq('type', 'transfer'),
+    supabase
+      .from('transactions')
+      .select('amount')
+      .eq('paid_from_goal_id', goalId)
+      .eq('type', 'expense'),
+  ]);
+  const contributions = (contribRes.data ?? []).reduce((s: number, r: { amount: number }) => s + r.amount, 0);
+  const payments = (paymentRes.data ?? []).reduce((s: number, r: { amount: number }) => s + r.amount, 0);
+  return { contributions, payments, net: contributions - payments };
+}
+
+/** Legacy helper — returns net effective balance (contributions - payments). */
 export async function fetchGoalContributions(
   supabase: SupabaseClient,
   goalId: string
 ): Promise<number> {
-  const { data } = await supabase
-    .from('transactions')
-    .select('amount')
-    .eq('goal_id', goalId)
-    .eq('type', 'transfer');
-  return (data ?? []).reduce((sum: number, r: { amount: number }) => sum + r.amount, 0);
+  const { net } = await fetchGoalAmounts(supabase, goalId);
+  return net;
+}
+
+interface NextCycleOptions {
+  name: string;
+  targetAmount: number;
+  deadline: string;
+  priority: number;
+}
+
+/** Creates the next cycle goal linked to the completed sinking fund. */
+export async function createNextCycle(
+  supabase: SupabaseClient,
+  userId: string,
+  completedGoal: Goal,
+  opts: NextCycleOptions
+): Promise<Goal | null> {
+  const { data, error } = await supabase
+    .from('goals')
+    .insert({
+      user_id: userId,
+      name: opts.name,
+      description: completedGoal.description,
+      icon: completedGoal.icon,
+      color: completedGoal.color,
+      goal_type: 'sinking_fund',
+      target_amount: opts.targetAmount,
+      deadline: opts.deadline,
+      funding_account_id: completedGoal.funding_account_id,
+      priority: opts.priority,
+      previous_goal_id: completedGoal.id,
+      cycle_count: (completedGoal.cycle_count ?? 1) + 1,
+    })
+    .select('*')
+    .single();
+
+  if (error) return null;
+  return data as Goal;
+}
+
+/** Suggest the next cycle name based on pattern, e.g. "Rent 2026 H1" → "Rent 2026 H2" or "Rent 2027 H1". */
+export function suggestNextCycleName(currentName: string, completionDate: Date): string {
+  // Try to increment a trailing year or cycle marker
+  const match = currentName.match(/^(.*?)(\s+\d{4}.*)?$/);
+  if (!match) return currentName;
+  const base = match[1].trim();
+  const nextYear = format(addMonths(completionDate, 6), 'yyyy');
+  const month = completionDate.getMonth();
+  const half = month < 6 ? 'H2' : 'H1';
+  return `${base} ${nextYear} ${half}`;
+}
+
+/** Suggest deadline for next cycle: 6 months from completion date. */
+export function suggestNextDeadline(completionDate: Date): string {
+  return format(addMonths(completionDate, 6), 'yyyy-MM-dd');
 }

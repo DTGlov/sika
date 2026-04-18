@@ -95,6 +95,9 @@ export function useDashboardData(cycleStartDateStr?: string) {
 
     const expenses = (cycleTxns ?? []).filter((t) => t.type === 'expense') as Transaction[];
     const totalSpentThisMonth = expenses.reduce((s, t) => s + t.amount, 0);
+    // Expenses flagged as paid from a sinking fund are excluded from bucket math —
+    // their cost was already accounted for by the monthly contribution to the goal.
+    const bucketExpenses = expenses.filter((t) => !t.paid_from_goal_id);
     const totalSpentLastMonth = (prevTxns ?? []).reduce(
       (s: number, t: { amount: number }) => s + t.amount,
       0
@@ -113,7 +116,7 @@ export function useDashboardData(cycleStartDateStr?: string) {
     };
 
     const bucketMap = new Map((buckets ?? []).map((b) => [b.id, b.name as BucketName]));
-    for (const txn of expenses) {
+    for (const txn of bucketExpenses) {
       const bucketId = txn.category?.bucket_id;
       if (bucketId) {
         const bName = bucketMap.get(bucketId);
@@ -125,7 +128,7 @@ export function useDashboardData(cycleStartDateStr?: string) {
     for (let i = 6; i >= 0; i--) {
       weeklyMap.set(format(subDays(now, i), 'yyyy-MM-dd'), 0);
     }
-    for (const txn of expenses) {
+    for (const txn of bucketExpenses) {
       if (txn.transaction_date >= weekAgo) {
         weeklyMap.set(txn.transaction_date, (weeklyMap.get(txn.transaction_date) ?? 0) + txn.amount);
       }

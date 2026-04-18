@@ -2,18 +2,19 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Pencil, Archive, Trash2, TrendingUp, Repeat } from 'lucide-react';
+import { ArrowLeft, Pencil, Archive, Trash2, TrendingUp, Repeat, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { TopBar } from '@/components/layout/top-bar';
 import { GoalModal } from '@/components/goals/goal-modal';
 import { ContributeModal } from '@/components/goals/contribute-modal';
+import { NextCycleModal } from '@/components/goals/next-cycle-modal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { createClient } from '@/lib/supabase/client';
-import { computeGoalProgress, fetchGoalContributions } from '@/lib/goals';
+import { computeGoalProgress, fetchGoalAmounts } from '@/lib/goals';
 import { revalidateForEntity } from '@/lib/revalidation';
 import { formatGHS, formatGHSCompact } from '@/lib/utils';
 import type { Goal, GoalProgress } from '@/types/goal';
@@ -28,14 +29,17 @@ export default function GoalDetailPage() {
 
   const [goalProgress, setGoalProgress] = useState<GoalProgress | null>(null);
   const [contributions, setContributions] = useState<Transaction[]>([]);
+  const [payments, setPayments] = useState<Transaction[]>([]);
+  const [previousGoal, setPreviousGoal] = useState<Goal | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
   const [showContribute, setShowContribute] = useState(false);
+  const [showNextCycle, setShowNextCycle] = useState(false);
   const [confirming, setConfirming] = useState<'archive' | 'delete' | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
-    const [goalRes, contribRes] = await Promise.all([
+    const [goalRes, contribRes, paymentRes] = await Promise.all([
       supabase.from('goals').select('*').eq('id', id).eq('user_id', user.id).single(),
       supabase
         .from('transactions')
@@ -43,15 +47,35 @@ export default function GoalDetailPage() {
         .eq('goal_id', id)
         .eq('type', 'transfer')
         .order('transaction_date', { ascending: false }),
+      supabase
+        .from('transactions')
+        .select('*, account:account_id(id,name), category:categories(name)')
+        .eq('paid_from_goal_id', id)
+        .eq('type', 'expense')
+        .order('transaction_date', { ascending: false }),
     ]);
 
     if (!goalRes.data) { router.replace('/goals'); return; }
     const goal: Goal = goalRes.data;
-    const txList: Transaction[] = contribRes.data ?? [];
-    const currentAmount = txList.reduce((s, t) => s + t.amount, 0);
+    const contribList: Transaction[] = contribRes.data ?? [];
+    const paymentList: Transaction[] = paymentRes.data ?? [];
+
+    const { net } = await fetchGoalAmounts(supabase, id);
     const fundingAccount = accounts.find(a => a.id === goal.funding_account_id) ?? accounts[0];
-    setGoalProgress(computeGoalProgress(goal, currentAmount, fundingAccount));
-    setContributions(txList);
+    setGoalProgress(computeGoalProgress(goal, net, fundingAccount));
+    setContributions(contribList);
+    setPayments(paymentList);
+
+    // Fetch previous cycle goal if exists
+    if (goal.previous_goal_id) {
+      const { data: prev } = await supabase
+        .from('goals')
+        .select('*')
+        .eq('id', goal.previous_goal_id)
+        .single();
+      setPreviousGoal(prev ?? null);
+    }
+
     setLoading(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, accounts, id, mutationCount]);
@@ -91,6 +115,9 @@ export default function GoalDetailPage() {
   const { goal, current_amount, progress_percent, days_remaining, required_monthly_pace, is_on_track } = goalProgress;
   const accentColor = goal.color ?? '#00D9A3';
   const isPerpetual = goal.goal_type === 'perpetual';
+  const isSinkingFund = goal.goal_type === 'sinking_fund';
+  const totalContributions = contributions.reduce((s, t) => s + t.amount, 0);
+  const totalPayments = payments.reduce((s, t) => s + t.amount, 0);
 
   return (
     <div className="max-w-2xl mx-auto pb-8">
@@ -125,7 +152,7 @@ export default function GoalDetailPage() {
           </button>
         </div>
 
-        {/* Confirm strip */}
+        {/* Confirm strips */}
         {confirming === 'archive' && (
           <div className="flex items-center gap-3 bg-[#1C1C1F] border border-[#27272A] rounded-2xl px-4 py-3 text-sm">
             <p className="text-[#A1A1AA] flex-1">Archive this goal? It won't appear in your list.</p>
@@ -141,6 +168,17 @@ export default function GoalDetailPage() {
           </div>
         )}
 
+        {/* Previous cycle link */}
+        {previousGoal && (
+          <button
+            onClick={() => router.push(`/goals/${previousGoal.id}`)}
+            className="flex items-center gap-1.5 text-xs text-[#71717A] hover:text-[#A1A1AA] transition-colors"
+          >
+            <ArrowLeft className="w-3 h-3" />
+            Previous cycle: {previousGoal.name}
+          </button>
+        )}
+
         {/* Hero card */}
         <div
           className="rounded-2xl p-5 space-y-4"
@@ -153,9 +191,13 @@ export default function GoalDetailPage() {
               {goal.description && (
                 <p className="text-[#A1A1AA] text-sm mt-0.5">{goal.description}</p>
               )}
+              {isSinkingFund && goal.cycle_count > 1 && (
+                <p className="text-[#71717A] text-xs mt-0.5">Cycle {goal.cycle_count}</p>
+              )}
             </div>
           </div>
 
+          {/* Effective balance */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span style={{ color: accentColor }} className="font-bold text-2xl tabular-nums">
@@ -167,6 +209,20 @@ export default function GoalDetailPage() {
                 </span>
               )}
             </div>
+
+            {/* For sinking funds: show contribution / payment breakdown */}
+            {isSinkingFund && (totalContributions > 0 || totalPayments > 0) && (
+              <div className="flex gap-3 text-xs">
+                <span className="text-[#71717A]">
+                  <span style={{ color: accentColor }}>+{formatGHSCompact(totalContributions)}</span> saved
+                </span>
+                {totalPayments > 0 && (
+                  <span className="text-[#71717A]">
+                    <span className="text-[#F97316]">−{formatGHSCompact(totalPayments)}</span> paid
+                  </span>
+                )}
+              </div>
+            )}
 
             {!isPerpetual && progress_percent != null && (
               <>
@@ -193,7 +249,7 @@ export default function GoalDetailPage() {
             )}
           </div>
 
-          {/* Stats row */}
+          {/* Stats grid */}
           <div className="grid grid-cols-2 gap-3">
             {days_remaining != null && (
               <StatTile label="Days left" value={`${days_remaining}d`} color={accentColor} />
@@ -201,7 +257,7 @@ export default function GoalDetailPage() {
             {required_monthly_pace != null && (
               <StatTile label="Monthly pace" value={formatGHSCompact(required_monthly_pace)} color={accentColor} />
             )}
-            {is_on_track != null && (
+            {is_on_track != null && !goal.completed_at && (
               <StatTile
                 label="Status"
                 value={is_on_track ? 'On Track' : 'Behind'}
@@ -212,15 +268,19 @@ export default function GoalDetailPage() {
               <StatTile label="Completed" value={format(parseISO(goal.completed_at), 'MMM d, yyyy')} color={accentColor} />
             )}
             <StatTile label="Contributions" value={`${contributions.length}`} color={accentColor} />
-            {goal.funding_account_id && (
+            {isSinkingFund && (
+              <StatTile label="Payments" value={`${payments.length}`} color={accentColor} />
+            )}
+            {goalProgress.funding_account && (
               <StatTile
                 label="Funding Account"
-                value={goalProgress.funding_account?.name ?? '—'}
+                value={goalProgress.funding_account.name}
                 color={accentColor}
               />
             )}
           </div>
 
+          {/* CTA */}
           {!goal.completed_at && (
             <button
               onClick={() => setShowContribute(true)}
@@ -230,33 +290,46 @@ export default function GoalDetailPage() {
               + Add Contribution
             </button>
           )}
+          {goal.completed_at && isSinkingFund && (
+            <button
+              onClick={() => setShowNextCycle(true)}
+              className="w-full h-11 rounded-xl font-semibold text-sm transition-colors hover:opacity-90"
+              style={{ background: accentColor + '22', color: accentColor, border: `1px solid ${accentColor}44` }}
+            >
+              Start next cycle →
+            </button>
+          )}
         </div>
 
-        {/* Contribution history */}
+        {/* Contributions section */}
         {contributions.length > 0 && (
           <div>
-            <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider mb-2">History</p>
+            <div className="flex items-center gap-2 mb-2">
+              <ArrowUpRight className="w-3.5 h-3.5" style={{ color: accentColor }} />
+              <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">
+                Contributions
+              </p>
+            </div>
             <div className="space-y-2">
               {contributions.map(tx => (
-                <div
-                  key={tx.id}
-                  className="bg-[#141416] border border-[#27272A] rounded-xl px-4 py-3 flex items-center justify-between"
-                >
-                  <div>
-                    <p className="text-[#FAFAFA] text-sm">
-                      {tx.note || `Contribution to ${goal.name}`}
-                    </p>
-                    <p className="text-[#71717A] text-xs mt-0.5">
-                      {format(parseISO(tx.transaction_date), 'MMM d, yyyy')}
-                      {tx.account && (
-                        <span className="text-[#52525B]"> · from {(tx.account as { name: string }).name}</span>
-                      )}
-                    </p>
-                  </div>
-                  <span className="font-semibold text-sm tabular-nums" style={{ color: accentColor }}>
-                    +{formatGHS(tx.amount)}
-                  </span>
-                </div>
+                <TxRow key={tx.id} tx={tx} goal={goal} type="contribution" accentColor={accentColor} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Payments section (sinking fund only) */}
+        {isSinkingFund && payments.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <ArrowDownLeft className="w-3.5 h-3.5 text-[#F97316]" />
+              <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">
+                Payments
+              </p>
+            </div>
+            <div className="space-y-2">
+              {payments.map(tx => (
+                <TxRow key={tx.id} tx={tx} goal={goal} type="payment" accentColor="#F97316" />
               ))}
             </div>
           </div>
@@ -269,6 +342,13 @@ export default function GoalDetailPage() {
         onClose={() => setShowContribute(false)}
         goalProgress={goalProgress}
       />
+      {showNextCycle && (
+        <NextCycleModal
+          open={showNextCycle}
+          onClose={() => setShowNextCycle(false)}
+          completedGoal={goal}
+        />
+      )}
     </div>
   );
 }
@@ -278,6 +358,33 @@ function StatTile({ label, value, color }: { label: string; value: string; color
     <div className="bg-[#141416]/60 rounded-xl p-3">
       <p className="text-[#71717A] text-xs">{label}</p>
       <p className="font-semibold text-sm mt-0.5" style={{ color }}>{value}</p>
+    </div>
+  );
+}
+
+function TxRow({ tx, goal, type, accentColor }: { tx: Transaction; goal: Goal; type: 'contribution' | 'payment'; accentColor: string }) {
+  const label = type === 'contribution'
+    ? (tx.note || `Contribution to ${goal.name}`)
+    : (tx.note || (tx as { category?: { name?: string } }).category?.name || `Payment from ${goal.name}`);
+
+  const fromAccount = type === 'contribution'
+    ? (tx.account as { name: string } | null)?.name
+    : (tx.account as { name: string } | null)?.name;
+
+  return (
+    <div className="bg-[#141416] border border-[#27272A] rounded-xl px-4 py-3 flex items-center justify-between">
+      <div>
+        <p className="text-[#FAFAFA] text-sm">{label}</p>
+        <p className="text-[#71717A] text-xs mt-0.5">
+          {format(parseISO(tx.transaction_date), 'MMM d, yyyy')}
+          {fromAccount && (
+            <span className="text-[#52525B]"> · {fromAccount}</span>
+          )}
+        </p>
+      </div>
+      <span className="font-semibold text-sm tabular-nums" style={{ color: accentColor }}>
+        {type === 'contribution' ? '+' : '−'}{formatGHS(tx.amount)}
+      </span>
     </div>
   );
 }

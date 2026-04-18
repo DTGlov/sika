@@ -8,11 +8,12 @@ import { TopBar } from '@/components/layout/top-bar';
 import { HintCard } from '@/components/hint-card';
 import { GoalModal } from '@/components/goals/goal-modal';
 import { ContributeModal } from '@/components/goals/contribute-modal';
+import { NextCycleModal } from '@/components/goals/next-cycle-modal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { createClient } from '@/lib/supabase/client';
-import { fetchGoals, fetchGoalContributions, computeGoalProgress } from '@/lib/goals';
+import { fetchGoals, fetchGoalAmounts, computeGoalProgress } from '@/lib/goals';
 import { formatGHS, formatGHSCompact } from '@/lib/utils';
 import type { GoalProgress, Goal } from '@/types/goal';
 
@@ -33,15 +34,16 @@ export default function GoalsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editGoal, setEditGoal] = useState<Goal | null>(null);
   const [contributeTarget, setContributeTarget] = useState<GoalProgress | null>(null);
+  const [nextCycleGoal, setNextCycleGoal] = useState<Goal | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
     const goals = await fetchGoals(supabase, user.id);
     const progresses = await Promise.all(
       goals.map(async goal => {
-        const currentAmount = await fetchGoalContributions(supabase, goal.id);
+        const { net } = await fetchGoalAmounts(supabase, goal.id);
         const fundingAccount = accounts.find(a => a.id === goal.funding_account_id) ?? accounts[0];
-        return computeGoalProgress(goal, currentAmount, fundingAccount);
+        return computeGoalProgress(goal, net, fundingAccount);
       })
     );
     setGoalProgresses(progresses);
@@ -150,6 +152,7 @@ export default function GoalsPage() {
                     completed
                     onEdit={() => { setEditGoal(gp.goal); setShowModal(true); }}
                     onContribute={() => setContributeTarget(gp)}
+                    onNextCycle={setNextCycleGoal}
                   />
                 ))}
               </div>
@@ -171,6 +174,14 @@ export default function GoalsPage() {
           goalProgress={contributeTarget}
         />
       )}
+
+      {nextCycleGoal && (
+        <NextCycleModal
+          open={!!nextCycleGoal}
+          onClose={() => setNextCycleGoal(null)}
+          completedGoal={nextCycleGoal}
+        />
+      )}
     </div>
   );
 }
@@ -181,9 +192,10 @@ interface GoalCardProps {
   completed?: boolean;
   onEdit: () => void;
   onContribute: () => void;
+  onNextCycle?: (goal: Goal) => void;
 }
 
-function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute }: GoalCardProps) {
+function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, onNextCycle }: GoalCardProps) {
   const router = useRouter();
   const { goal, current_amount, progress_percent, days_remaining, is_on_track } = gp;
   const accentColor = goal.color ?? '#00D9A3';
@@ -235,6 +247,15 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute }: 
               style={{ background: accentColor + '22', color: accentColor }}
             >
               Add
+            </button>
+          )}
+          {completed && goal.goal_type === 'sinking_fund' && onNextCycle && (
+            <button
+              onClick={e => { e.stopPropagation(); onNextCycle(goal); }}
+              className="h-7 px-2.5 rounded-lg text-xs font-medium transition-colors"
+              style={{ background: accentColor + '22', color: accentColor }}
+            >
+              Next cycle
             </button>
           )}
         </div>

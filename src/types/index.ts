@@ -73,6 +73,7 @@ export interface Transaction {
   created_at: string;
   generated_from_recurring?: string | null;
   goal_id?: string | null;
+  paid_from_goal_id?: string | null;
   category?: Category | null;
   account?: AccountRef | null;
   to_account?: AccountRef | null;

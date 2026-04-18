@@ -17,6 +17,8 @@ export interface Goal {
   is_active: boolean;
   is_archived: boolean;
   completed_at: string | null;
+  previous_goal_id: string | null;
+  cycle_count: number;
   created_at: string;
   updated_at: string;
 }
