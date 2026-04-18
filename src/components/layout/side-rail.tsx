@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, Receipt, Wallet, RefreshCw, Settings, TrendingUp } from 'lucide-react';
+import { Home, Receipt, Wallet, Target, RefreshCw, Settings, TrendingUp } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/transactions', label: 'Transactions', icon: Receipt },
   { href: '/accounts', label: 'Accounts', icon: Wallet },
+  { href: '/goals', label: 'Goals', icon: Target },
   { href: '/recurring', label: 'Recurring', icon: RefreshCw },
   { href: '/settings', label: 'Settings', icon: Settings },
 ] as const;
