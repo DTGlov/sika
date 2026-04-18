@@ -115,12 +115,38 @@ export function useDashboardData(cycleStartDateStr?: string) {
       future: (monthlyIncome * profile.future_percent) / 100,
     };
 
+    const SAVINGS_ACCOUNT_TYPES = new Set(['savings', 'investment']);
+
     const bucketMap = new Map((buckets ?? []).map((b) => [b.id, b.name as BucketName]));
     for (const txn of bucketExpenses) {
       const bucketId = txn.category?.bucket_id;
       if (bucketId) {
         const bName = bucketMap.get(bucketId);
         if (bName) bucketSpend[bName] += txn.amount;
+      }
+    }
+
+    // Future bucket: also count goal contributions and savings-account transfers.
+    // This reflects money committed to future-you this cycle, not just future-bucket expenses.
+    const cycleTxnList = (cycleTxns ?? []) as Transaction[];
+    for (const txn of cycleTxnList) {
+      if (txn.type !== 'transfer') continue;
+
+      // Rule 1: any goal contribution (transfer with goal_id set)
+      if (txn.goal_id) {
+        bucketSpend.future += txn.amount;
+        continue;
+      }
+
+      // Rule 2: transfer to a savings/investment account that is NOT an internal shuffle
+      // (from_account must NOT be savings/investment — only money flowing "in" counts)
+      const toType = (txn.to_account as { type?: string } | null)?.type;
+      const fromType = (txn.account as { type?: string } | null)?.type;
+      if (
+        toType && SAVINGS_ACCOUNT_TYPES.has(toType) &&
+        (!fromType || !SAVINGS_ACCOUNT_TYPES.has(fromType))
+      ) {
+        bucketSpend.future += txn.amount;
       }
     }
 
