@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, Target, TrendingUp, Trophy, Repeat } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
 import { TopBar } from '@/components/layout/top-bar';
 import { HintCard } from '@/components/hint-card';
 import { GoalModal } from '@/components/goals/goal-modal';
@@ -184,6 +184,7 @@ interface GoalCardProps {
 }
 
 function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute }: GoalCardProps) {
+  const router = useRouter();
   const { goal, current_amount, progress_percent, days_remaining, is_on_track } = gp;
   const accentColor = goal.color ?? '#00D9A3';
   const isPerpetual = goal.goal_type === 'perpetual';
@@ -195,7 +196,11 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute }: 
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ delay: index * 0.04 }}
-      className="bg-[#141416] border border-[#27272A] rounded-2xl p-4 space-y-3"
+      onClick={() => router.push(`/goals/${goal.id}`)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => { if (e.key === 'Enter') router.push(`/goals/${goal.id}`); }}
+      className="bg-[#141416] border border-[#27272A] rounded-2xl p-4 space-y-3 cursor-pointer hover:border-[#3F3F46] hover:-translate-y-0.5 hover:shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
       style={{ opacity: completed ? 0.7 : 1 }}
     >
       <div className="flex items-start gap-3">
@@ -207,12 +212,9 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute }: 
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <Link
-              href={`/goals/${goal.id}`}
-              className="text-[#FAFAFA] font-semibold text-sm hover:text-[#00D9A3] transition-colors truncate"
-            >
+            <span className="text-[#FAFAFA] font-semibold text-sm truncate">
               {goal.name}
-            </Link>
+            </span>
             {completed && <Trophy className="w-3.5 h-3.5 text-[#FBBF24] shrink-0" />}
           </div>
           {goal.description && (
@@ -221,14 +223,14 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute }: 
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <button
-            onClick={onEdit}
+            onClick={e => { e.stopPropagation(); onEdit(); }}
             className="h-7 px-2.5 rounded-lg text-[#71717A] text-xs hover:text-[#FAFAFA] hover:bg-[#27272A] transition-colors"
           >
             Edit
           </button>
           {!completed && (
             <button
-              onClick={onContribute}
+              onClick={e => { e.stopPropagation(); onContribute(); }}
               className="h-7 px-2.5 rounded-lg text-xs font-medium transition-colors"
               style={{ background: accentColor + '22', color: accentColor }}
             >

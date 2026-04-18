@@ -31,7 +31,7 @@ export function GoalsWidget({ goals }: GoalsWidgetProps) {
             <Link
               key={gp.goal.id}
               href={`/goals/${gp.goal.id}`}
-              className="block bg-[#141416] border border-[#27272A] rounded-2xl p-3 hover:border-[#3F3F46] transition-colors"
+              className="block bg-[#141416] border border-[#27272A] rounded-2xl p-3 hover:border-[#3F3F46] hover:-translate-y-0.5 hover:shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
             >
               <div className="flex items-center gap-2.5 mb-2">
                 <span className="text-base shrink-0">{gp.goal.icon ?? '🎯'}</span>
