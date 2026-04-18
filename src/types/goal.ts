@@ -1,6 +1,6 @@
 import type { Account } from '@/types/account';
 
-export type GoalType = 'savings' | 'perpetual' | 'sinking_fund';
+export type GoalType = 'target' | 'perpetual';
 
 export interface Goal {
   id: string;

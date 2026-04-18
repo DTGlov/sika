@@ -8,7 +8,7 @@ export type HintId =
   | 'settings_categories'
   | 'transaction_sheet_reconcile'
   | 'goals_intro'
-  | 'sinking_fund_intro';
+  | 'target_intro';
 
 export async function dismissHint(
   supabase: SupabaseClient,

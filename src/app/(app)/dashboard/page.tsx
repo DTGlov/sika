@@ -264,7 +264,7 @@ function DashboardContent() {
         <div className="grid grid-cols-3 gap-3">
           {(() => {
             const sinkingFundEarmarked = goalProgresses
-              .filter(gp => gp.goal.goal_type === 'sinking_fund' && !gp.goal.completed_at && gp.required_monthly_pace != null)
+              .filter(gp => gp.goal.goal_type === 'target' && !gp.goal.completed_at && gp.required_monthly_pace != null)
               .reduce((s, gp) => s + (gp.required_monthly_pace ?? 0), 0);
             return loading
               ? Array.from({ length: 3 }).map((_, i) => (

@@ -95,9 +95,9 @@ export async function contributeToGoal(
     goal_id: goal.id,
   });
 
-  // For savings goals, mark complete when target is reached via contributions
+  // For target goals, mark complete when target is reached via contributions
   if (
-    goal.goal_type === 'savings' &&
+    goal.goal_type === 'target' &&
     goal.target_amount != null &&
     !goal.completed_at &&
     currentAmount + amount >= goal.target_amount
@@ -176,7 +176,7 @@ export async function createNextCycle(
       description: completedGoal.description,
       icon: completedGoal.icon,
       color: completedGoal.color,
-      goal_type: 'sinking_fund',
+      goal_type: 'target',
       target_amount: opts.targetAmount,
       deadline: opts.deadline,
       funding_account_id: completedGoal.funding_account_id,

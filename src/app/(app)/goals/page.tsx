@@ -19,9 +19,9 @@ import type { GoalProgress, Goal } from '@/types/goal';
 
 const SUGGESTION_PILLS = [
   { label: 'Life Savings', icon: '🎯', type: 'perpetual' as const },
-  { label: 'Emergency Fund', icon: '🛡️', type: 'savings' as const },
-  { label: 'New Car', icon: '🚗', type: 'savings' as const },
-  { label: 'Vacation', icon: '✈️', type: 'sinking_fund' as const },
+  { label: 'Emergency Fund', icon: '🛡️', type: 'target' as const },
+  { label: 'New Car', icon: '🚗', type: 'target' as const },
+  { label: 'Vacation', icon: '✈️', type: 'target' as const },
 ];
 
 export default function GoalsPage() {
@@ -249,7 +249,7 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, on
               Add
             </button>
           )}
-          {completed && goal.goal_type === 'sinking_fund' && onNextCycle && (
+          {completed && goal.goal_type === 'target' && onNextCycle && (
             <button
               onClick={e => { e.stopPropagation(); onNextCycle(goal); }}
               className="h-7 px-2.5 rounded-lg text-xs font-medium transition-colors"
