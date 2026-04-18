@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, Suspense } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Plus, Pencil, Pause, Play, Trash2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import {
+  format, differenceInCalendarDays, startOfDay, isBefore, addDays, parse,
+} from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { useProfile } from '@/hooks/use-profile';
@@ -18,7 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { RecurringModal } from '@/components/recurring/recurring-modal';
 import type { RecurringTransaction, RecurringFrequency } from '@/types';
 
-type TabFilter = 'all' | 'active' | 'paused';
+type TabValue = 'expense' | 'income' | 'paused';
 
 const TEMPLATES: Array<{
   label: string;
@@ -32,19 +35,150 @@ const TEMPLATES: Array<{
   { label: 'Utility bill', emoji: '⚡', defaults: { type: 'expense', frequency: 'monthly', auto_log: false, note: 'Utility bill' } },
 ];
 
-export default function RecurringPage() {
+function parseDateStr(str: string): Date {
+  const d = parse(str, 'yyyy-MM-dd', new Date());
+  return startOfDay(d);
+}
+
+interface DueDateInfo {
+  label: string;
+  color: string;
+  bold: boolean;
+}
+
+function getDueDateInfo(item: RecurringTransaction, today: Date): DueDateInfo {
+  const todayStart = startOfDay(today);
+
+  // Check for overdue: first missed occurrence before today (only relevant for nudge-mode)
+  if (!item.auto_log) {
+    const overdueFrom = item.last_generated_date
+      ? addDays(parseDateStr(item.last_generated_date), 1)
+      : parseDateStr(item.start_date);
+    // Call with last_generated_date: null to bypass internal guard and get first occurrence from overdueFrom
+    const firstMissed = getNextDueDate({ ...item, last_generated_date: null }, overdueFrom);
+    if (firstMissed && isBefore(startOfDay(firstMissed), todayStart)) {
+      return {
+        label: `OVERDUE since ${format(firstMissed, 'MMM d')}`,
+        color: '#F43F5E',
+        bold: true,
+      };
+    }
+  }
+
+  const nextDue = getNextDueDate(item, today);
+  if (!nextDue) return { label: 'No future occurrences', color: '#52525B', bold: false };
+
+  const diffDays = differenceInCalendarDays(startOfDay(nextDue), todayStart);
+
+  if (diffDays === 0) return { label: 'TODAY', color: '#00D9A3', bold: true };
+  if (diffDays === 1) return { label: 'Tomorrow', color: '#FAFAFA', bold: false };
+  if (diffDays <= 7) return { label: `in ${diffDays} days (${format(nextDue, 'EEE MMM d')})`, color: '#FAFAFA', bold: false };
+  if (diffDays <= 30) return { label: format(nextDue, 'EEE MMM d'), color: '#71717A', bold: false };
+  return { label: format(nextDue, 'MMM d, yyyy'), color: '#52525B', bold: false };
+}
+
+function getNextDueTimestamp(item: RecurringTransaction, today: Date): number {
+  const next = getNextDueDate(item, today);
+  return next ? next.getTime() : Infinity;
+}
+
+interface RecurringCardProps {
+  item: RecurringTransaction;
+  accentColor: string;
+  today: Date;
+  onTogglePause: (item: RecurringTransaction) => void;
+  onEdit: (item: RecurringTransaction) => void;
+  onDelete: (id: string) => void;
+}
+
+function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDelete }: RecurringCardProps) {
+  const dueInfo = getDueDateInfo(item, today);
+  const name = item.note ?? item.category?.name ?? FREQUENCY_LABELS[item.frequency];
+
+  return (
+    <div className="bg-[#141416] border border-[#27272A] rounded-2xl overflow-hidden"
+      style={{ borderLeftColor: accentColor, borderLeftWidth: 3 }}
+    >
+      {/* Due date header */}
+      <div className="px-4 pt-3 pb-2.5 flex items-center justify-between">
+        <p
+          className="text-xs font-semibold"
+          style={{ color: dueInfo.color, fontWeight: dueInfo.bold ? 700 : 500 }}
+        >
+          {item.is_paused ? 'Paused' : `Next due: ${dueInfo.label}`}
+        </p>
+        <div className="flex items-center gap-1">
+          {!item.auto_log && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#A1A1AA18] text-[#A1A1AA] font-medium">
+              Nudge
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="h-px bg-[#27272A]" />
+
+      {/* Name + amount + actions */}
+      <div className="px-4 py-3 flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[#FAFAFA] font-bold text-base truncate">{name}</p>
+          <p className="text-[#52525B] text-xs mt-0.5">
+            {item.account?.name}
+            {item.category ? ` · ${item.category.name}` : ''}
+            {' · '}{formatScheduleSummary(item)}
+          </p>
+        </div>
+
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <p className="text-lg font-bold tabular-nums" style={{ color: accentColor }}>
+            {formatGHS(item.amount)}
+          </p>
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={() => onTogglePause(item)}
+              className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
+              title={item.is_paused ? 'Resume' : 'Pause'}
+            >
+              {item.is_paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+            </button>
+            <button
+              onClick={() => onEdit(item)}
+              className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => onDelete(item.id)}
+              className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#F43F5E] flex items-center justify-center transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecurringContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const { user } = useAuthStore();
   const { mutationCount } = useTransactionStore();
   useProfile();
   const supabase = createClient();
 
+  const tab = (searchParams.get('tab') ?? 'expense') as TabValue;
+
   const [items, setItems] = useState<RecurringTransaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<TabFilter>('active');
   const [modalOpen, setModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<RecurringTransaction | undefined>();
   const [defaultModalValues, setDefaultModalValues] = useState<Record<string, unknown>>({});
   const [syncing, setSyncing] = useState(false);
+
+  const today = new Date();
 
   useEffect(() => {
     if (!user) return;
@@ -54,14 +188,53 @@ export default function RecurringPage() {
         .from('recurring_transactions')
         .select('*, account:accounts!account_id(id,name,type,color,icon), category:categories(*, bucket:budget_buckets(*))')
         .eq('user_id', user!.id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .eq('is_active', true);
       setItems((data ?? []) as RecurringTransaction[]);
       setLoading(false);
     }
     load();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, mutationCount]);
+
+  function setTab(t: TabValue) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', t);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
+  const expenseItems = useMemo(
+    () => items
+      .filter(i => i.type === 'expense' && !i.is_paused)
+      .sort((a, b) => getNextDueTimestamp(a, today) - getNextDueTimestamp(b, today)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [items]
+  );
+
+  const incomeItems = useMemo(
+    () => items
+      .filter(i => i.type === 'income' && !i.is_paused)
+      .sort((a, b) => getNextDueTimestamp(a, today) - getNextDueTimestamp(b, today)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [items]
+  );
+
+  const pausedItems = useMemo(
+    () => items
+      .filter(i => i.is_paused)
+      .sort((a, b) => b.updated_at.localeCompare(a.updated_at)),
+    [items]
+  );
+
+  const TABS: { value: TabValue; label: string; count: number }[] = [
+    { value: 'expense', label: 'Expense', count: expenseItems.length },
+    { value: 'income', label: 'Income', count: incomeItems.length },
+    { value: 'paused', label: 'Paused', count: pausedItems.length },
+  ];
+
+  const visibleItems =
+    tab === 'expense' ? expenseItems :
+    tab === 'income' ? incomeItems :
+    pausedItems;
 
   async function handleSync() {
     if (!user) return;
@@ -73,24 +246,34 @@ export default function RecurringPage() {
   }
 
   async function handleTogglePause(item: RecurringTransaction) {
+    // Optimistic update — immediately removes from current tab list
+    setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_paused: !i.is_paused } : i));
     const { error } = await supabase
       .from('recurring_transactions')
       .update({ is_paused: !item.is_paused })
       .eq('id', item.id);
-    if (error) { toast.error('Failed to update'); return; }
-    setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_paused: !i.is_paused } : i));
+    if (error) {
+      // Revert on failure
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_paused: item.is_paused } : i));
+      toast.error('Failed to update');
+      return;
+    }
     toast.success(item.is_paused ? 'Resumed' : 'Paused');
   }
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this recurring transaction? Already-generated transactions are kept.')) return;
+    setItems(prev => prev.filter(i => i.id !== id));
     const { error } = await supabase
       .from('recurring_transactions')
       .update({ is_active: false })
       .eq('id', id);
-    if (error) { toast.error('Failed to delete'); return; }
-    setItems(prev => prev.filter(i => i.id !== id));
-    toast.success('Deleted');
+    if (error) {
+      toast.error('Failed to delete');
+      revalidateForEntity('transaction'); // re-fetch to restore
+    } else {
+      toast.success('Deleted');
+    }
   }
 
   function openTemplate(tmpl: typeof TEMPLATES[0]) {
@@ -99,19 +282,11 @@ export default function RecurringPage() {
     setModalOpen(true);
   }
 
-  const filtered = items.filter(i => {
-    if (tab === 'active') return !i.is_paused;
-    if (tab === 'paused') return i.is_paused;
-    return true;
-  });
-
-  const incomeItems = filtered.filter(i => i.type === 'income');
-  const expenseItems = filtered.filter(i => i.type === 'expense');
-
-  const today = new Date();
+  const accentColor = tab === 'income' ? '#00D9A3' : tab === 'expense' ? '#F43F5E' : '#FBBF24';
 
   return (
     <div className="max-w-2xl mx-auto pb-8 px-4 pt-6 md:px-8">
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-[#FAFAFA]">Recurring</h1>
         <div className="flex items-center gap-2">
@@ -124,7 +299,11 @@ export default function RecurringPage() {
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
           </button>
           <Button
-            onClick={() => { setEditItem(undefined); setDefaultModalValues({}); setModalOpen(true); }}
+            onClick={() => {
+              setEditItem(undefined);
+              setDefaultModalValues(tab !== 'paused' ? { type: tab } : {});
+              setModalOpen(true);
+            }}
             className="h-9 px-3 text-sm bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-medium rounded-xl gap-1.5"
           >
             <Plus className="w-4 h-4" /> Add
@@ -133,136 +312,62 @@ export default function RecurringPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 bg-[#141416] border border-[#27272A] rounded-xl p-1">
-        {(['active', 'paused', 'all'] as TabFilter[]).map(t => (
+      <div className="flex gap-1 mb-5 bg-[#141416] border border-[#27272A] rounded-xl p-1 overflow-x-auto scrollbar-none">
+        {TABS.map(({ value, label, count }) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
-            className="flex-1 h-8 rounded-lg text-xs font-medium capitalize transition-colors"
+            key={value}
+            onClick={() => setTab(value)}
+            className="flex-1 h-9 rounded-lg text-xs font-medium transition-colors min-w-[80px] whitespace-nowrap"
             style={{
-              backgroundColor: tab === t ? '#1C1C1F' : 'transparent',
-              color: tab === t ? '#FAFAFA' : '#71717A',
+              backgroundColor: tab === value ? '#1C1C1F' : 'transparent',
+              color: tab === value ? '#FAFAFA' : '#71717A',
             }}
           >
-            {t}
+            {label}
+            {count > 0 && (
+              <span
+                className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                style={{
+                  backgroundColor: tab === value ? accentColor + '22' : '#27272A',
+                  color: tab === value ? accentColor : '#52525B',
+                }}
+              >
+                {count}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
-      {/* Quick-add templates */}
-      {items.length === 0 && !loading && (
-        <div className="mb-5">
-          <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider mb-3">Common templates</p>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {TEMPLATES.map(tmpl => (
-              <button
-                key={tmpl.label}
-                onClick={() => openTemplate(tmpl)}
-                className="flex items-center gap-2 bg-[#141416] border border-[#27272A] rounded-2xl p-3 text-left hover:border-[#3F3F46] transition-colors"
-              >
-                <span className="text-xl shrink-0">{tmpl.emoji}</span>
-                <span className="text-[#A1A1AA] text-xs leading-tight">{tmpl.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
+      {/* Content */}
       {loading ? (
         <div className="space-y-3">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-2xl bg-[#141416]" />)}
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-2xl bg-[#141416]" />)}
         </div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-[#71717A] text-sm">
-          {tab === 'paused' ? 'No paused recurring transactions.' : 'No recurring transactions yet. Tap "Add" to create one.'}
-        </div>
+      ) : visibleItems.length === 0 ? (
+        <EmptyState tab={tab} onAdd={() => {
+          setEditItem(undefined);
+          setDefaultModalValues(tab !== 'paused' ? { type: tab } : {});
+          setModalOpen(true);
+        }} />
       ) : (
-        <div className="space-y-6">
-          {[
-            { label: 'Income', list: incomeItems, color: '#00D9A3' },
-            { label: 'Expense', list: expenseItems, color: '#F43F5E' },
-          ].map(({ label, list, color }) =>
-            list.length === 0 ? null : (
-              <div key={label}>
-                <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider mb-2">{label}</p>
-                <div className="space-y-3">
-                  {list.map(item => {
-                    const nextDue = getNextDueDate(item, today);
-                    return (
-                      <div
-                        key={item.id}
-                        className="bg-[#141416] border border-[#27272A] rounded-2xl p-4"
-                        style={{ borderLeftColor: color, borderLeftWidth: 3, opacity: item.is_paused ? 0.6 : 1 }}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-[#FAFAFA] font-semibold text-sm truncate">
-                                {item.note ?? item.category?.name ?? FREQUENCY_LABELS[item.frequency]}
-                              </p>
-                              {item.is_paused && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#FBBF2418] text-[#FBBF24] font-medium shrink-0">
-                                  Paused
-                                </span>
-                              )}
-                              {!item.auto_log && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#A1A1AA18] text-[#A1A1AA] font-medium shrink-0">
-                                  Nudge
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[#71717A] text-xs mt-0.5">{formatScheduleSummary(item)}</p>
-                            <p className="text-[#52525B] text-xs">
-                              {item.account?.name}
-                              {item.category ? ` · ${item.category.name}` : ''}
-                            </p>
-                          </div>
-
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button
-                              onClick={() => handleTogglePause(item)}
-                              className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
-                              title={item.is_paused ? 'Resume' : 'Pause'}
-                            >
-                              {item.is_paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
-                            </button>
-                            <button
-                              onClick={() => { setEditItem(item); setModalOpen(true); }}
-                              className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
-                            >
-                              <Pencil className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(item.id)}
-                              className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#F43F5E] flex items-center justify-center transition-colors"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="mt-3 pt-3 border-t border-[#27272A] flex items-center justify-between">
-                          <p className="text-xl font-bold tabular-nums" style={{ color }}>
-                            {formatGHS(item.amount)}
-                          </p>
-                          <p className="text-[#52525B] text-xs">
-                            {nextDue
-                              ? `Next: ${format(nextDue, 'MMM d, yyyy')}`
-                              : 'No future occurrences'}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )
-          )}
+        <div className="space-y-3">
+          {visibleItems.map(item => (
+            <RecurringCard
+              key={item.id}
+              item={item}
+              accentColor={item.type === 'income' ? '#00D9A3' : '#F43F5E'}
+              today={today}
+              onTogglePause={handleTogglePause}
+              onEdit={(i) => { setEditItem(i); setModalOpen(true); }}
+              onDelete={handleDelete}
+            />
+          ))}
         </div>
       )}
 
-      {/* Templates shown when items exist too */}
-      {items.length > 0 && (
+      {/* Quick templates strip */}
+      {!loading && (
         <div className="mt-8">
           <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider mb-3">Quick templates</p>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -288,5 +393,49 @@ export default function RecurringPage() {
         onSaved={() => revalidateForEntity('transaction')}
       />
     </div>
+  );
+}
+
+function EmptyState({ tab, onAdd }: { tab: TabValue; onAdd: () => void }) {
+  if (tab === 'paused') {
+    return (
+      <div className="text-center py-16 text-[#71717A] text-sm">
+        Nothing paused right now.
+      </div>
+    );
+  }
+
+  const isExpense = tab === 'expense';
+  return (
+    <div className="text-center py-16 px-4">
+      <p className="text-[#71717A] text-sm mb-4">
+        {isExpense
+          ? 'No recurring expenses yet. Add things like rent, subscriptions, or bills.'
+          : 'No recurring income yet. Add your salary or regular allowances.'}
+      </p>
+      <Button
+        onClick={onAdd}
+        className="h-9 px-4 text-sm bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+      >
+        <Plus className="w-4 h-4 mr-1.5" />
+        Add {isExpense ? 'expense' : 'income'}
+      </Button>
+    </div>
+  );
+}
+
+export default function RecurringPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-2xl mx-auto px-4 pt-6 md:px-8 space-y-3">
+          <div className="h-8 w-36 rounded-xl bg-[#141416] animate-pulse" />
+          <div className="h-11 rounded-xl bg-[#141416] animate-pulse" />
+          {[1, 2, 3].map(i => <div key={i} className="h-28 rounded-2xl bg-[#141416] animate-pulse" />)}
+        </div>
+      }
+    >
+      <RecurringContent />
+    </Suspense>
   );
 }
