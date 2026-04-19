@@ -111,6 +111,9 @@ export interface DashboardStats {
   totalSpentToday: number;
   totalSpentThisMonth: number;
   totalSpentLastMonth: number;
+  totalReceived: number;
+  totalSpentActual: number;
+  cycleNet: number;
   bucketSpend: Record<BucketName, number>;
   bucketLimits: Record<BucketName, number>;
   weeklySpend: { date: string; amount: number }[];

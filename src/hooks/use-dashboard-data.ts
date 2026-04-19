@@ -98,6 +98,11 @@ export function useDashboardData(cycleStartDateStr?: string) {
     // Expenses flagged as paid from a sinking fund are excluded from bucket math —
     // their cost was already accounted for by the monthly contribution to the goal.
     const bucketExpenses = expenses.filter((t) => !t.paid_from_goal_id);
+    const totalSpentActual = bucketExpenses.reduce((s, t) => s + t.amount, 0);
+    const totalReceived = (cycleTxns ?? [])
+      .filter((t): t is Transaction => t.type === 'income')
+      .reduce((s, t) => s + t.amount, 0);
+    const cycleNet = totalReceived - totalSpentActual;
     const totalSpentLastMonth = (prevTxns ?? []).reduce(
       (s: number, t: { amount: number }) => s + t.amount,
       0
@@ -167,6 +172,9 @@ export function useDashboardData(cycleStartDateStr?: string) {
       totalSpentToday,
       totalSpentThisMonth,
       totalSpentLastMonth,
+      totalReceived,
+      totalSpentActual,
+      cycleNet,
       bucketSpend,
       bucketLimits,
       weeklySpend,
