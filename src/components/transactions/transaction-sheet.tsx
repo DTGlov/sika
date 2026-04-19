@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ChevronRight, ArrowRight, Scale, AlertTriangle } from 'lucide-react';
+import { Loader2, ChevronRight, ArrowRight, Scale, AlertTriangle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useTransactionStore } from '@/stores/transaction-store';
@@ -17,6 +17,7 @@ import { ACCOUNT_TYPE_CONFIG } from '@/lib/accounts';
 import { formatGHS } from '@/lib/utils';
 import { revalidateForEntity } from '@/lib/revalidation';
 import { HintCard } from '@/components/hint-card';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { NextCycleModal } from '@/components/goals/next-cycle-modal';
 import { fetchGoals, fetchGoalAmounts } from '@/lib/goals';
 import { updateLoggingStreak, loggingMilestoneMessage } from '@/lib/streaks';
@@ -622,17 +623,35 @@ export function TransactionSheet() {
             {/* Target goal payment — only for expense with active target-type goals */}
             {txType === 'expense' && sinkingFundGoals.length > 0 && (
               <div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSfExpanded(v => !v);
-                    setSfHintDismissed(false);
-                  }}
-                  className="flex items-center gap-1.5 text-xs text-[#71717A] hover:text-[#A1A1AA] transition-colors"
-                >
-                  <span className="text-[#52525B]">{sfExpanded ? '▾' : '▸'}</span>
-                  Paid from a target?
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSfExpanded(v => !v);
+                      setSfHintDismissed(false);
+                    }}
+                    className="flex items-center gap-1.5 text-xs text-[#71717A] hover:text-[#A1A1AA] transition-colors"
+                  >
+                    <span className="text-[#52525B]">{sfExpanded ? '▾' : '▸'}</span>
+                    Paid from a target?
+                  </button>
+                  <Popover>
+                    <PopoverTrigger
+                      render={
+                        <button
+                          type="button"
+                          aria-label="Why isn't my perpetual goal here?"
+                          className="text-[#71717A] hover:text-[#A1A1AA] transition-colors cursor-pointer"
+                        />
+                      }
+                    >
+                      <Info className="w-3.5 h-3.5" />
+                    </PopoverTrigger>
+                    <PopoverContent side="bottom" align="start" sideOffset={8} collisionPadding={16}>
+                      Perpetual goals (like Life Savings) are designed to be untouchable and don&apos;t appear here. For real emergencies, log as a normal expense.
+                    </PopoverContent>
+                  </Popover>
+                </div>
 
                 <AnimatePresence>
                   {sfExpanded && (

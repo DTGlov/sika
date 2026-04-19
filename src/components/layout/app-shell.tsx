@@ -24,7 +24,7 @@ export function AppShell({ user, children }: AppShellProps) {
   }, [user, setUser]);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B]">
+    <div className="min-h-screen bg-[#0A0A0B] overflow-x-hidden">
       <SideRail />
 
       {/* Main content — indented right to clear the side rail on md+ */}
