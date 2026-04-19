@@ -18,6 +18,7 @@ import { HintCard, BucketsTooltip } from '@/components/hint-card';
 import { GoalsWidget } from '@/components/dashboard/goals-widget';
 import { StreakStrip } from '@/components/dashboard/streak-strip';
 import { SundayRecapCard } from '@/components/dashboard/sunday-recap-card';
+import { CycleCard } from '@/components/dashboard/cycle-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
@@ -189,6 +190,23 @@ function DashboardContent() {
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Virtual cycle card */}
+        {loading ? (
+          <Skeleton
+            className="w-full max-w-[440px] rounded-[20px] bg-[#141416]"
+            style={{ aspectRatio: '85.6 / 54' }}
+          />
+        ) : (
+          <CycleCard
+            cycleNet={dashboardStats?.cycleNet ?? 0}
+            cycleLabel={cycle.label}
+            userName={profile?.full_name?.toUpperCase() ?? 'SIKA USER'}
+            received={dashboardStats?.totalReceived ?? 0}
+            spent={dashboardStats?.totalSpentActual ?? 0}
+            expected={monthlyIncome}
+          />
+        )}
 
         {/* Sunday recap — only on Sundays */}
         <SundayRecapCard />
