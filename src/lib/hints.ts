@@ -12,6 +12,7 @@ export type HintId =
   | 'streaks_intro'
   | 'dashboard_card_intro'
   | 'card_theme_available'
+  | 'accounts_reconcile_reminder'
   | `sunday_recap_${string}`;
 
 export async function dismissHint(

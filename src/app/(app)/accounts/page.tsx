@@ -131,6 +131,16 @@ export default function AccountsPage() {
         />
       )}
 
+      {/* Reconcile reminder hint */}
+      <HintCard
+        hintId="accounts_reconcile_reminder"
+        title="Keep balances accurate"
+        body="Tap the scale icon on any account to reconcile — compare what Sika shows against your actual bank balance and log any difference as an adjustment."
+        icon={Scale}
+        variant="banner"
+        className="mb-4"
+      />
+
       {/* Total balance */}
       <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5 mb-4">
         <p className="text-[#71717A] text-sm mb-1">Total balance</p>
@@ -139,6 +149,7 @@ export default function AccountsPage() {
         ) : (
           <p className="text-3xl font-bold text-[#FAFAFA] tabular-nums">{formatGHS(totalBalance)}</p>
         )}
+        <p className="text-sm text-[#71717A] mt-1">The money currently in your accounts.</p>
       </div>
 
       {/* Account list */}
