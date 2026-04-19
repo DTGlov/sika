@@ -32,7 +32,8 @@ import {
   CategoryModal,
   ICON_OPTIONS,
 } from "@/components/settings/category-modal";
-import type { Category } from "@/types";
+import { CardThemePicker } from "@/components/settings/card-theme-picker";
+import type { Category, CardTheme } from "@/types";
 
 const profileSchema = z
   .object({
@@ -211,6 +212,19 @@ export default function SettingsPage() {
             />
           )}
           <IncomeSourcesSection />
+        </div>
+
+        {/* Card Style picker */}
+        <div className="mb-6">
+          <HintCard
+            hintId="card_theme_available"
+            title="Customize your card"
+            body="You can change your card's style anytime. Default is Classic Gold, with 5 other styles to try."
+            className="mb-4"
+          />
+          <CardThemePicker
+            currentTheme={(profile?.card_theme ?? 'classic_gold') as CardTheme}
+          />
         </div>
 
         <form onSubmit={handleSubmit(onSaveProfile)} className="space-y-6">

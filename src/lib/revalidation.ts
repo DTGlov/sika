@@ -27,6 +27,7 @@ export const REVALIDATION_MAP = {
   goal:                  ['/goals', '/dashboard'],
   goal_contribution:     ['/goals', '/dashboard', '/accounts', '/transactions', '/streaks'],
   sinking_fund_payment:  ['/goals', '/dashboard', '/accounts', '/transactions'],
+  card_theme:            ['/dashboard', '/settings'],
 } as const;
 
 import { useTransactionStore } from '@/stores/transaction-store';
