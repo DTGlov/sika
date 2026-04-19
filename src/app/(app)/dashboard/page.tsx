@@ -206,7 +206,6 @@ function DashboardContent() {
               theme={profile?.card_theme ?? 'classic_gold'}
               received={dashboardStats?.totalReceived ?? 0}
               spent={dashboardStats?.totalSpentActual ?? 0}
-              totalBalance={Object.values(dashboardStats?.accountBalances ?? {}).reduce((s, v) => s + v, 0)}
               expected={monthlyIncome}
             />
             <HintCard

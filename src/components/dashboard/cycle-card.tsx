@@ -211,7 +211,6 @@ interface CycleCardProps {
   theme: CardTheme;
   received: number;
   spent: number;
-  totalBalance: number;
   expected: number;
 }
 
@@ -222,7 +221,6 @@ export function CycleCard({
   theme,
   received,
   spent,
-  totalBalance,
   expected,
 }: CycleCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -273,8 +271,6 @@ export function CycleCard({
         <span>Received <span className="text-[#A1A1AA]">{formatGHSCompact(received)}</span></span>
         <span className="text-[#3F3F46]">·</span>
         <span>Spent <span className="text-[#A1A1AA]">{formatGHSCompact(spent)}</span></span>
-        <span className="text-[#3F3F46]">·</span>
-        <span>Balance <span className="text-[#A1A1AA]">{formatGHSCompact(totalBalance)}</span></span>
         <span className="text-[#3F3F46]">·</span>
         <span>Expected <span className="text-[#A1A1AA]">{formatGHSCompact(expected)}/mo</span></span>
       </div>
