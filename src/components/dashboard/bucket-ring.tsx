@@ -72,19 +72,19 @@ export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRin
 
         {/* Sinking fund earmarked breakdown — Future bucket only */}
         {bucket === 'future' && earmarked != null && earmarked > 0 && (
-          <div className="mt-2 pt-2 border-t border-[#27272A] space-y-0.5 text-left">
-            <div className="flex justify-between text-[10px]">
-              <span className="text-[#71717A]">Earmarked</span>
-              <span className="text-[#A1A1AA] tabular-nums">{formatGHSCompact(earmarked)}/mo</span>
+          <div className="mt-2 pt-2 border-t border-[#27272A] space-y-1 text-left">
+            <div>
+              <p className="text-[9px] text-[#71717A] leading-none mb-0.5">Earmarked</p>
+              <p className="text-[10px] text-[#A1A1AA] tabular-nums leading-tight">{formatGHSCompact(earmarked)}/mo</p>
             </div>
-            <div className="flex justify-between text-[10px]">
-              <span className="text-[#71717A]">Uncommitted</span>
-              <span
-                className="tabular-nums"
+            <div>
+              <p className="text-[9px] leading-none mb-0.5" style={{ color: limit - earmarked < 0 ? '#F97316' : '#71717A' }}>Uncommitted</p>
+              <p
+                className="text-[10px] tabular-nums leading-tight"
                 style={{ color: limit - earmarked < 0 ? '#F97316' : '#A1A1AA' }}
               >
                 {formatGHSCompact(limit - earmarked)}/mo
-              </span>
+              </p>
             </div>
             {limit - earmarked < 0 && (
               <div className="flex items-center gap-1 pt-0.5">
