@@ -72,24 +72,24 @@ export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRin
 
         {/* Sinking fund earmarked breakdown — Future bucket only */}
         {bucket === 'future' && earmarked != null && earmarked > 0 && (
-          <div className="mt-2 pt-2 border-t border-[#27272A] space-y-1 text-left">
+          <div className="mt-2 pt-2 border-t border-[#27272A] space-y-1.5 text-xs text-left">
             <div>
-              <p className="text-[9px] text-[#71717A] leading-none mb-0.5">Earmarked</p>
-              <p className="text-[10px] text-[#A1A1AA] tabular-nums leading-tight">{formatGHSCompact(earmarked)}/mo</p>
+              <div className="text-[#71717A]">Earmarked</div>
+              <div className="text-[#A1A1AA] tabular-nums">{formatGHSCompact(earmarked)}/mo</div>
             </div>
             <div>
-              <p className="text-[9px] leading-none mb-0.5" style={{ color: limit - earmarked < 0 ? '#F97316' : '#71717A' }}>Uncommitted</p>
-              <p
-                className="text-[10px] tabular-nums leading-tight"
+              <div style={{ color: limit - earmarked < 0 ? '#F97316' : '#71717A' }}>Uncommitted</div>
+              <div
+                className="tabular-nums"
                 style={{ color: limit - earmarked < 0 ? '#F97316' : '#A1A1AA' }}
               >
                 {formatGHSCompact(limit - earmarked)}/mo
-              </p>
+              </div>
             </div>
             {limit - earmarked < 0 && (
-              <div className="flex items-center gap-1 pt-0.5">
+              <div className="flex items-center gap-1">
                 <AlertTriangle className="w-2.5 h-2.5 text-[#F97316] shrink-0" />
-                <span className="text-[10px] text-[#F97316] leading-tight">Over budget</span>
+                <span className="text-[#F97316]">Over budget</span>
               </div>
             )}
           </div>
