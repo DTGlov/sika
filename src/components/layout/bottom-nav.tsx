@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, Receipt, Wallet, Target, RefreshCw, Settings } from 'lucide-react';
+import { Home, Receipt, Wallet, Target, RefreshCw } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Home', icon: Home },
@@ -11,7 +11,6 @@ const NAV_ITEMS = [
   { href: '/accounts', label: 'Accounts', icon: Wallet },
   { href: '/goals', label: 'Goals', icon: Target },
   { href: '/recurring', label: 'Recurring', icon: RefreshCw },
-  { href: '/settings', label: 'Settings', icon: Settings },
 ] as const;
 
 export function BottomNav() {

@@ -328,9 +328,9 @@ function DashboardContent() {
           )}
         </div>
 
-        {/* Account strip */}
+        {/* Account strip — desktop only */}
         {accounts.length > 0 && (
-          <div>
+          <div className="hidden md:block">
             <div className="flex items-center justify-between mb-2">
               <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">Accounts</p>
               <Link href="/accounts" className="text-[#00D9A3] text-xs hover:text-[#00F5B8] transition-colors">
@@ -372,12 +372,14 @@ function DashboardContent() {
           <WeeklyChart data={dashboardStats?.weeklySpend ?? []} />
         )}
 
-        {/* Recent transactions */}
-        {loading ? (
-          <Skeleton className="h-64 rounded-2xl bg-[#141416]" />
-        ) : (
-          <RecentTransactions transactions={dashboardStats?.recentTransactions ?? []} />
-        )}
+        {/* Recent transactions — desktop only */}
+        <div className="hidden md:block">
+          {loading ? (
+            <Skeleton className="h-64 rounded-2xl bg-[#141416]" />
+          ) : (
+            <RecentTransactions transactions={dashboardStats?.recentTransactions ?? []} />
+          )}
+        </div>
       </div>
 
       <OnboardingModal open={showOnboarding} onClose={() => setShowOnboarding(false)} />
