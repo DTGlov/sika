@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { revalidateForEntity } from '@/lib/revalidation';
 import { contributeToGoal } from '@/lib/goals';
+import { updateSavingsStreak, savingsMilestoneMessage } from '@/lib/streaks';
 import { formatGHS } from '@/lib/utils';
 import type { GoalProgress } from '@/types/goal';
 
@@ -20,7 +21,7 @@ interface ContributeModalProps {
 
 export function ContributeModal({ open, onClose, goalProgress }: ContributeModalProps) {
   const supabase = createClient();
-  const { user, accounts } = useAuthStore();
+  const { user, accounts, setStreaks } = useAuthStore();
 
   const { goal, current_amount, target_amount } = goalProgress.goal
     ? { goal: goalProgress.goal, current_amount: goalProgress.current_amount, target_amount: goalProgress.goal.target_amount }
@@ -66,6 +67,15 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
         currentAmount: current_amount,
       });
       revalidateForEntity('goal_contribution');
+      // Update savings streak
+      updateSavingsStreak(supabase, user.id).then(result => {
+        if (result.streaks) setStreaks(result.streaks);
+        if (result.milestone_hit) {
+          toast.success(savingsMilestoneMessage(result.milestone_hit), { duration: 5000 });
+        } else if (result.freeze_used) {
+          toast(`❄️ Streak freeze used to protect your saving streak.`);
+        }
+      });
       toast.success(`${formatGHS(numAmount)} added to ${goal.name}`);
       onClose();
     } catch {

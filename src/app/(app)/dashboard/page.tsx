@@ -16,11 +16,14 @@ import { OnboardingModal } from '@/components/dashboard/onboarding-modal';
 import { IncomeNudgeCard, PendingRecurringCard } from '@/components/dashboard/income-nudge-card';
 import { HintCard, BucketsTooltip } from '@/components/hint-card';
 import { GoalsWidget } from '@/components/dashboard/goals-widget';
+import { StreakStrip } from '@/components/dashboard/streak-strip';
+import { SundayRecapCard } from '@/components/dashboard/sunday-recap-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { useDashboardData } from '@/hooks/use-dashboard-data';
 import { useProfile } from '@/hooks/use-profile';
+import { useStreakHealth } from '@/hooks/use-streaks';
 import { totalMonthlyIncome, FREQUENCY_LABELS } from '@/lib/income';
 import { formatGHS, formatGHSCompact } from '@/lib/utils';
 import { ACCOUNT_TYPE_CONFIG } from '@/lib/accounts';
@@ -41,7 +44,8 @@ function DashboardContent() {
   const pathname = usePathname();
   const supabase = createClient();
 
-  const { profile, incomeSources, accounts, user } = useAuthStore();
+  const { profile, incomeSources, accounts, user, streaks } = useAuthStore();
+  useStreakHealth();
   const { dashboardStats } = useTransactionStore();
   const cycleStartDay = profile?.cycle_start_day ?? 1;
 
@@ -185,6 +189,21 @@ function DashboardContent() {
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Sunday recap — only on Sundays */}
+        <SundayRecapCard />
+
+        {/* Streak strip or intro hint */}
+        {streaks && (streaks.logging_current > 0 || streaks.savings_current > 0) ? (
+          <StreakStrip streaks={streaks} />
+        ) : (
+          <HintCard
+            hintId="streaks_intro"
+            title="Build your streaks"
+            body="Log a transaction every day to build your logging streak. Contribute to a goal each week for your saving streak. Freezes protect you when life gets busy. 🔥"
+            variant="banner"
+          />
+        )}
 
         {/* Income summary row */}
         {monthlyIncome > 0 && (
