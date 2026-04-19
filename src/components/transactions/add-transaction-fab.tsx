@@ -15,10 +15,10 @@ export function AddTransactionFab() {
       whileTap={{ scale: 0.92 }}
       onClick={() => openLogSheet()}
       aria-label="Log a transaction"
-      // Mobile: centered horizontally, lifted above the 64px bottom nav with a 16px gap
-      // Desktop: fixed bottom-right corner
+      // Mobile: centered, lifted ~112px + safe-area above the bottom nav
+      // Desktop: fixed bottom-right corner, no bottom nav
       className="fixed z-40 w-14 h-14 rounded-full bg-[#00D9A3] text-[#0A0A0B] shadow-lg flex items-center justify-center
-        bottom-20 left-1/2 -translate-x-1/2
+        bottom-[calc(7rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2
         md:bottom-6 md:left-auto md:right-6 md:translate-x-0"
     >
       <motion.div
