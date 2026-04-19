@@ -194,18 +194,27 @@ function DashboardContent() {
         {/* Virtual cycle card */}
         {loading ? (
           <Skeleton
-            className="w-full max-w-[440px] rounded-[20px] bg-[#141416]"
-            style={{ aspectRatio: '85.6 / 54' }}
+            className="w-full max-w-[440px] bg-[#141416]"
+            style={{ aspectRatio: '85.6 / 54', borderRadius: 20 }}
           />
         ) : (
-          <CycleCard
-            cycleNet={dashboardStats?.cycleNet ?? 0}
-            cycleLabel={cycle.label}
-            userName={profile?.full_name?.toUpperCase() ?? 'SIKA USER'}
-            received={dashboardStats?.totalReceived ?? 0}
-            spent={dashboardStats?.totalSpentActual ?? 0}
-            expected={monthlyIncome}
-          />
+          <>
+            <CycleCard
+              cycleNet={dashboardStats?.cycleNet ?? 0}
+              cycleLabel={cycle.label}
+              userName={profile?.full_name?.toUpperCase() ?? 'SIKA USER'}
+              theme={profile?.card_theme ?? 'classic_gold'}
+              received={dashboardStats?.totalReceived ?? 0}
+              spent={dashboardStats?.totalSpentActual ?? 0}
+              totalBalance={Object.values(dashboardStats?.accountBalances ?? {}).reduce((s, v) => s + v, 0)}
+              expected={monthlyIncome}
+            />
+            <HintCard
+              hintId="dashboard_card_intro"
+              title="This is your cycle card"
+              body="It shows money that came in minus money that went out this cycle. Resets at the start of each cycle. Customize the style in Settings."
+            />
+          </>
         )}
 
         {/* Sunday recap — only on Sundays */}

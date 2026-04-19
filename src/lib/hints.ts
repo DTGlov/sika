@@ -10,6 +10,8 @@ export type HintId =
   | 'goals_intro'
   | 'target_intro'
   | 'streaks_intro'
+  | 'dashboard_card_intro'
+  | 'card_theme_available'
   | `sunday_recap_${string}`;
 
 export async function dismissHint(
