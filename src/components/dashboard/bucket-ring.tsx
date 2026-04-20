@@ -5,6 +5,7 @@ import { AlertTriangle } from 'lucide-react';
 import { clampPercent, formatGHS, formatGHSCompact, getProgressColor } from '@/lib/utils';
 import type { BucketName } from '@/types';
 import { BUCKET_CONFIG } from '@/lib/constants';
+import { BucketInfoIcon } from './bucket-info-icon';
 
 interface BucketRingProps {
   bucket: BucketName;
@@ -64,9 +65,12 @@ export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRin
       </div>
 
       <div className="text-center w-full">
-        <p className="font-semibold text-[#FAFAFA] text-sm mb-0.5" style={{ color: config.color }}>
-          {config.label}
-        </p>
+        <div className="flex items-center justify-center gap-1 mb-0.5">
+          <p className="font-semibold text-sm" style={{ color: config.color }}>
+            {config.label}
+          </p>
+          <BucketInfoIcon bucketName={config.label} explanation={config.explanation} />
+        </div>
         <p className="amount text-xs text-[#FAFAFA] font-medium">{formatGHS(spent)}</p>
         <p className="text-xs text-[#71717A]">of {formatGHS(limit)}</p>
 

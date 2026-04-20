@@ -4,21 +4,24 @@ export const CURRENCY = 'GHS';
 export const CURRENCY_SYMBOL = '₵';
 export const DEFAULT_MONTHLY_INCOME = 11500;
 
-export const BUCKET_CONFIG: Record<BucketName, { label: string; color: string; description: string }> = {
+export const BUCKET_CONFIG: Record<BucketName, { label: string; color: string; description: string; explanation: string }> = {
   needs: {
     label: 'Needs',
     color: '#00D9A3',
     description: 'Essentials',
+    explanation: "Expenses you can't reasonably cut — rent, utilities, groceries, transport, healthcare, gym, family support.",
   },
   wants: {
     label: 'Wants',
     color: '#FBBF24',
     description: 'Lifestyle',
+    explanation: 'Optional quality-of-life expenses — eating out, entertainment, subscriptions, hobbies, shopping.',
   },
   future: {
     label: 'Future',
     color: '#60A5FA',
     description: 'Savings & Investments',
+    explanation: 'Money committed to future-you this cycle — via goal contributions, savings transfers, or Future-category expenses.',
   },
 };
 
