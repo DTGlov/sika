@@ -251,12 +251,12 @@ export default function SettingsPage() {
 
           {/* Budget Cycle */}
           <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-            <h2 className="text-[#FAFAFA] font-semibold mb-1">Budget Cycle</h2>
+            <h2 className="text-[#FAFAFA] font-semibold mb-1">Budget Month</h2>
             <p className="text-[#71717A] text-xs mb-4">
-              Which day of the month does your cycle start? (1–28)
+              Which day of the month does your month start? (1–28)
             </p>
             <div className="space-y-1.5">
-              <Label className="text-[#A1A1AA] text-sm">Cycle start day</Label>
+              <Label className="text-[#A1A1AA] text-sm">Month start day</Label>
               <Input
                 type="number"
                 min="1"

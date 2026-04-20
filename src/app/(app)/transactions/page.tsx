@@ -27,8 +27,8 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 ];
 
 const PERIOD_TABS = [
-  { value: 'cycle', label: 'This Cycle' },
-  { value: 'prev_cycle', label: 'Last Cycle' },
+  { value: 'cycle', label: 'This Month' },
+  { value: 'prev_cycle', label: 'Last Month' },
   { value: 'last30', label: '30 Days' },
   { value: 'last90', label: '90 Days' },
   { value: 'all', label: 'All' },

@@ -63,7 +63,7 @@ export function CardThemePicker({ currentTheme }: CardThemePickerProps) {
     <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
       <h2 className="text-[#FAFAFA] font-semibold mb-1">Card Style</h2>
       <p className="text-[#71717A] text-xs mb-4">
-        Choose how your cycle card looks on the dashboard.
+        Choose how your month card looks on the dashboard.
       </p>
 
       {/* Classic Gold (default — always at top) */}

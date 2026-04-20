@@ -21,7 +21,7 @@ export const BUCKET_CONFIG: Record<BucketName, { label: string; color: string; d
     label: 'Future',
     color: '#60A5FA',
     description: 'Savings & Investments',
-    explanation: 'Money committed to future-you this cycle — via goal contributions, savings transfers, or Future-category expenses.',
+    explanation: 'Money committed to future-you this month — via goal contributions, savings transfers, or Future-category expenses.',
   },
 };
 

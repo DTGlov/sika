@@ -163,7 +163,7 @@ function DashboardContent() {
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigateCycle(-1)}
-            aria-label="Previous cycle"
+            aria-label="Previous month"
             className="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -175,7 +175,7 @@ function DashboardContent() {
             </h2>
             {!cycle.isCurrent && (
               <span className="text-[#71717A] text-[10px] font-medium uppercase tracking-wider">
-                Past cycle
+                Past month
               </span>
             )}
           </div>
@@ -183,7 +183,7 @@ function DashboardContent() {
           <button
             onClick={() => navigateCycle(1)}
             disabled={cycle.isCurrent}
-            aria-label="Next cycle"
+            aria-label="Next month"
             className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
             style={{ color: cycle.isCurrent ? '#3F3F46' : '#71717A' }}
           >
@@ -210,8 +210,8 @@ function DashboardContent() {
             />
             <HintCard
               hintId="dashboard_card_intro"
-              title="This is your cycle card"
-              body="It shows money that came in minus money that went out this cycle. Resets at the start of each cycle. Customize the style in Settings."
+              title="This is your month card"
+              body="It shows money that came in minus money that went out this month. Resets at the start of each month. Customize the style in Settings."
             />
           </>
         )}
@@ -344,10 +344,10 @@ function DashboardContent() {
                 index={0}
               />
               <SpendCard
-                title={cycle.isCurrent ? 'This Cycle' : cycle.label.split(' ')[0]}
+                title={cycle.isCurrent ? 'This Month' : cycle.label.split(' ')[0]}
                 amount={dashboardStats?.totalSpentThisMonth ?? 0}
                 compareAmount={dashboardStats?.totalSpentLastMonth}
-                compareLabel="prev cycle"
+                compareLabel="prev month"
                 index={1}
               />
             </>

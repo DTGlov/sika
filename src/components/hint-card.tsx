@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, HelpCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { dismissHint } from '@/lib/hints';
 import type { HintId } from '@/lib/hints';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { BUCKET_CONFIG } from '@/lib/constants';
 
 interface HintCardProps {
   hintId: HintId;
@@ -75,64 +77,62 @@ export function HintCard({ hintId, title, body, icon: Icon, variant = 'inline', 
 }
 
 /**
- * Always-visible ? icon that shows a popover explaining the bucket system.
- * Not a dismissible hint — just an on-demand tooltip.
+ * Always-visible ? icon that opens a dialog explaining the bucket system.
+ * Not a dismissible hint — just an on-demand info dialog.
  */
 interface BucketsTooltipProps {
   className?: string;
 }
 
+const BUCKET_ROWS = [
+  { key: 'needs', color: '#00D9A3' },
+  { key: 'wants', color: '#FBBF24' },
+  { key: 'future', color: '#60A5FA' },
+] as const;
+
 export function BucketsTooltip({ className }: BucketsTooltipProps) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const { profile } = useAuthStore();
 
-  useEffect(() => {
-    if (!open) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [open]);
+  const percents = {
+    needs: profile?.needs_percent ?? 50,
+    wants: profile?.wants_percent ?? 30,
+    future: profile?.future_percent ?? 20,
+  };
 
   return (
-    <div ref={ref} className={`relative inline-block ${className ?? ''}`}>
+    <div className={className}>
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={() => setOpen(true)}
         className="w-5 h-5 rounded-full flex items-center justify-center text-[#52525B] hover:text-[#A1A1AA] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
         aria-label="How do buckets work?"
       >
         <HelpCircle className="w-4 h-4" />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
-            transition={{ duration: 0.15 }}
-            className="absolute left-1/2 -translate-x-1/2 top-7 z-50 w-72 bg-[#1C1C1F] border border-[#27272A] rounded-2xl p-4 shadow-2xl"
-          >
-            <p className="text-[#FAFAFA] text-sm font-medium mb-2">How buckets work</p>
-            <p className="text-[#A1A1AA] text-xs leading-relaxed">
-              Your income is split 50/30/20 by default:{' '}
-              <span className="text-[#00D9A3]">Needs</span> (must-haves like rent, food, transport),{' '}
-              <span className="text-[#FBBF24]">Wants</span> (eating out, entertainment, gym),{' '}
-              <span className="text-[#60A5FA]">Future</span> (savings, investments, emergency fund).
-              Customize the split in Settings.
-            </p>
-            <button
-              onClick={() => setOpen(false)}
-              className="mt-3 text-xs text-[#52525B] hover:text-[#71717A] transition-colors"
-            >
-              Got it
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent
+          showCloseButton
+          className="max-w-[calc(100vw-32px)] sm:max-w-md bg-[#0A0A0B] border-[#00D9A3]/30 shadow-[0_0_60px_rgba(0,217,163,0.25),0_0_20px_rgba(0,217,163,0.15)] p-6"
+        >
+          <DialogTitle className="text-xl font-semibold text-[#FAFAFA] mb-4">
+            Your buckets
+          </DialogTitle>
+          <div className="space-y-5">
+            {BUCKET_ROWS.map(({ key, color }) => {
+              const cfg = BUCKET_CONFIG[key];
+              return (
+                <div key={key}>
+                  <h4 className="text-base font-semibold mb-1.5" style={{ color }}>
+                    {cfg.label} ({percents[key]}%)
+                  </h4>
+                  <p className="text-sm text-[#A1A1AA] leading-relaxed">{cfg.explanation}</p>
+                </div>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
