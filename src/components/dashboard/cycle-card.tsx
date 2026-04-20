@@ -126,7 +126,7 @@ export function CardSurface({
               marginBottom: mini ? 2 : 4,
             }}
           >
-            This Cycle
+            This Month
           </div>
 
           {amountKey !== undefined && mounted ? (
