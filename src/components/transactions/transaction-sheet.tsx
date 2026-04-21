@@ -642,11 +642,11 @@ export function TransactionSheet() {
                           type="button"
                           aria-label="Why isn't my perpetual goal here?"
                           className="text-[#71717A] hover:text-[#A1A1AA] transition-colors cursor-pointer"
-                        />
+                        >
+                          <Info className="w-3.5 h-3.5" />
+                        </button>
                       }
-                    >
-                      <Info className="w-3.5 h-3.5" />
-                    </PopoverTrigger>
+                    />
                     <PopoverContent side="bottom" align="start" sideOffset={8} collisionPadding={16}>
                       Perpetual goals (like Life Savings) are designed to be untouchable and don&apos;t appear here. For real emergencies, log as a normal expense.
                     </PopoverContent>
