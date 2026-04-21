@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { dismissHint } from '@/lib/hints';
 import type { HintId } from '@/lib/hints';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import { BUCKET_CONFIG } from '@/lib/constants';
 
 interface HintCardProps {
@@ -22,8 +23,12 @@ interface HintCardProps {
 }
 
 export function HintCard({ hintId, title, body, icon: Icon, variant = 'inline', className, cta }: HintCardProps) {
-  const { user, dismissedHints, addDismissedHint } = useAuthStore();
+  const { user, dismissedHints, hintsLoaded, addDismissedHint } = useAuthStore();
   const supabase = createClient();
+
+  if (!hintsLoaded) {
+    return <Skeleton className={`h-[72px] rounded-2xl bg-[#141416] ${className ?? ''}`} />;
+  }
 
   const isDismissed = dismissedHints.includes(hintId);
 
