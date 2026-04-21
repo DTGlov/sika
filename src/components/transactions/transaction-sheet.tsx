@@ -683,6 +683,13 @@ export function TransactionSheet() {
                         ))}
                       </select>
 
+                      {/* Perpetual goals note */}
+                      <div className="border-t border-[#27272A] mt-2 pt-2">
+                        <p className="text-xs text-[#71717A] leading-relaxed px-1">
+                          Perpetual goals (like Life Savings) don&apos;t appear here — they&apos;re protected.
+                        </p>
+                      </div>
+
                       {/* Live balance preview */}
                       {paidFromGoalId && !sfBalanceLoading && sfBalance !== null && (
                         sfOverpayment ? (
