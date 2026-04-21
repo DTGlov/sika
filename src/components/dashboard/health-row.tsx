@@ -49,7 +49,7 @@ export function HealthRow() {
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[#A1A1AA] text-sm">Your health:</span>
+            <span className="text-[#A1A1AA] text-sm">Your Sika score:</span>
             <span className="text-[#FAFAFA] text-sm font-bold tabular-nums">{healthScore.total}</span>
             <span className="text-[#52525B] text-sm">·</span>
             <span className="text-sm font-semibold" style={{ color: labelCfg.color }}>
