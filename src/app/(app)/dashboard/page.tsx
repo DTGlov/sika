@@ -16,9 +16,7 @@ import { OnboardingModal } from '@/components/dashboard/onboarding-modal';
 import { IncomeNudgeCard, PendingRecurringCard } from '@/components/dashboard/income-nudge-card';
 import { HintCard, BucketsTooltip } from '@/components/hint-card';
 import { GoalsWidget } from '@/components/dashboard/goals-widget';
-import { StreakStrip } from '@/components/dashboard/streak-strip';
-import { MomentumStrip } from '@/components/dashboard/momentum-strip';
-import { RecentBadges } from '@/components/dashboard/recent-badges';
+import { HealthRow } from '@/components/dashboard/health-row';
 import { SundayRecapCard } from '@/components/dashboard/sunday-recap-card';
 import { CycleCard } from '@/components/dashboard/cycle-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -48,7 +46,7 @@ function DashboardContent() {
   const pathname = usePathname();
   const supabase = createClient();
 
-  const { profile, incomeSources, accounts, user, streaks, momentum, enqueueBadgeCelebrations } = useAuthStore();
+  const { profile, incomeSources, accounts, user, enqueueBadgeCelebrations } = useAuthStore();
   useStreakHealth();
   const { dashboardStats } = useTransactionStore();
   const cycleStartDay = profile?.cycle_start_day ?? 1;
@@ -236,23 +234,8 @@ function DashboardContent() {
         {/* Sunday recap — only on Sundays */}
         <SundayRecapCard />
 
-        {/* Streak strip or intro hint */}
-        {streaks && (streaks.logging_current > 0 || streaks.savings_current > 0) ? (
-          <StreakStrip streaks={streaks} />
-        ) : (
-          <HintCard
-            hintId="streaks_intro"
-            title="Build your streaks"
-            body="Log a transaction every day to build your logging streak. Contribute to a goal each week for your saving streak. Freezes protect you when life gets busy. 🔥"
-            variant="banner"
-          />
-        )}
-
-        {/* Momentum strip */}
-        {momentum && <MomentumStrip momentum={momentum} />}
-
-        {/* Recent badge unlocks */}
-        <RecentBadges />
+        {/* Financial health row */}
+        <HealthRow />
 
         {/* Income summary row */}
         {monthlyIncome > 0 && (
