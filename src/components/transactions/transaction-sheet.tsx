@@ -22,6 +22,7 @@ import { NextCycleModal } from '@/components/goals/next-cycle-modal';
 import { fetchGoals, fetchGoalAmounts } from '@/lib/goals';
 import { updateLoggingStreak, loggingMilestoneMessage } from '@/lib/streaks';
 import { awardMomentum } from '@/lib/momentum';
+import { checkAndUnlockBadges } from '@/lib/badges';
 import { MomentumFloatContainer, TierUpModal } from '@/components/momentum-float';
 import type { TransactionType } from '@/types';
 import type { Goal } from '@/types/goal';
@@ -40,7 +41,7 @@ export function TransactionSheet() {
     reconcileContext,
     dashboardStats,
   } = useTransactionStore();
-  const { user, accounts, setStreaks, setMomentum } = useAuthStore();
+  const { user, accounts, setStreaks, setMomentum, enqueueBadgeCelebrations } = useAuthStore();
   const [momentumFloats, setMomentumFloats] = useState<Array<{ id: string; points: number }>>([]);
   const [tierUpTier, setTierUpTier] = useState<TierConfig | null>(null);
   const supabase = createClient();
@@ -238,8 +239,16 @@ export function TransactionSheet() {
         } else if (result.freeze_earned) {
           toast(`❄️ Streak freeze earned! ${result.streaks.freezes_banked} banked.`);
         }
+        // Check streak-triggered badges
+        checkAndUnlockBadges(supabase, user.id, 'streak_updated').then(({ newlyUnlocked }) => {
+          if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
+        });
       });
       handleMomentumAward('transaction_logged');
+      // Check transaction-triggered badges
+      checkAndUnlockBadges(supabase, user.id, 'transaction_logged').then(({ newlyUnlocked }) => {
+        if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
+      });
 
       if (paidFromGoalId && txType === 'expense') {
         revalidateForEntity('sinking_fund_payment');
@@ -261,6 +270,9 @@ export function TransactionSheet() {
             toast.success(`${goal.name} is complete! 🎉`);
             setNextCycleGoal({ ...goal, completed_at: new Date().toISOString() });
             handleMomentumAward('goal_completed');
+            checkAndUnlockBadges(supabase, user.id, 'goal_completed').then(({ newlyUnlocked }) => {
+              if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
+            });
           } else {
             toast.success('Expense logged');
           }
@@ -317,6 +329,9 @@ export function TransactionSheet() {
     revalidateForEntity('adjustment');
     toast.success(`Reconciled to ${formatGHS(parseFloat(reconcileActual) || 0)}`);
     handleMomentumAward('account_reconciled');
+    checkAndUnlockBadges(supabase, user.id, 'account_reconciled').then(({ newlyUnlocked }) => {
+      if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
+    });
     handleClose();
   }
 

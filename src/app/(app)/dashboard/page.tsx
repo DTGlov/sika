@@ -18,6 +18,7 @@ import { HintCard, BucketsTooltip } from '@/components/hint-card';
 import { GoalsWidget } from '@/components/dashboard/goals-widget';
 import { StreakStrip } from '@/components/dashboard/streak-strip';
 import { MomentumStrip } from '@/components/dashboard/momentum-strip';
+import { RecentBadges } from '@/components/dashboard/recent-badges';
 import { SundayRecapCard } from '@/components/dashboard/sunday-recap-card';
 import { CycleCard } from '@/components/dashboard/cycle-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -33,6 +34,7 @@ import { getCycleForDate, getCycleAtOffset, parseCycleParam, getCycleFromStartDa
 import { getDueIncomeNudges, recordNudgeDismissal } from '@/lib/income-nudges';
 import { confirmPendingRecurring, skipPendingRecurring } from '@/lib/recurring';
 import { revalidateForEntity } from '@/lib/revalidation';
+import { checkAndUnlockBadges } from '@/lib/badges';
 import { createClient } from '@/lib/supabase/client';
 import { fetchGoals, fetchGoalAmounts, computeGoalProgress } from '@/lib/goals';
 import type { BucketName, IncomeNudge, RecurringTransaction } from '@/types';
@@ -46,7 +48,7 @@ function DashboardContent() {
   const pathname = usePathname();
   const supabase = createClient();
 
-  const { profile, incomeSources, accounts, user, streaks, momentum } = useAuthStore();
+  const { profile, incomeSources, accounts, user, streaks, momentum, enqueueBadgeCelebrations } = useAuthStore();
   useStreakHealth();
   const { dashboardStats } = useTransactionStore();
   const cycleStartDay = profile?.cycle_start_day ?? 1;
@@ -76,6 +78,18 @@ function DashboardContent() {
       setShowOnboarding(true);
     }
   }, [profile, incomeSources]);
+
+  // Check cycle-ended badges on dashboard load
+  useEffect(() => {
+    if (!user) return;
+    checkAndUnlockBadges(supabase, user.id, 'cycle_ended').then(({ newlyUnlocked }) => {
+      if (newlyUnlocked.length > 0) {
+        enqueueBadgeCelebrations(newlyUnlocked);
+        revalidateForEntity('badge_unlocked');
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   // Fetch income nudges once profile + income sources are available
   useEffect(() => {
@@ -236,6 +250,9 @@ function DashboardContent() {
 
         {/* Momentum strip */}
         {momentum && <MomentumStrip momentum={momentum} />}
+
+        {/* Recent badge unlocks */}
+        <RecentBadges />
 
         {/* Income summary row */}
         {monthlyIncome > 0 && (
