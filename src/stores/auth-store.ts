@@ -10,6 +10,7 @@ interface AuthState {
   incomeSources: IncomeSource[];
   accounts: Account[];
   dismissedHints: string[];
+  hintsLoaded: boolean;
   streaks: Streaks | null;
   setUser: (user: User | null) => void;
   setProfile: (profile: Profile | null) => void;
@@ -27,14 +28,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   incomeSources: [],
   accounts: [],
   dismissedHints: [],
+  hintsLoaded: false,
   streaks: null,
   setUser: (user) => set({ user }),
   setProfile: (profile) => set({ profile }),
   setIncomeSources: (incomeSources) => set({ incomeSources }),
   setAccounts: (accounts) => set({ accounts }),
-  setDismissedHints: (dismissedHints) => set({ dismissedHints }),
+  setDismissedHints: (dismissedHints) => set({ dismissedHints, hintsLoaded: true }),
   addDismissedHint: (hintId) =>
     set((s) => ({ dismissedHints: s.dismissedHints.includes(hintId) ? s.dismissedHints : [...s.dismissedHints, hintId] })),
   setStreaks: (streaks) => set({ streaks }),
-  reset: () => set({ user: null, profile: null, incomeSources: [], accounts: [], dismissedHints: [], streaks: null }),
+  reset: () => set({ user: null, profile: null, incomeSources: [], accounts: [], dismissedHints: [], hintsLoaded: false, streaks: null }),
 }));
