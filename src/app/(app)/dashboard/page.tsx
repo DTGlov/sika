@@ -17,6 +17,7 @@ import { IncomeNudgeCard, PendingRecurringCard } from '@/components/dashboard/in
 import { HintCard, BucketsTooltip } from '@/components/hint-card';
 import { GoalsWidget } from '@/components/dashboard/goals-widget';
 import { StreakStrip } from '@/components/dashboard/streak-strip';
+import { MomentumStrip } from '@/components/dashboard/momentum-strip';
 import { SundayRecapCard } from '@/components/dashboard/sunday-recap-card';
 import { CycleCard } from '@/components/dashboard/cycle-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -45,7 +46,7 @@ function DashboardContent() {
   const pathname = usePathname();
   const supabase = createClient();
 
-  const { profile, incomeSources, accounts, user, streaks } = useAuthStore();
+  const { profile, incomeSources, accounts, user, streaks, momentum } = useAuthStore();
   useStreakHealth();
   const { dashboardStats } = useTransactionStore();
   const cycleStartDay = profile?.cycle_start_day ?? 1;
@@ -232,6 +233,9 @@ function DashboardContent() {
             variant="banner"
           />
         )}
+
+        {/* Momentum strip */}
+        {momentum && <MomentumStrip momentum={momentum} />}
 
         {/* Income summary row */}
         {monthlyIncome > 0 && (

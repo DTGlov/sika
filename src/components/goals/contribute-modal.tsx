@@ -10,6 +10,9 @@ import { useAuthStore } from '@/stores/auth-store';
 import { revalidateForEntity } from '@/lib/revalidation';
 import { contributeToGoal } from '@/lib/goals';
 import { updateSavingsStreak, savingsMilestoneMessage } from '@/lib/streaks';
+import { awardMomentum } from '@/lib/momentum';
+import { MomentumFloatContainer, TierUpModal } from '@/components/momentum-float';
+import type { TierConfig } from '@/types/momentum';
 import { formatGHS } from '@/lib/utils';
 import type { GoalProgress } from '@/types/goal';
 
@@ -21,7 +24,9 @@ interface ContributeModalProps {
 
 export function ContributeModal({ open, onClose, goalProgress }: ContributeModalProps) {
   const supabase = createClient();
-  const { user, accounts, setStreaks } = useAuthStore();
+  const { user, accounts, setStreaks, setMomentum } = useAuthStore();
+  const [momentumFloats, setMomentumFloats] = useState<Array<{ id: string; points: number }>>([]);
+  const [tierUpTier, setTierUpTier] = useState<TierConfig | null>(null);
 
   const { goal, current_amount, target_amount } = goalProgress.goal
     ? { goal: goalProgress.goal, current_amount: goalProgress.current_amount, target_amount: goalProgress.goal.target_amount }
@@ -76,6 +81,13 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
           toast(`❄️ Streak freeze used to protect your saving streak.`);
         }
       });
+      // Award momentum
+      awardMomentum(supabase, user.id, 'goal_contribution').then(result => {
+        setMomentum(result.momentum);
+        const floatId = `${Date.now()}-${Math.random()}`;
+        setMomentumFloats(prev => [...prev, { id: floatId, points: result.points_awarded }]);
+        if (result.tier_changed) setTierUpTier(result.new_tier);
+      });
       toast.success(`${formatGHS(numAmount)} added to ${goal.name}`);
       onClose();
     } catch {
@@ -86,6 +98,7 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
   }
 
   return (
+    <>
     <AnimatePresence>
       {open && (
         <>
@@ -212,5 +225,19 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
         </>
       )}
     </AnimatePresence>
+
+    <MomentumFloatContainer
+      floats={momentumFloats}
+      onDone={id => setMomentumFloats(prev => prev.filter(f => f.id !== id))}
+    />
+
+    {tierUpTier && (
+      <TierUpModal
+        open={!!tierUpTier}
+        onClose={() => setTierUpTier(null)}
+        tier={tierUpTier}
+      />
+    )}
+    </>
   );
 }
