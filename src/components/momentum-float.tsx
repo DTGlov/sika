@@ -3,8 +3,18 @@
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { Medal, Award, Trophy, Crown, Gem } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import type { TierConfig } from '@/types/momentum';
+import { TIERS } from '@/types/momentum';
+import type { TierConfig, Tier } from '@/types/momentum';
+
+const TIER_ICON_MAP = { Medal, Award, Trophy, Crown, Gem } as const;
+
+export function TierIcon({ tier, size = 20 }: { tier: Tier; size?: number }) {
+  const cfg = TIERS[tier];
+  const Icon = TIER_ICON_MAP[cfg.iconName as keyof typeof TIER_ICON_MAP];
+  return <Icon size={size} style={{ color: cfg.color }} />;
+}
 
 interface MomentumFloatProps {
   points: number;
@@ -65,16 +75,16 @@ export function TierUpModal({ open, onClose, tier }: TierUpModalProps) {
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          className="text-6xl mb-4"
+          className="flex justify-center mb-4"
         >
-          {tier.emoji}
+          <TierIcon tier={tier.id} size={64} />
         </motion.div>
         <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color: tier.color }}>
           Tier Up!
         </p>
-        <h2 className="text-2xl font-bold text-[#FAFAFA] mb-2">{tier.label}</h2>
+        <h2 className="text-2xl font-bold text-[#FAFAFA] mb-2">{tier.name}</h2>
         <p className="text-sm text-[#A1A1AA] leading-relaxed">
-          You&apos;ve reached <span style={{ color: tier.color }}>{tier.label}</span>. Keep going — the next tier is waiting.
+          You&apos;ve reached <span style={{ color: tier.color }}>{tier.name}</span>. Keep going — the next tier is waiting.
         </p>
         <button
           onClick={onClose}

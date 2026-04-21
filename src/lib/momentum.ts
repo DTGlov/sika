@@ -1,24 +1,27 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   TIERS,
+  TIER_ORDER,
   MOMENTUM_AMOUNTS,
+  type Tier,
   type TierConfig,
-  type TierId,
   type Momentum,
   type MomentumEventType,
   type MomentumUpdateResult,
 } from '@/types/momentum';
 
+const TIERS_LIST = TIER_ORDER.map(id => TIERS[id]);
+
 export function calculateTier(points: number): TierConfig {
-  for (let i = TIERS.length - 1; i >= 0; i--) {
-    if (points >= TIERS[i].minPoints) return TIERS[i];
+  for (let i = TIERS_LIST.length - 1; i >= 0; i--) {
+    if (points >= TIERS_LIST[i].threshold) return TIERS_LIST[i];
   }
-  return TIERS[0];
+  return TIERS_LIST[0];
 }
 
-export function getNextTier(currentTierId: TierId): TierConfig | null {
-  const idx = TIERS.findIndex(t => t.id === currentTierId);
-  return idx < TIERS.length - 1 ? TIERS[idx + 1] : null;
+export function getNextTier(currentTierId: Tier): TierConfig | null {
+  const idx = TIER_ORDER.indexOf(currentTierId);
+  return idx < TIER_ORDER.length - 1 ? TIERS[TIER_ORDER[idx + 1]] : null;
 }
 
 export function getTierProgress(totalPoints: number): {
@@ -33,10 +36,10 @@ export function getTierProgress(totalPoints: number): {
   if (!nextTier) {
     return { tier, nextTier: null, progressPercent: 100, pointsInTier: 0, pointsNeeded: 0 };
   }
-  const pointsInTier = totalPoints - tier.minPoints;
-  const tierRange = nextTier.minPoints - tier.minPoints;
+  const pointsInTier = totalPoints - tier.threshold;
+  const tierRange = nextTier.threshold - tier.threshold;
   const progressPercent = Math.min(100, (pointsInTier / tierRange) * 100);
-  const pointsNeeded = nextTier.minPoints - totalPoints;
+  const pointsNeeded = nextTier.threshold - totalPoints;
   return { tier, nextTier, progressPercent, pointsInTier, pointsNeeded };
 }
 
@@ -57,7 +60,7 @@ export async function awardMomentum(
   if (!existing) {
     const { data: created } = await supabase
       .from('momentum')
-      .insert({ user_id: userId, total_points: 0, tier: 'seedling' })
+      .insert({ user_id: userId, total_points: 0, tier: 'bronze' })
       .select('*')
       .single();
     existing = created;
@@ -83,7 +86,7 @@ export async function awardMomentum(
   const momentum: Momentum = (momentumRes.data as Momentum) ?? {
     user_id: userId,
     total_points: newTotal,
-    tier: newTier.id as TierId,
+    tier: newTier.id as Tier,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

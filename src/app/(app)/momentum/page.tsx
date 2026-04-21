@@ -7,18 +7,20 @@ import { ChevronLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { useProfile } from '@/hooks/use-profile';
-import { getTierProgress, calculateTier } from '@/lib/momentum';
-import { TIERS, MOMENTUM_AMOUNTS } from '@/types/momentum';
+import { getTierProgress } from '@/lib/momentum';
+import { TIERS, TIER_ORDER, MOMENTUM_AMOUNTS } from '@/types/momentum';
+import { TierIcon } from '@/components/momentum-float';
 import type { MomentumEvent } from '@/types/momentum';
 import { formatDistanceToNow } from 'date-fns';
 
 const EVENT_LABELS: Record<string, string> = {
-  transaction_logged: 'Logged a transaction',
-  transaction_logged_via_nudge: 'Logged via income nudge',
-  goal_contribution: 'Contributed to a goal',
-  goal_completed: 'Completed a goal',
-  account_reconciled: 'Reconciled an account',
-  logging_streak_7_days: '7-day logging streak',
+  transaction_logged:              'Logged a transaction',
+  transaction_logged_via_nudge:    'Logged via income nudge',
+  goal_contribution:               'Contributed to a goal',
+  goal_completed:                  'Completed a goal',
+  account_reconciled:              'Reconciled an account',
+  logging_streak_7_days:           '7-day logging streak',
+  bucket_within_limit_full_month:  'All buckets within limit (full month)',
 };
 
 export default function MomentumPage() {
@@ -76,21 +78,24 @@ export default function MomentumPage() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-            className="text-7xl mb-3"
+            className="flex justify-center mb-3"
           >
-            {tier.emoji}
+            <TierIcon tier={tier.id} size={72} />
           </motion.div>
           <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color: tier.color }}>
             Current Tier
           </p>
-          <h2 className="text-3xl font-bold text-[#FAFAFA] mb-1">{tier.label}</h2>
+          <h2 className="text-3xl font-bold text-[#FAFAFA] mb-1">{tier.name}</h2>
           <p className="text-[#A1A1AA] text-sm tabular-nums">{totalPoints.toLocaleString()} total points</p>
 
           {nextTier && (
             <div className="mt-5">
-              <div className="flex justify-between text-xs text-[#52525B] mb-1.5">
-                <span>{tier.label}</span>
-                <span>{nextTier.emoji} {nextTier.label}</span>
+              <div className="flex justify-between items-center text-xs text-[#52525B] mb-1.5">
+                <span>{tier.name}</span>
+                <div className="flex items-center gap-1">
+                  <TierIcon tier={nextTier.id} size={12} />
+                  <span>{nextTier.name}</span>
+                </div>
               </div>
               <div className="h-2 bg-[#1C1C1F] rounded-full overflow-hidden">
                 <motion.div
@@ -110,20 +115,20 @@ export default function MomentumPage() {
         <div>
           <h3 className="text-[#FAFAFA] font-semibold text-sm mb-3">All Tiers</h3>
           <div className="bg-[#141416] border border-[#27272A] rounded-2xl divide-y divide-[#1C1C1F]">
-            {TIERS.map(t => {
+            {TIER_ORDER.map(tierId => {
+              const t = TIERS[tierId];
               const isCurrent = t.id === tier.id;
-              const isUnlocked = totalPoints >= t.minPoints;
+              const isUnlocked = totalPoints >= t.threshold;
               return (
                 <div key={t.id} className="flex items-center gap-3 px-4 py-3">
-                  <span className={`text-xl ${!isUnlocked ? 'opacity-30' : ''}`}>{t.emoji}</span>
+                  <div className={isUnlocked ? '' : 'opacity-30'}>
+                    <TierIcon tier={t.id} size={20} />
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p
-                      className="text-sm font-medium"
-                      style={{ color: isUnlocked ? t.color : '#52525B' }}
-                    >
-                      {t.label}
+                    <p className="text-sm font-medium" style={{ color: isUnlocked ? t.color : '#52525B' }}>
+                      {t.name}
                     </p>
-                    <p className="text-xs text-[#52525B]">{t.minPoints.toLocaleString()} pts</p>
+                    <p className="text-xs text-[#52525B]">{t.threshold.toLocaleString()} pts</p>
                   </div>
                   {isCurrent && (
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: `${t.color}20`, color: t.color }}>
