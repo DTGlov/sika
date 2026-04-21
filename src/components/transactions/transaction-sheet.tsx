@@ -21,8 +21,11 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { NextCycleModal } from '@/components/goals/next-cycle-modal';
 import { fetchGoals, fetchGoalAmounts } from '@/lib/goals';
 import { updateLoggingStreak, loggingMilestoneMessage } from '@/lib/streaks';
+import { awardMomentum } from '@/lib/momentum';
+import { MomentumFloatContainer, TierUpModal } from '@/components/momentum-float';
 import type { TransactionType } from '@/types';
 import type { Goal } from '@/types/goal';
+import type { TierConfig } from '@/types/momentum';
 
 type Step = 'amount' | 'category' | 'accounts' | 'details' | 'reconcile';
 
@@ -37,7 +40,9 @@ export function TransactionSheet() {
     reconcileContext,
     dashboardStats,
   } = useTransactionStore();
-  const { user, accounts, setStreaks } = useAuthStore();
+  const { user, accounts, setStreaks, setMomentum } = useAuthStore();
+  const [momentumFloats, setMomentumFloats] = useState<Array<{ id: string; points: number }>>([]);
+  const [tierUpTier, setTierUpTier] = useState<TierConfig | null>(null);
   const supabase = createClient();
 
   const defaultAccountId = accounts.find(a => a.is_default)?.id ?? accounts[0]?.id ?? null;
@@ -170,6 +175,15 @@ export function TransactionSheet() {
     }
   }
 
+  async function handleMomentumAward(eventType: Parameters<typeof awardMomentum>[2]) {
+    if (!user) return;
+    const result = await awardMomentum(supabase, user.id, eventType);
+    setMomentum(result.momentum);
+    const floatId = `${Date.now()}-${Math.random()}`;
+    setMomentumFloats(prev => [...prev, { id: floatId, points: result.points_awarded }]);
+    if (result.tier_changed) setTierUpTier(result.new_tier);
+  }
+
   async function handleSave() {
     if (!user || parseFloat(amount) <= 0) return;
     if (txType === 'transfer' && (!accountId || !toAccountId || accountId === toAccountId)) {
@@ -218,10 +232,14 @@ export function TransactionSheet() {
         if (result.streaks) setStreaks(result.streaks);
         if (result.milestone_hit) {
           toast.success(loggingMilestoneMessage(result.milestone_hit), { duration: 5000 });
+          if (result.milestone_hit === 7) {
+            handleMomentumAward('logging_streak_7_days');
+          }
         } else if (result.freeze_earned) {
           toast(`❄️ Streak freeze earned! ${result.streaks.freezes_banked} banked.`);
         }
       });
+      handleMomentumAward('transaction_logged');
 
       if (paidFromGoalId && txType === 'expense') {
         revalidateForEntity('sinking_fund_payment');
@@ -242,6 +260,7 @@ export function TransactionSheet() {
               .eq('id', goal.id);
             toast.success(`${goal.name} is complete! 🎉`);
             setNextCycleGoal({ ...goal, completed_at: new Date().toISOString() });
+            handleMomentumAward('goal_completed');
           } else {
             toast.success('Expense logged');
           }
@@ -297,6 +316,7 @@ export function TransactionSheet() {
 
     revalidateForEntity('adjustment');
     toast.success(`Reconciled to ${formatGHS(parseFloat(reconcileActual) || 0)}`);
+    handleMomentumAward('account_reconciled');
     handleClose();
   }
 
@@ -777,6 +797,19 @@ export function TransactionSheet() {
         open={!!nextCycleGoal}
         onClose={() => setNextCycleGoal(null)}
         completedGoal={nextCycleGoal}
+      />
+    )}
+
+    <MomentumFloatContainer
+      floats={momentumFloats}
+      onDone={id => setMomentumFloats(prev => prev.filter(f => f.id !== id))}
+    />
+
+    {tierUpTier && (
+      <TierUpModal
+        open={!!tierUpTier}
+        onClose={() => setTierUpTier(null)}
+        tier={tierUpTier}
       />
     )}
   </>
