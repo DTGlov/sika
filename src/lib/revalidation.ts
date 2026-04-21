@@ -29,6 +29,7 @@ export const REVALIDATION_MAP = {
   sinking_fund_payment:  ['/goals', '/dashboard', '/accounts', '/transactions'],
   card_theme:            ['/dashboard', '/settings'],
   momentum_event:        ['/dashboard', '/momentum'],
+  badge_unlocked:        ['/dashboard', '/badges'],
 } as const;
 
 import { useTransactionStore } from '@/stores/transaction-store';

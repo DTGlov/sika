@@ -11,6 +11,7 @@ import { revalidateForEntity } from '@/lib/revalidation';
 import { contributeToGoal } from '@/lib/goals';
 import { updateSavingsStreak, savingsMilestoneMessage } from '@/lib/streaks';
 import { awardMomentum } from '@/lib/momentum';
+import { checkAndUnlockBadges } from '@/lib/badges';
 import { MomentumFloatContainer, TierUpModal } from '@/components/momentum-float';
 import type { TierConfig } from '@/types/momentum';
 import { formatGHS } from '@/lib/utils';
@@ -24,7 +25,7 @@ interface ContributeModalProps {
 
 export function ContributeModal({ open, onClose, goalProgress }: ContributeModalProps) {
   const supabase = createClient();
-  const { user, accounts, setStreaks, setMomentum } = useAuthStore();
+  const { user, accounts, setStreaks, setMomentum, enqueueBadgeCelebrations } = useAuthStore();
   const [momentumFloats, setMomentumFloats] = useState<Array<{ id: string; points: number }>>([]);
   const [tierUpTier, setTierUpTier] = useState<TierConfig | null>(null);
 
@@ -72,7 +73,7 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
         currentAmount: current_amount,
       });
       revalidateForEntity('goal_contribution');
-      // Update savings streak
+      // Update savings streak + check streak badges
       updateSavingsStreak(supabase, user.id).then(result => {
         if (result.streaks) setStreaks(result.streaks);
         if (result.milestone_hit) {
@@ -80,6 +81,9 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
         } else if (result.freeze_used) {
           toast(`❄️ Streak freeze used to protect your saving streak.`);
         }
+        checkAndUnlockBadges(supabase, user.id, 'streak_updated').then(({ newlyUnlocked }) => {
+          if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
+        });
       });
       // Award momentum
       awardMomentum(supabase, user.id, 'goal_contribution').then(result => {
@@ -87,6 +91,10 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
         const floatId = `${Date.now()}-${Math.random()}`;
         setMomentumFloats(prev => [...prev, { id: floatId, points: result.points_awarded }]);
         if (result.tier_changed) setTierUpTier(result.new_tier);
+      });
+      // Check contribution + safety_net badges
+      checkAndUnlockBadges(supabase, user.id, 'contribution_made').then(({ newlyUnlocked }) => {
+        if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
       });
       toast.success(`${formatGHS(numAmount)} added to ${goal.name}`);
       onClose();

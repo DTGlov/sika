@@ -9,6 +9,7 @@ import { TransactionSheet } from '@/components/transactions/transaction-sheet';
 import { AddTransactionFab } from '@/components/transactions/add-transaction-fab';
 import { BottomNav } from './bottom-nav';
 import { SideRail } from './side-rail';
+import { BadgeCelebrationHost } from '@/components/badges/badge-celebration-host';
 
 interface AppShellProps {
   user: User;
@@ -44,6 +45,7 @@ export function AppShell({ user, children }: AppShellProps) {
 
       <AddTransactionFab />
       <TransactionSheet />
+      <BadgeCelebrationHost />
       <BottomNav />
     </div>
   );
