@@ -84,7 +84,7 @@ export default function HealthPage() {
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-[#FAFAFA] font-semibold text-base">Financial Health</h1>
+          <h1 className="text-[#FAFAFA] font-semibold text-base">Your Sika score</h1>
         </div>
       </div>
 
