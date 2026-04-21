@@ -192,29 +192,31 @@ function DashboardContent() {
         </div>
 
         {/* Virtual cycle card */}
-        {loading ? (
-          <Skeleton
-            className="w-full max-w-[440px] bg-[#141416]"
-            style={{ aspectRatio: '85.6 / 54', borderRadius: 20 }}
-          />
-        ) : (
-          <>
-            <CycleCard
-              cycleNet={dashboardStats?.cycleNet ?? 0}
-              cycleLabel={cycle.label}
-              userName={profile?.full_name?.toUpperCase() ?? 'SIKA USER'}
-              theme={profile?.card_theme ?? 'classic_gold'}
-              received={dashboardStats?.totalReceived ?? 0}
-              spent={dashboardStats?.totalSpentActual ?? 0}
-              expected={monthlyIncome}
+        <div className="w-full md:max-w-[440px] md:mx-auto">
+          {loading ? (
+            <Skeleton
+              className="w-full bg-[#141416]"
+              style={{ aspectRatio: '85.6 / 54', borderRadius: 20 }}
             />
-            <HintCard
-              hintId="dashboard_card_intro"
-              title="This is your month card"
-              body="It shows money that came in minus money that went out this month. Resets at the start of each month. Customize the style in Settings."
-            />
-          </>
-        )}
+          ) : (
+            <>
+              <CycleCard
+                cycleNet={dashboardStats?.cycleNet ?? 0}
+                cycleLabel={cycle.label}
+                userName={profile?.full_name?.toUpperCase() ?? 'SIKA USER'}
+                theme={profile?.card_theme ?? 'classic_gold'}
+                received={dashboardStats?.totalReceived ?? 0}
+                spent={dashboardStats?.totalSpentActual ?? 0}
+                expected={monthlyIncome}
+              />
+              <HintCard
+                hintId="dashboard_card_intro"
+                title="This is your month card"
+                body="It shows money that came in minus money that went out this month. Resets at the start of each month. Customize the style in Settings."
+              />
+            </>
+          )}
+        </div>
 
         {/* Sunday recap — only on Sundays */}
         <SundayRecapCard />
