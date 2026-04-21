@@ -16,7 +16,7 @@
 //   bucket     (update)              → /dashboard, /settings
 
 export const REVALIDATION_MAP = {
-  transaction:       ['/dashboard', '/transactions', '/accounts', '/streaks'],
+  transaction:       ['/dashboard', '/transactions', '/accounts', '/streaks', '/health'],
   account:           ['/accounts', '/dashboard', '/transactions', '/settings'],
   transfer:          ['/dashboard', '/transactions', '/accounts'],
   adjustment:        ['/dashboard', '/transactions', '/accounts'],
@@ -25,11 +25,11 @@ export const REVALIDATION_MAP = {
   profile:           ['/dashboard', '/settings'],
   bucket:            ['/dashboard', '/settings'],
   goal:                  ['/goals', '/dashboard'],
-  goal_contribution:     ['/goals', '/dashboard', '/accounts', '/transactions', '/streaks'],
+  goal_contribution:     ['/goals', '/dashboard', '/accounts', '/transactions', '/streaks', '/health'],
   sinking_fund_payment:  ['/goals', '/dashboard', '/accounts', '/transactions'],
   card_theme:            ['/dashboard', '/settings'],
-  momentum_event:        ['/dashboard', '/momentum'],
-  badge_unlocked:        ['/dashboard', '/badges'],
+  momentum_event:        ['/dashboard', '/momentum', '/health'],
+  badge_unlocked:        ['/dashboard', '/badges', '/health'],
 } as const;
 
 import { useTransactionStore } from '@/stores/transaction-store';

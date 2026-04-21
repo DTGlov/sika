@@ -5,6 +5,7 @@ import type { Account } from '@/types/account';
 import type { Streaks } from '@/types/streak';
 import type { Momentum } from '@/types/momentum';
 import type { UserBadge } from '@/types/badge';
+import type { HealthScore } from '@/types/health';
 
 interface BadgeCelebrationItem {
   userBadgeId: string;
@@ -22,6 +23,7 @@ interface AuthState {
   momentum: Momentum | null;
   userBadges: UserBadge[];
   badgeCelebrationQueue: BadgeCelebrationItem[];
+  healthScore: HealthScore | null;
   setUser: (user: User | null) => void;
   setProfile: (profile: Profile | null) => void;
   setIncomeSources: (sources: IncomeSource[]) => void;
@@ -31,6 +33,7 @@ interface AuthState {
   setStreaks: (streaks: Streaks | null) => void;
   setMomentum: (momentum: Momentum | null) => void;
   setUserBadges: (badges: UserBadge[]) => void;
+  setHealthScore: (score: HealthScore | null) => void;
   enqueueBadgeCelebrations: (badges: UserBadge[]) => void;
   shiftBadgeCelebration: () => void;
   reset: () => void;
@@ -47,6 +50,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   momentum: null,
   userBadges: [],
   badgeCelebrationQueue: [],
+  healthScore: null,
   setUser: (user) => set({ user }),
   setProfile: (profile) => set({ profile }),
   setIncomeSources: (incomeSources) => set({ incomeSources }),
@@ -57,6 +61,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setStreaks: (streaks) => set({ streaks }),
   setMomentum: (momentum) => set({ momentum }),
   setUserBadges: (userBadges) => set({ userBadges }),
+  setHealthScore: (healthScore) => set({ healthScore }),
   enqueueBadgeCelebrations: (badges) =>
     set((s) => ({
       badgeCelebrationQueue: [
@@ -71,6 +76,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   reset: () => set({
     user: null, profile: null, incomeSources: [], accounts: [],
     dismissedHints: [], hintsLoaded: false, streaks: null, momentum: null,
-    userBadges: [], badgeCelebrationQueue: [],
+    userBadges: [], badgeCelebrationQueue: [], healthScore: null,
   }),
 }));
