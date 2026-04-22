@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 import { PwaRegister } from '@/components/pwa-register';
 import { PwaSplash } from '@/components/pwa-splash';
+import { DevThemeToggle } from '@/components/dev-theme-toggle';
 import './globals.css';
 
 const geistSans = Geist({
@@ -44,13 +46,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full dark`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full`}
+      suppressHydrationWarning
     >
       <body className="min-h-full antialiased">
-        <PwaSplash />
-        {children}
-        <Toaster richColors position="top-center" />
-        <PwaRegister />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+          storageKey="sika-theme"
+        >
+          <PwaSplash />
+          {children}
+          <Toaster richColors position="top-center" />
+          <PwaRegister />
+          <DevThemeToggle />
+        </ThemeProvider>
       </body>
     </html>
   );
