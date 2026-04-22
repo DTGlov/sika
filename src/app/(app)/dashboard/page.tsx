@@ -114,16 +114,17 @@ function DashboardContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Fetch latest unread monthly recap
+  // Fetch latest unread + undismissed monthly recap
   useEffect(() => {
     if (!user) return;
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     supabase
       .from('monthly_recaps')
-      .select('id, viewed_at, generated_at')
+      .select('id, viewed_at, dismissed_at, generated_at')
       .eq('user_id', user.id)
       .is('viewed_at', null)
+      .is('dismissed_at', null)
       .gte('generated_at', thirtyDaysAgo.toISOString())
       .order('month_start', { ascending: false })
       .limit(1)
@@ -325,7 +326,17 @@ function DashboardContent() {
         </div>
 
         {/* Should I buy it? */}
-        <ShouldIBuyButton />
+        {loading ? (
+          <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#141416] border border-[#27272A]">
+            <div className="w-9 h-9 rounded-xl bg-[#1C1C1F] animate-pulse shrink-0" />
+            <div className="space-y-1.5 flex-1">
+              <div className="h-3.5 w-28 rounded bg-[#1C1C1F] animate-pulse" />
+              <div className="h-3 w-36 rounded bg-[#1C1C1F] animate-pulse" />
+            </div>
+          </div>
+        ) : (
+          <ShouldIBuyButton />
+        )}
 
         {/* Sunday recap — only on Sundays */}
         <SundayRecapCard />
