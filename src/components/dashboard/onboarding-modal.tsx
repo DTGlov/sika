@@ -158,7 +158,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 16 }}
             transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-            className="relative z-10 bg-[#141416] border border-[#27272A] rounded-2xl p-6 w-full max-w-sm"
+            className="relative z-10 bg-card border border-border rounded-2xl p-6 w-full max-w-sm"
           >
             {/* Step indicator */}
             <div className="flex items-center gap-1.5 mb-5">
@@ -168,7 +168,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                   className="h-1 rounded-full transition-all"
                   style={{
                     flex: s === step ? 2 : 1,
-                    backgroundColor: s <= step ? '#00D9A3' : '#27272A',
+                    backgroundColor: s <= step ? '#00D9A3' : 'var(--border)',
                   }}
                 />
               ))}
@@ -182,11 +182,11 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                     <Sparkles className="w-5 h-5 text-[#00D9A3]" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-[#FAFAFA]">How do you earn?</h2>
-                    <p className="text-[#A1A1AA] text-xs">Let&apos;s set up your income</p>
+                    <h2 className="text-lg font-bold text-foreground">How do you earn?</h2>
+                    <p className="text-muted-foreground text-xs">Let&apos;s set up your income</p>
                   </div>
                 </div>
-                <p className="text-[#71717A] text-sm mb-6">
+                <p className="text-muted-foreground text-sm mb-6">
                   Sika tracks multiple income sources — salary, allowances, side income — so your 50/30/20 split always reflects your real situation.
                 </p>
                 <Button
@@ -197,7 +197,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                 </Button>
                 <button
                   onClick={handleClose}
-                  className="w-full mt-3 text-[#52525B] text-sm hover:text-[#71717A] transition-colors"
+                  className="w-full mt-3 text-muted-foreground/70 text-sm hover:text-muted-foreground transition-colors"
                 >
                   I&apos;ll do this later
                 </button>
@@ -209,33 +209,33 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
               <div>
                 <button
                   onClick={() => setStep(1)}
-                  className="flex items-center gap-1 text-[#71717A] text-sm mb-4 hover:text-[#A1A1AA] transition-colors"
+                  className="flex items-center gap-1 text-muted-foreground text-sm mb-4 hover:text-foreground transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" /> Back
                 </button>
-                <h2 className="text-lg font-bold text-[#FAFAFA] mb-1">Primary income</h2>
-                <p className="text-[#71717A] text-xs mb-5">Your main source of earnings</p>
+                <h2 className="text-lg font-bold text-foreground mb-1">Primary income</h2>
+                <p className="text-muted-foreground text-xs mb-5">Your main source of earnings</p>
 
                 <form onSubmit={handleSubmit(onPrimarySubmit)} className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label className="text-[#A1A1AA] text-sm">Source name</Label>
+                    <Label className="text-muted-foreground text-sm">Source name</Label>
                     <Input
                       placeholder="e.g. Salary"
-                      className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#52525B] focus-visible:ring-[#00D9A3]"
+                      className="h-11 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-accent"
                       {...register('name')}
                     />
                     {errors.name && <p className="text-[#F43F5E] text-xs">{errors.name.message}</p>}
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-[#A1A1AA] text-sm">Amount ({CURRENCY_SYMBOL})</Label>
+                    <Label className="text-muted-foreground text-sm">Amount ({CURRENCY_SYMBOL})</Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">{CURRENCY_SYMBOL}</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{CURRENCY_SYMBOL}</span>
                       <Input
                         type="number"
                         min="0.01"
                         step="0.01"
-                        className="h-11 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                        className="h-11 pl-7 bg-input border-border text-foreground focus-visible:ring-accent amount"
                         {...register('amount', { valueAsNumber: true })}
                       />
                     </div>
@@ -243,7 +243,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-[#A1A1AA] text-sm">Frequency</Label>
+                    <Label className="text-muted-foreground text-sm">Frequency</Label>
                     <div className="grid grid-cols-4 gap-1.5">
                       {FREQUENCIES.map(f => (
                         <button
@@ -254,7 +254,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                           style={
                             frequency === f
                               ? { backgroundColor: FREQUENCY_COLORS[f] + '22', color: FREQUENCY_COLORS[f], borderWidth: 1, borderColor: FREQUENCY_COLORS[f] }
-                              : { backgroundColor: '#1C1C1F', color: '#71717A', borderWidth: 1, borderColor: '#27272A' }
+                              : { backgroundColor: 'var(--input)', color: 'var(--muted-foreground)', borderWidth: 1, borderColor: 'var(--border)' }
                           }
                         >
                           {f === 'biweekly' ? 'Bi-wk' : FREQUENCY_LABELS[f]}
@@ -278,12 +278,12 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
               <div>
                 <button
                   onClick={() => setStep(2)}
-                  className="flex items-center gap-1 text-[#71717A] text-sm mb-4 hover:text-[#A1A1AA] transition-colors"
+                  className="flex items-center gap-1 text-muted-foreground text-sm mb-4 hover:text-foreground transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" /> Back
                 </button>
-                <h2 className="text-lg font-bold text-[#FAFAFA] mb-1">Any other income?</h2>
-                <p className="text-[#71717A] text-xs mb-4">Add more sources or skip — you can always add them in Settings</p>
+                <h2 className="text-lg font-bold text-foreground mb-1">Any other income?</h2>
+                <p className="text-muted-foreground text-xs mb-4">Add more sources or skip — you can always add them in Settings</p>
 
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   {EXTRA_TEMPLATES.map(t => {
@@ -294,15 +294,15 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                         onClick={() => added ? removeExtra(t._key) : addTemplate(t)}
                         className="text-left p-3 rounded-xl border transition-all"
                         style={{
-                          borderColor: added ? '#00D9A3' : '#27272A',
-                          backgroundColor: added ? '#00D9A3' + '11' : '#1C1C1F',
+                          borderColor: added ? '#00D9A3' : 'var(--border)',
+                          backgroundColor: added ? '#00D9A311' : 'var(--input)',
                         }}
                       >
                         <div className="flex items-start justify-between">
-                          <p className="text-[#FAFAFA] text-xs font-medium leading-tight">{t.name}</p>
+                          <p className="text-foreground text-xs font-medium leading-tight">{t.name}</p>
                           {added && <Check className="w-3 h-3 text-[#00D9A3] shrink-0 ml-1" />}
                         </div>
-                        <p className="text-[#71717A] text-xs mt-0.5">{FREQUENCY_LABELS[t.frequency]}</p>
+                        <p className="text-muted-foreground text-xs mt-0.5">{FREQUENCY_LABELS[t.frequency]}</p>
                       </button>
                     );
                   })}
@@ -311,12 +311,12 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                 {extraSources.length > 0 && (
                   <div className="space-y-1.5 mb-4">
                     {extraSources.map(s => (
-                      <div key={s._key} className="flex items-center justify-between px-3 py-2 bg-[#1C1C1F] rounded-lg">
+                      <div key={s._key} className="flex items-center justify-between px-3 py-2 bg-muted rounded-lg">
                         <div>
-                          <span className="text-[#FAFAFA] text-xs font-medium">{s.name}</span>
-                          <span className="text-[#71717A] text-xs ml-2">{formatGHS(s.amount)} · {FREQUENCY_LABELS[s.frequency]}</span>
+                          <span className="text-foreground text-xs font-medium">{s.name}</span>
+                          <span className="text-muted-foreground text-xs ml-2">{formatGHS(s.amount)} · {FREQUENCY_LABELS[s.frequency]}</span>
                         </div>
-                        <button onClick={() => removeExtra(s._key)} className="text-[#52525B] hover:text-[#F43F5E] ml-2 transition-colors">
+                        <button onClick={() => removeExtra(s._key)} className="text-muted-foreground/70 hover:text-[#F43F5E] ml-2 transition-colors">
                           <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -338,11 +338,11 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
               <div>
                 <button
                   onClick={() => setStep(3)}
-                  className="flex items-center gap-1 text-[#71717A] text-sm mb-4 hover:text-[#A1A1AA] transition-colors"
+                  className="flex items-center gap-1 text-muted-foreground text-sm mb-4 hover:text-foreground transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" /> Back
                 </button>
-                <h2 className="text-lg font-bold text-[#FAFAFA] mb-1">Your monthly income</h2>
+                <h2 className="text-lg font-bold text-foreground mb-1">Your monthly income</h2>
                 <div className="text-3xl font-bold text-[#00D9A3] mb-5">
                   {formatGHS(totalMonthly)}
                 </div>
@@ -351,15 +351,15 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                   {allSources.map(s => {
                     const eq = calculateMonthlyEquivalent(s.amount, s.frequency);
                     return (
-                      <div key={s._key} className="flex items-center justify-between px-3 py-2 bg-[#1C1C1F] rounded-lg">
+                      <div key={s._key} className="flex items-center justify-between px-3 py-2 bg-muted rounded-lg">
                         <div>
-                          <span className="text-[#FAFAFA] text-xs font-medium">{s.name}</span>
-                          <span className="text-[#71717A] text-xs ml-2">{FREQUENCY_LABELS[s.frequency]}</span>
+                          <span className="text-foreground text-xs font-medium">{s.name}</span>
+                          <span className="text-muted-foreground text-xs ml-2">{FREQUENCY_LABELS[s.frequency]}</span>
                         </div>
                         <div className="text-right">
-                          <span className="text-[#FAFAFA] text-xs">{formatGHS(s.amount)}</span>
+                          <span className="text-foreground text-xs">{formatGHS(s.amount)}</span>
                           {s.frequency !== 'monthly' && s.frequency !== 'irregular' && (
-                            <p className="text-[#52525B] text-[10px]">≈ {formatGHS(eq)}/mo</p>
+                            <p className="text-muted-foreground/70 text-[10px]">≈ {formatGHS(eq)}/mo</p>
                           )}
                         </div>
                       </div>
@@ -368,8 +368,8 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                 </div>
 
                 {/* Bucket preview */}
-                <div className="bg-[#1C1C1F] rounded-xl p-3 mb-5">
-                  <p className="text-[#71717A] text-xs mb-2">50/30/20 split</p>
+                <div className="bg-muted rounded-xl p-3 mb-5">
+                  <p className="text-muted-foreground text-xs mb-2">50/30/20 split</p>
                   <div className="grid grid-cols-3 gap-2 text-center">
                     {([
                       { label: 'Needs', pct: 50, color: '#00D9A3' },
@@ -378,7 +378,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                     ] as const).map(b => (
                       <div key={b.label}>
                         <p className="text-[10px]" style={{ color: b.color }}>{b.label}</p>
-                        <p className="text-[#FAFAFA] text-xs font-semibold">{formatGHS((totalMonthly * b.pct) / 100)}</p>
+                        <p className="text-foreground text-xs font-semibold">{formatGHS((totalMonthly * b.pct) / 100)}</p>
                       </div>
                     ))}
                   </div>
