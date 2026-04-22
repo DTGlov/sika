@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { useTransition, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Home, Receipt, Wallet, Target, RefreshCw } from 'lucide-react';
 
@@ -14,7 +14,21 @@ const NAV_ITEMS = [
 ] as const;
 
 export function BottomNav() {
+  const router = useRouter();
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  function handleNav(href: string) {
+    if (pathname === href) return;
+    setPendingHref(href);
+    startTransition(() => {
+      router.push(href);
+    });
+  }
+
+  // activePending is null once the transition settles — real pathname takes over
+  const activePending = isPending ? pendingHref : null;
 
   return (
     <nav
@@ -24,15 +38,18 @@ export function BottomNav() {
     >
       <div className="flex h-16">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + '?');
+          const isActive = pathname === href || pathname.startsWith(href + '?');
+          const showActive = isActive || activePending === href;
+
           return (
-            <Link
+            <button
               key={href}
-              href={href}
+              onClick={() => handleNav(href)}
               className="relative flex flex-col items-center justify-center flex-1 gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
-              aria-current={active ? 'page' : undefined}
+              style={{ touchAction: 'manipulation' }}
+              aria-current={isActive ? 'page' : undefined}
             >
-              {active && (
+              {showActive && (
                 <motion.div
                   layoutId="bottom-nav-indicator"
                   className="absolute top-0 left-4 right-4 h-[2px] rounded-full bg-[#00D9A3]"
@@ -40,15 +57,15 @@ export function BottomNav() {
                 />
               )}
               <Icon
-                className={`w-5 h-5 transition-colors ${active ? 'text-[#00D9A3]' : 'text-muted-foreground'}`}
+                className={`w-5 h-5 transition-colors ${showActive ? 'text-[#00D9A3]' : 'text-muted-foreground'}`}
                 aria-hidden
               />
               <span
-                className={`text-[10px] font-medium leading-none transition-colors ${active ? 'text-[#00D9A3]' : 'text-muted-foreground'}`}
+                className={`text-[10px] font-medium leading-none transition-colors ${showActive ? 'text-[#00D9A3]' : 'text-muted-foreground'}`}
               >
                 {label}
               </span>
-            </Link>
+            </button>
           );
         })}
       </div>

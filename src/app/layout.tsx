@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { PwaRegister } from '@/components/pwa-register';
 import { PwaSplash } from '@/components/pwa-splash';
 import { createClient } from '@/lib/supabase/server';
+import { ProgressBarProvider } from '@/components/progress-bar';
 import './globals.css';
 
 const geistSans = Geist({
@@ -79,6 +80,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           disableTransitionOnChange
           storageKey="sika-theme"
         >
+          <ProgressBarProvider />
           <PwaSplash />
           {children}
           <Toaster richColors position="top-center" />
