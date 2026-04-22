@@ -9,6 +9,7 @@ Phase 6, before Phase 6.10.
 | Component | Path | Used on pages | Flagged in phase |
 |-----------|------|---------------|------------------|
 | HintCard | src/components/hint-card.tsx | accounts, dashboard, settings, goals, recurring, transaction-sheet | 6.1 |
+| NextCycleModal | src/components/goals/next-cycle-modal.tsx | goals, transaction-sheet | 6.3 |
 
 ## How to use this file
 

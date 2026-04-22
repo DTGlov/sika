@@ -71,9 +71,9 @@ export default function GoalsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-[#FAFAFA] font-bold text-xl">Goals</h1>
+            <h1 className="text-foreground font-bold text-xl">Goals</h1>
             {!loading && goalProgresses.length > 0 && (
-              <p className="text-[#71717A] text-xs mt-0.5">
+              <p className="text-muted-foreground text-xs mt-0.5">
                 {formatGHS(totalSaved)} saved across {goalProgresses.length} goal{goalProgresses.length !== 1 ? 's' : ''}
               </p>
             )}
@@ -101,25 +101,25 @@ export default function GoalsPage() {
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-28 rounded-2xl bg-[#141416]" />
+              <Skeleton key={i} className="h-28 rounded-2xl bg-muted" />
             ))}
           </div>
         ) : goalProgresses.length === 0 ? (
           /* Empty state */
           <div className="flex flex-col items-center py-12 text-center space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#141416] border border-[#27272A] flex items-center justify-center">
-              <Target className="w-8 h-8 text-[#3F3F46]" />
+            <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center">
+              <Target className="w-8 h-8 text-muted-foreground/60" />
             </div>
             <div>
-              <p className="text-[#FAFAFA] font-medium">No goals yet</p>
-              <p className="text-[#71717A] text-sm mt-1">Create your first goal to start tracking your savings</p>
+              <p className="text-foreground font-medium">No goals yet</p>
+              <p className="text-muted-foreground text-sm mt-1">Create your first goal to start tracking your savings</p>
             </div>
             <div className="flex flex-wrap gap-2 justify-center">
               {SUGGESTION_PILLS.map(pill => (
                 <button
                   key={pill.label}
                   onClick={openCreate}
-                  className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-[#141416] border border-[#27272A] text-[#A1A1AA] text-sm hover:border-[#3F3F46] hover:text-[#FAFAFA] transition-colors"
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-card border border-border text-muted-foreground text-sm hover:border-border hover:text-foreground transition-colors"
                 >
                   <span>{pill.icon}</span>
                   {pill.label}
@@ -143,7 +143,7 @@ export default function GoalsPage() {
             {/* Completed goals */}
             {completedGoals.length > 0 && (
               <div className="pt-2">
-                <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider mb-2">Completed</p>
+                <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-2">Completed</p>
                 {completedGoals.map((gp, i) => (
                   <GoalCard
                     key={gp.goal.id}
@@ -212,7 +212,7 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, on
       role="button"
       tabIndex={0}
       onKeyDown={e => { if (e.key === 'Enter') router.push(`/goals/${goal.id}`); }}
-      className="bg-[#141416] border border-[#27272A] rounded-2xl p-4 space-y-3 cursor-pointer hover:border-[#3F3F46] hover:-translate-y-0.5 hover:shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
+      className="bg-card border border-border rounded-2xl p-4 space-y-3 cursor-pointer hover:border-border hover:-translate-y-0.5 hover:shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       style={{ opacity: completed ? 0.7 : 1 }}
     >
       <div className="flex items-start gap-3">
@@ -224,19 +224,19 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, on
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[#FAFAFA] font-semibold text-sm truncate">
+            <span className="text-foreground font-semibold text-sm truncate">
               {goal.name}
             </span>
             {completed && <Trophy className="w-3.5 h-3.5 text-[#FBBF24] shrink-0" />}
           </div>
           {goal.description && (
-            <p className="text-[#71717A] text-xs mt-0.5 line-clamp-1">{goal.description}</p>
+            <p className="text-muted-foreground text-xs mt-0.5 line-clamp-1">{goal.description}</p>
           )}
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={e => { e.stopPropagation(); onEdit(); }}
-            className="h-7 px-2.5 rounded-lg text-[#71717A] text-xs hover:text-[#FAFAFA] hover:bg-[#27272A] transition-colors"
+            className="h-7 px-2.5 rounded-lg text-muted-foreground text-xs hover:text-foreground hover:bg-muted transition-colors"
           >
             Edit
           </button>
@@ -264,7 +264,7 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, on
       {/* Progress */}
       {!isPerpetual && progress_percent != null ? (
         <div className="space-y-1.5">
-          <div className="h-2 bg-[#27272A] rounded-full overflow-hidden">
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
             <motion.div
               className="h-full rounded-full"
               style={{ background: accentColor }}
@@ -277,7 +277,7 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, on
             <span style={{ color: accentColor }}>
               {formatGHSCompact(current_amount)}
               {goal.target_amount && (
-                <span className="text-[#52525B]"> / {formatGHSCompact(goal.target_amount)}</span>
+                <span className="text-muted-foreground/70"> / {formatGHSCompact(goal.target_amount)}</span>
               )}
             </span>
             <div className="flex items-center gap-2">
@@ -287,7 +287,7 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, on
                 </span>
               )}
               {days_remaining != null && !completed && (
-                <span className="text-[#71717A]">
+                <span className="text-muted-foreground">
                   {days_remaining}d left
                 </span>
               )}
@@ -295,7 +295,7 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, on
           </div>
         </div>
       ) : isPerpetual ? (
-        <div className="flex items-center gap-1.5 text-xs text-[#71717A]">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Repeat className="w-3 h-3" style={{ color: accentColor }} />
           <span>Perpetual · </span>
           <TrendingUp className="w-3 h-3" style={{ color: accentColor }} />
