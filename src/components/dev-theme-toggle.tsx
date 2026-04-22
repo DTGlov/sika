@@ -19,7 +19,7 @@ export function DevThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isLight ? 'dark' : 'light')}
-      className="fixed bottom-4 left-4 z-[200] w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+      className="fixed top-4 right-4 z-[200] w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
       style={{
         backgroundColor: isLight ? '#0A0A0B' : '#FAFAF7',
         color: isLight ? '#FAFAF7' : '#0A0A0B',
