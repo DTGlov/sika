@@ -33,6 +33,7 @@ import {
   ICON_OPTIONS,
 } from "@/components/settings/category-modal";
 import { CardThemePicker } from "@/components/settings/card-theme-picker";
+import { AppearanceSection } from "@/components/settings/appearance-section";
 import type { Category, CardTheme } from "@/types";
 
 const profileSchema = z
@@ -198,6 +199,9 @@ export default function SettingsPage() {
     <div className="max-w-2xl mx-auto pb-24">
       <div className="px-4 pt-6 md:px-8">
         <h1 className="text-2xl font-bold text-[#FAFAFA] mb-6">Settings</h1>
+
+        {/* Appearance */}
+        <AppearanceSection />
 
         {/* Income Sources */}
         <div className="mb-6">
