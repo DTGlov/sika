@@ -30,7 +30,7 @@ export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRin
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: index * 0.1, ease: 'easeOut' }}
-      className="bg-[#141416] border border-[#27272A] rounded-2xl p-4 flex flex-col items-center gap-3 hover:bg-[#1C1C1F] transition-colors"
+      className="bg-card border border-border rounded-2xl p-4 flex flex-col items-center gap-3 hover:bg-muted transition-colors"
     >
       <div className="relative w-20 h-20">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 88 88">
@@ -39,7 +39,7 @@ export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRin
             cy="44"
             r={RADIUS}
             fill="none"
-            stroke="#27272A"
+            style={{ stroke: 'var(--border)' }}
             strokeWidth="6"
           />
           <motion.circle
@@ -64,24 +64,24 @@ export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRin
       </div>
 
       <div className="text-center w-full">
-        <p className="font-semibold text-[#FAFAFA] text-sm mb-0.5" style={{ color: config.color }}>
+        <p className="font-semibold text-sm mb-0.5" style={{ color: config.color }}>
           {config.label}
         </p>
-        <p className="amount text-xs text-[#FAFAFA] font-medium">{formatGHS(spent)}</p>
-        <p className="text-xs text-[#71717A]">of {formatGHS(limit)}</p>
+        <p className="amount text-xs text-foreground font-medium">{formatGHS(spent)}</p>
+        <p className="text-xs text-muted-foreground">of {formatGHS(limit)}</p>
 
         {/* Sinking fund earmarked breakdown — Future bucket only, desktop only */}
         {bucket === 'future' && earmarked != null && earmarked > 0 && (
-          <div className="hidden md:block mt-2 pt-2 border-t border-[#27272A] space-y-1.5 text-xs text-left">
+          <div className="hidden md:block mt-2 pt-2 border-t border-border space-y-1.5 text-xs text-left">
             <div>
-              <div className="text-[#71717A]">Earmarked</div>
-              <div className="text-[#A1A1AA] tabular-nums">{formatGHSCompact(earmarked)}/mo</div>
+              <div className="text-muted-foreground">Earmarked</div>
+              <div className="text-muted-foreground tabular-nums">{formatGHSCompact(earmarked)}/mo</div>
             </div>
             <div>
-              <div style={{ color: limit - earmarked < 0 ? '#F97316' : '#71717A' }}>Uncommitted</div>
+              <div style={{ color: limit - earmarked < 0 ? '#F97316' : 'var(--muted-foreground)' }}>Uncommitted</div>
               <div
                 className="tabular-nums"
-                style={{ color: limit - earmarked < 0 ? '#F97316' : '#A1A1AA' }}
+                style={{ color: limit - earmarked < 0 ? '#F97316' : 'var(--muted-foreground)' }}
               >
                 {formatGHSCompact(limit - earmarked)}/mo
               </div>

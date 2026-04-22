@@ -267,12 +267,12 @@ export function CycleCard({
       </div>
 
       {/* Supporting stats */}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#71717A] tabular-nums px-1">
-        <span>Received <span className="text-[#A1A1AA]">{formatGHSCompact(received)}</span></span>
-        <span className="text-[#3F3F46]">·</span>
-        <span>Spent <span className="text-[#A1A1AA]">{formatGHSCompact(spent)}</span></span>
-        <span className="text-[#3F3F46]">·</span>
-        <span>Expected <span className="text-[#A1A1AA]">{formatGHSCompact(expected)}/mo</span></span>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground tabular-nums px-1">
+        <span>Received <span className="text-muted-foreground">{formatGHSCompact(received)}</span></span>
+        <span className="text-muted-foreground/60">·</span>
+        <span>Spent <span className="text-muted-foreground">{formatGHSCompact(spent)}</span></span>
+        <span className="text-muted-foreground/60">·</span>
+        <span>Expected <span className="text-muted-foreground">{formatGHSCompact(expected)}/mo</span></span>
       </div>
     </div>
   );
