@@ -1,0 +1,173 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { TrendingUp, Flame, Eye, Target, ArrowRight, Sparkles, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
+import type { WeeklyCard, WeeklyAccent } from '@/types/weekly';
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  TrendingUp, Flame, Eye, Target, ArrowRight, Sparkles,
+};
+
+const ACCENT_CLASS: Record<WeeklyAccent, string> = {
+  green: 'text-[#00D9A3]',
+  amber: 'text-[#FBBF24]',
+  red: 'text-[#F43F5E]',
+  blue: 'text-[#60A5FA]',
+  neutral: 'text-[#FAFAFA]',
+};
+
+const ACCENT_BG: Record<WeeklyAccent, string> = {
+  green: 'bg-[#00D9A3]/10 border-[#00D9A3]/20',
+  amber: 'bg-[#FBBF24]/10 border-[#FBBF24]/20',
+  red: 'bg-[#F43F5E]/10 border-[#F43F5E]/20',
+  blue: 'bg-[#60A5FA]/10 border-[#60A5FA]/20',
+  neutral: 'bg-[#1C1C1F] border-[#27272A]',
+};
+
+interface WeeklyCardItemProps {
+  card: WeeklyCard;
+  index: number;
+}
+
+function WeeklyCardItem({ card, index }: WeeklyCardItemProps) {
+  const accent: WeeklyAccent = card.accent_color ?? 'neutral';
+  const Icon = card.icon ? (ICON_MAP[card.icon] ?? Sparkles) : Sparkles;
+  const isHeadline = card.type === 'headline';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: 'easeOut', delay: index * 0.08 }}
+      className={`rounded-3xl border p-6 ${ACCENT_BG[accent]}`}
+    >
+      {isHeadline ? (
+        <div className="text-center space-y-3">
+          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mx-auto ${ACCENT_BG[accent]}`}>
+            <Icon className={`w-5 h-5 ${ACCENT_CLASS[accent]}`} />
+          </div>
+          <p className={`text-2xl font-bold leading-tight ${ACCENT_CLASS[accent]} amount`}>
+            {card.headline}
+          </p>
+          <p className="text-[#A1A1AA] text-sm leading-relaxed">{card.body}</p>
+          {card.stat && (
+            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#141416] border border-[#27272A]">
+              <span className="text-[#71717A] text-xs">{card.stat.label}</span>
+              <span className={`text-sm font-bold amount ${ACCENT_CLASS[accent]}`}>{card.stat.value}</span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${ACCENT_BG[accent]}`}>
+              <Icon className={`w-4 h-4 ${ACCENT_CLASS[accent]}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={`text-base font-bold leading-snug ${ACCENT_CLASS[accent]}`}>
+                {card.headline}
+              </p>
+            </div>
+          </div>
+          <p className="text-[#A1A1AA] text-sm leading-relaxed">{card.body}</p>
+          {card.stat && (
+            <div className="flex items-center gap-2 pt-1">
+              <span className="text-[#71717A] text-xs">{card.stat.label}</span>
+              <span className={`text-sm font-bold amount ${ACCENT_CLASS[accent]}`}>{card.stat.value}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+interface WeeklyRecapProps {
+  cards: WeeklyCard[];
+  recapId: string;
+  weekStart: string;
+  weekEnd: string;
+}
+
+export function WeeklyRecap({ cards, recapId, weekStart, weekEnd }: WeeklyRecapProps) {
+  const [shared, setShared] = useState(false);
+  const viewedRef = useRef(false);
+
+  useEffect(() => {
+    if (viewedRef.current) return;
+    viewedRef.current = true;
+    fetch('/api/weekly/view', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recap_id: recapId }),
+    });
+  }, [recapId]);
+
+  const formatWeekRange = () => {
+    const s = new Date(weekStart);
+    const e = new Date(weekEnd);
+    const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+    return `${s.toLocaleDateString('en-GB', opts)} — ${e.toLocaleDateString('en-GB', opts)}`;
+  };
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/weekly/share/${recapId}`;
+    const shareText = `My week in money 🔥 — tracked with Sika`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'My Sika Week', text: shareText, url: shareUrl });
+        await fetch('/api/weekly/share', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recap_id: recapId }),
+        });
+        setShared(true);
+      } catch {
+        // user dismissed
+      }
+    } else {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success('Link copied');
+      await fetch('/api/weekly/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recap_id: recapId }),
+      });
+      setShared(true);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-[#71717A] text-xs text-center pb-1"
+      >
+        {formatWeekRange()}
+      </motion.p>
+
+      {cards.map((card, i) => (
+        <WeeklyCardItem key={card.id} card={card} index={i} />
+      ))}
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: cards.length * 0.08 + 0.1 }}
+        className="pt-2"
+      >
+        <button
+          onClick={handleShare}
+          className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-[#141416] border border-[#27272A] text-[#A1A1AA] hover:border-[#00D9A3]/40 hover:text-[#00D9A3] transition-colors text-sm font-medium"
+        >
+          <Share2 className="w-4 h-4" />
+          {shared ? 'Shared ✓' : 'Share my week'}
+        </button>
+      </motion.div>
+    </div>
+  );
+}
