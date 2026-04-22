@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { useTransition, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Home, Receipt, Wallet, Target, RefreshCw, Settings, TrendingUp } from 'lucide-react';
 
@@ -15,7 +15,20 @@ const NAV_ITEMS = [
 ] as const;
 
 export function SideRail() {
+  const router = useRouter();
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  function handleNav(href: string) {
+    if (pathname === href || pathname.startsWith(href + '/')) return;
+    setPendingHref(href);
+    startTransition(() => {
+      router.push(href);
+    });
+  }
+
+  const activePending = isPending ? pendingHref : null;
 
   return (
     <nav
@@ -35,15 +48,18 @@ export function SideRail() {
       {/* Nav items */}
       <div className="flex-1 py-4 space-y-0.5 px-2 overflow-y-auto">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + '?') || pathname.startsWith(href + '/');
+          const isActive = pathname === href || pathname.startsWith(href + '?') || pathname.startsWith(href + '/');
+          const showActive = isActive || activePending === href;
+
           return (
-            <Link
+            <button
               key={href}
-              href={href}
-              aria-current={active ? 'page' : undefined}
-              className="relative flex items-center gap-3 px-3 py-3 rounded-xl transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              onClick={() => handleNav(href)}
+              aria-current={isActive ? 'page' : undefined}
+              style={{ touchAction: 'manipulation' }}
+              className="relative w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
-              {active && (
+              {showActive && (
                 <>
                   <motion.div
                     layoutId="side-nav-bg"
@@ -54,15 +70,15 @@ export function SideRail() {
                 </>
               )}
               <Icon
-                className={`w-5 h-5 shrink-0 relative z-10 transition-colors ${active ? 'text-[#00D9A3]' : 'text-muted-foreground'}`}
+                className={`w-5 h-5 shrink-0 relative z-10 transition-colors ${showActive ? 'text-[#00D9A3]' : 'text-muted-foreground'}`}
                 aria-hidden
               />
               <span
-                className={`text-sm font-medium relative z-10 transition-colors hidden lg:block ${active ? 'text-foreground' : 'text-muted-foreground'}`}
+                className={`text-sm font-medium relative z-10 transition-colors hidden lg:block ${showActive ? 'text-foreground' : 'text-muted-foreground'}`}
               >
                 {label}
               </span>
-            </Link>
+            </button>
           );
         })}
       </div>
