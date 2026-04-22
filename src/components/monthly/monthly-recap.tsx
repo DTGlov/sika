@@ -15,7 +15,7 @@ const ACCENT_CLASS: Record<MonthlyAccent, string> = {
   amber: 'text-[#FBBF24]',
   red: 'text-[#F43F5E]',
   blue: 'text-[#60A5FA]',
-  neutral: 'text-[#FAFAFA]',
+  neutral: 'text-foreground',
 };
 
 const ACCENT_BG: Record<MonthlyAccent, string> = {
@@ -23,7 +23,7 @@ const ACCENT_BG: Record<MonthlyAccent, string> = {
   amber: 'bg-[#FBBF24]/10 border-[#FBBF24]/20',
   red: 'bg-[#F43F5E]/10 border-[#F43F5E]/20',
   blue: 'bg-[#60A5FA]/10 border-[#60A5FA]/20',
-  neutral: 'bg-[#1C1C1F] border-[#27272A]',
+  neutral: 'bg-muted border-border',
 };
 
 interface MonthlyCardItemProps {
@@ -51,10 +51,10 @@ function MonthlyCardItem({ card, index }: MonthlyCardItemProps) {
           <p className={`text-2xl font-bold leading-tight ${ACCENT_CLASS[accent]} amount`}>
             {card.headline}
           </p>
-          <p className="text-[#A1A1AA] text-sm leading-relaxed">{card.body}</p>
+          <p className="text-muted-foreground text-sm leading-relaxed">{card.body}</p>
           {card.stat && (
-            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#141416] border border-[#27272A]">
-              <span className="text-[#71717A] text-xs">{card.stat.label}</span>
+            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card border border-border">
+              <span className="text-muted-foreground text-xs">{card.stat.label}</span>
               <span className={`text-sm font-bold amount ${ACCENT_CLASS[accent]}`}>{card.stat.value}</span>
             </div>
           )}
@@ -71,10 +71,10 @@ function MonthlyCardItem({ card, index }: MonthlyCardItemProps) {
               </p>
             </div>
           </div>
-          <p className="text-[#A1A1AA] text-sm leading-relaxed">{card.body}</p>
+          <p className="text-muted-foreground text-sm leading-relaxed">{card.body}</p>
           {card.stat && (
             <div className="flex items-center gap-2 pt-1">
-              <span className="text-[#71717A] text-xs">{card.stat.label}</span>
+              <span className="text-muted-foreground text-xs">{card.stat.label}</span>
               <span className={`text-sm font-bold amount ${ACCENT_CLASS[accent]}`}>{card.stat.value}</span>
             </div>
           )}
@@ -145,7 +145,7 @@ export function MonthlyRecap({ cards, recapId, monthStart, monthEnd }: MonthlyRe
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="text-[#71717A] text-xs text-center pb-1"
+        className="text-muted-foreground text-xs text-center pb-1"
       >
         {formatMonthRange()}
       </motion.p>
@@ -162,7 +162,7 @@ export function MonthlyRecap({ cards, recapId, monthStart, monthEnd }: MonthlyRe
       >
         <button
           onClick={handleShare}
-          className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-[#141416] border border-[#27272A] text-[#A1A1AA] hover:border-[#00D9A3]/40 hover:text-[#00D9A3] transition-colors text-sm font-medium"
+          className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-card border border-border text-muted-foreground hover:border-[#00D9A3]/40 hover:text-[#00D9A3] transition-colors text-sm font-medium"
         >
           <Share2 className="w-4 h-4" />
           {shared ? 'Shared ✓' : 'Share my month'}

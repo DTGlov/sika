@@ -18,7 +18,7 @@ function StoryCard({ story }: { story: DailyStory }) {
   const label = CATEGORY_LABELS[story.category];
 
   return (
-    <div className="bg-[#141416] border border-[#27272A] rounded-2xl px-4 py-4 space-y-2">
+    <div className="bg-card border border-border rounded-2xl px-4 py-4 space-y-2">
       <p
         className="text-[10px] font-bold uppercase tracking-wider"
         style={{ color }}
@@ -27,10 +27,10 @@ function StoryCard({ story }: { story: DailyStory }) {
       </p>
       <div className="flex items-start gap-2">
         <span className="text-xl leading-none mt-0.5 shrink-0">{story.emoji}</span>
-        <h3 className="text-[#FAFAFA] font-semibold text-sm leading-snug">{story.title}</h3>
+        <h3 className="text-foreground font-semibold text-sm leading-snug">{story.title}</h3>
       </div>
-      <p className="text-[#A1A1AA] text-sm leading-relaxed">{story.summary}</p>
-      <p className="text-[#52525B] text-xs">— {story.source_name}</p>
+      <p className="text-muted-foreground text-sm leading-relaxed">{story.summary}</p>
+      <p className="text-muted-foreground/70 text-xs">— {story.source_name}</p>
     </div>
   );
 }
@@ -103,16 +103,16 @@ export default function DailyPage() {
   return (
     <div className="max-w-2xl mx-auto pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#0A0A0B] border-b border-[#141416]">
+      <div className="sticky top-0 z-10 bg-background border-b border-card">
         <div className="flex items-center gap-3 px-4 h-14">
           <button
             onClick={() => router.back()}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             aria-label="Go back"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-[#FAFAFA] font-semibold text-base">Sika Daily</h1>
+          <h1 className="text-foreground font-semibold text-base">Sika Daily</h1>
         </div>
       </div>
 
@@ -121,20 +121,20 @@ export default function DailyPage() {
           <div className="space-y-4">
             {/* Header skeleton */}
             <div className="space-y-2">
-              <div className="h-4 w-48 rounded bg-[#141416] animate-pulse" />
+              <div className="h-4 w-48 rounded bg-card animate-pulse" />
             </div>
 
             {/* Story card skeletons */}
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="rounded-2xl bg-[#141416] border border-[#27272A] px-4 py-4 space-y-3">
-                <div className="h-2.5 w-20 rounded bg-[#1C1C1F] animate-pulse" />
-                <div className="h-4 w-3/4 rounded bg-[#1C1C1F] animate-pulse" />
+              <div key={i} className="rounded-2xl bg-card border border-border px-4 py-4 space-y-3">
+                <div className="h-2.5 w-20 rounded bg-muted animate-pulse" />
+                <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
                 <div className="space-y-2">
-                  <div className="h-3 w-full rounded bg-[#1C1C1F] animate-pulse" />
-                  <div className="h-3 w-5/6 rounded bg-[#1C1C1F] animate-pulse" />
-                  <div className="h-3 w-2/3 rounded bg-[#1C1C1F] animate-pulse" />
+                  <div className="h-3 w-full rounded bg-muted animate-pulse" />
+                  <div className="h-3 w-5/6 rounded bg-muted animate-pulse" />
+                  <div className="h-3 w-2/3 rounded bg-muted animate-pulse" />
                 </div>
-                <div className="h-2.5 w-24 rounded bg-[#1C1C1F] animate-pulse" />
+                <div className="h-2.5 w-24 rounded bg-muted animate-pulse" />
               </div>
             ))}
           </div>
@@ -142,7 +142,7 @@ export default function DailyPage() {
           <>
             {/* Date + fallback badge */}
             <div className="space-y-1">
-              <p className="text-[#71717A] text-sm">{dateLabel}</p>
+              <p className="text-muted-foreground text-sm">{dateLabel}</p>
               {digest?.is_fallback && (
                 <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#FBBF24]/10 text-[#FBBF24] uppercase tracking-wider">
                   Catch up from yesterday
@@ -165,14 +165,14 @@ export default function DailyPage() {
         {!isLoading && digest && !isRead && (
           <button
             onClick={markRead}
-            className="w-full py-3 rounded-2xl border border-[#27272A] text-sm text-[#71717A] hover:text-[#FAFAFA] hover:border-[#3F3F46] transition-colors"
+            className="w-full py-3 rounded-2xl border border-border text-sm text-muted-foreground hover:text-foreground hover:border-border transition-colors"
           >
             Mark as read
           </button>
         )}
 
         {!isLoading && digest && isRead && (
-          <p className="text-center text-xs text-[#3F3F46] py-2">
+          <p className="text-center text-xs text-muted-foreground/60 py-2">
             ✓ Read
           </p>
         )}
