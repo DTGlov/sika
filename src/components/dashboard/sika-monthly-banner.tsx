@@ -5,14 +5,23 @@ import { useRouter } from 'next/navigation';
 import { ChevronRight, X } from 'lucide-react';
 
 interface SikaMonthlyBannerProps {
-  recapId: string; // reserved for future deep-link
+  recapId: string;
 }
 
-export function SikaMonthlyBanner({ recapId: _recapId }: SikaMonthlyBannerProps) {
+export function SikaMonthlyBanner({ recapId }: SikaMonthlyBannerProps) {
   const router = useRouter();
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed) return null;
+
+  function handleDismiss() {
+    setDismissed(true);
+    fetch('/api/monthly/dismiss', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recap_id: recapId }),
+    }).catch(() => {});
+  }
 
   return (
     <div className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-[#141416] to-[#1C1C1F] border border-[#FBBF24]/20 shadow-[0_0_20px_rgba(251,191,36,0.06)]">
@@ -35,7 +44,7 @@ export function SikaMonthlyBanner({ recapId: _recapId }: SikaMonthlyBannerProps)
           <ChevronRight className="w-4 h-4" />
         </button>
         <button
-          onClick={() => setDismissed(true)}
+          onClick={handleDismiss}
           className="text-[#52525B] hover:text-[#71717A] transition-colors p-1"
           aria-label="Dismiss"
         >

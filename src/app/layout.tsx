@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import { PwaRegister } from '@/components/pwa-register';
+import { PwaSplash } from '@/components/pwa-splash';
 import './globals.css';
 
 const geistSans = Geist({
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full dark`}
     >
       <body className="min-h-full antialiased">
+        <PwaSplash />
         {children}
         <Toaster richColors position="top-center" />
         <PwaRegister />
