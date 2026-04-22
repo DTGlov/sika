@@ -36,7 +36,7 @@ export function CardThemePicker({ currentTheme }: CardThemePickerProps) {
   async function handleSelect(themeId: CardTheme) {
     if (themeId === selected || !user) return;
     const prev = selected;
-    setSelected(themeId); // optimistic
+    setSelected(themeId);
     setSaving(themeId);
 
     const { error } = await supabase
@@ -60,13 +60,12 @@ export function CardThemePicker({ currentTheme }: CardThemePickerProps) {
   const otherThemes = THEME_ORDER.slice(1);
 
   return (
-    <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-      <h2 className="text-[#FAFAFA] font-semibold mb-1">Card Style</h2>
-      <p className="text-[#71717A] text-xs mb-4">
+    <div className="bg-card border border-border rounded-2xl p-5">
+      <h2 className="text-foreground font-semibold mb-1">Card Style</h2>
+      <p className="text-muted-foreground text-xs mb-4">
         Choose how your month card looks on the dashboard.
       </p>
 
-      {/* Classic Gold (default — always at top) */}
       <ThemeRow
         themeId={defaultTheme}
         selected={selected}
@@ -76,8 +75,7 @@ export function CardThemePicker({ currentTheme }: CardThemePickerProps) {
         isDefault
       />
 
-      {/* Divider + other themes */}
-      <p className="text-[#52525B] text-xs font-medium uppercase tracking-wider mt-5 mb-3">
+      <p className="text-muted-foreground/70 text-xs font-medium uppercase tracking-wider mt-5 mb-3">
         Or try
       </p>
 
@@ -120,21 +118,20 @@ function ThemeRow({
     <button
       onClick={() => onSelect(themeId)}
       disabled={isSaving}
-      className="w-full text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3] rounded-2xl"
+      className="w-full text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-2xl"
     >
       <div
         className="border rounded-2xl p-3 transition-colors"
         style={{
-          borderColor: isSelected ? '#00D9A3' : '#27272A',
+          borderColor: isSelected ? '#00D9A3' : 'var(--border)',
           background: isSelected ? 'rgba(0,217,163,0.04)' : 'transparent',
         }}
       >
-        {/* Header row: name + badge */}
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-[#FAFAFA]">{config.name}</span>
+            <span className="text-sm font-medium text-foreground">{config.name}</span>
             {isDefault && (
-              <span className="text-[10px] font-medium text-[#71717A] bg-[#27272A] rounded px-1.5 py-0.5">
+              <span className="text-[10px] font-medium text-muted-foreground bg-muted rounded px-1.5 py-0.5">
                 Default
               </span>
             )}
@@ -150,7 +147,6 @@ function ThemeRow({
           </div>
         </div>
 
-        {/* Mini card preview */}
         <div className="w-[200px]">
           <CardSurface
             themeId={themeId}
@@ -161,8 +157,7 @@ function ThemeRow({
           />
         </div>
 
-        {/* Description */}
-        <p className="mt-2 text-[#71717A] text-xs">{config.description}</p>
+        <p className="mt-2 text-muted-foreground text-xs">{config.description}</p>
       </div>
     </button>
   );
