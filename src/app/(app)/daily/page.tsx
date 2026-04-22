@@ -42,6 +42,7 @@ export default function DailyPage() {
   useProfile();
 
   const [digest, setDigest] = useState<DailyDigest | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isRead, setIsRead] = useState(false);
   const autoReadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -54,6 +55,7 @@ export default function DailyPage() {
       .single()
       .then(({ data }) => {
         if (data) setDigest(data as DailyDigest);
+        setIsLoading(false);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -115,33 +117,52 @@ export default function DailyPage() {
       </div>
 
       <div className="px-4 md:px-8 pt-6 space-y-4">
-        {/* Date + fallback badge */}
-        <div className="space-y-1">
-          <p className="text-[#71717A] text-sm">{dateLabel}</p>
-          {digest?.is_fallback && (
-            <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#FBBF24]/10 text-[#FBBF24] uppercase tracking-wider">
-              Catch up from yesterday
-            </span>
-          )}
-        </div>
+        {isLoading ? (
+          <div className="space-y-4">
+            {/* Header skeleton */}
+            <div className="space-y-2">
+              <div className="h-4 w-48 rounded bg-[#141416] animate-pulse" />
+            </div>
 
-        {/* Stories */}
-        {digest ? (
-          <div className="space-y-3">
-            {digest.stories.map((story: DailyStory) => (
-              <StoryCard key={story.id} story={story} />
+            {/* Story card skeletons */}
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-2xl bg-[#141416] border border-[#27272A] px-4 py-4 space-y-3">
+                <div className="h-2.5 w-20 rounded bg-[#1C1C1F] animate-pulse" />
+                <div className="h-4 w-3/4 rounded bg-[#1C1C1F] animate-pulse" />
+                <div className="space-y-2">
+                  <div className="h-3 w-full rounded bg-[#1C1C1F] animate-pulse" />
+                  <div className="h-3 w-5/6 rounded bg-[#1C1C1F] animate-pulse" />
+                  <div className="h-3 w-2/3 rounded bg-[#1C1C1F] animate-pulse" />
+                </div>
+                <div className="h-2.5 w-24 rounded bg-[#1C1C1F] animate-pulse" />
+              </div>
             ))}
           </div>
         ) : (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-32 bg-[#141416] rounded-2xl animate-pulse" />
-            ))}
-          </div>
+          <>
+            {/* Date + fallback badge */}
+            <div className="space-y-1">
+              <p className="text-[#71717A] text-sm">{dateLabel}</p>
+              {digest?.is_fallback && (
+                <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#FBBF24]/10 text-[#FBBF24] uppercase tracking-wider">
+                  Catch up from yesterday
+                </span>
+              )}
+            </div>
+
+            {/* Stories */}
+            {digest && (
+              <div className="space-y-3">
+                {digest.stories.map((story: DailyStory) => (
+                  <StoryCard key={story.id} story={story} />
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {/* Mark as read button */}
-        {digest && !isRead && (
+        {!isLoading && digest && !isRead && (
           <button
             onClick={markRead}
             className="w-full py-3 rounded-2xl border border-[#27272A] text-sm text-[#71717A] hover:text-[#FAFAFA] hover:border-[#3F3F46] transition-colors"
@@ -150,7 +171,7 @@ export default function DailyPage() {
           </button>
         )}
 
-        {digest && isRead && (
+        {!isLoading && digest && isRead && (
           <p className="text-center text-xs text-[#3F3F46] py-2">
             ✓ Read
           </p>
