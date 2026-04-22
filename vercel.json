@@ -1,16 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/cron/generate-digest",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/monthly-generate",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/insights-generate",
-      "schedule": "30 0 * * *"
-    }
-  ]
-}
+{}
