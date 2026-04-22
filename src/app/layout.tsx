@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import { PwaRegister } from '@/components/pwa-register';
+import { createClient } from '@/lib/supabase/server';
 import './globals.css';
 
 const geistSans = Geist({
@@ -39,13 +40,37 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  let initialResolvedTheme: 'light' | 'dark' = 'dark';
+
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('theme_preference')
+        .eq('id', user.id)
+        .single();
+
+      const pref = profile?.theme_preference;
+      if (pref === 'light') initialResolvedTheme = 'light';
+      else if (pref === 'dark') initialResolvedTheme = 'dark';
+      // 'auto' or null stays 'dark' — client flips to OS preference on mount
+    }
+  } catch {
+    // default to dark
+  }
+
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full`}
+      data-theme={initialResolvedTheme}
+      className={`${geistSans.variable} ${geistMono.variable} h-full`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full bg-[#0A0A0B] text-[#FAFAFA] antialiased">
+      <body className="min-h-full antialiased" style={{ background: 'var(--bg-page)', color: 'var(--text-fg)' }}>
         {children}
         <Toaster richColors position="top-center" />
         <PwaRegister />
