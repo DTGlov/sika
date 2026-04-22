@@ -74,6 +74,7 @@ function DashboardContent() {
   const [goalProgresses, setGoalProgresses] = useState<GoalProgress[]>([]);
   const [todayDigest, setTodayDigest] = useState<DailyDigest | null>(null);
   const [digestRead, setDigestRead] = useState(false);
+  const [digestLoading, setDigestLoading] = useState(true);
 
   useEffect(() => {
     if (profile && profile.monthly_income === 0 && incomeSources.length === 0) {
@@ -91,7 +92,7 @@ function DashboardContent() {
       .eq('digest_date', today)
       .single()
       .then(({ data: digest }) => {
-        if (!digest) return;
+        if (!digest) { setDigestLoading(false); return; }
         setTodayDigest(digest as DailyDigest);
         supabase
           .from('user_daily_reads')
@@ -99,7 +100,10 @@ function DashboardContent() {
           .eq('user_id', user.id)
           .eq('digest_date', today)
           .single()
-          .then(({ data: read }) => setDigestRead(!!read));
+          .then(({ data: read }) => {
+            setDigestRead(!!read);
+            setDigestLoading(false);
+          });
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -231,10 +235,21 @@ function DashboardContent() {
           </button>
         </div>
 
-        {/* Sika Daily banner — shown when unread digest exists */}
-        {todayDigest && !digestRead && (
+        {/* Sika Daily banner — skeleton while loading, banner/nothing once resolved */}
+        {digestLoading ? (
+          <div className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-[#141416] to-[#1C1C1F] border border-[#00D9A3]/10">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-[#1C1C1F] animate-pulse" />
+              <div className="space-y-1.5">
+                <div className="h-3.5 w-32 rounded bg-[#1C1C1F] animate-pulse" />
+                <div className="h-3 w-24 rounded bg-[#1C1C1F] animate-pulse" />
+              </div>
+            </div>
+            <div className="w-4 h-4 rounded bg-[#1C1C1F] animate-pulse" />
+          </div>
+        ) : todayDigest && !digestRead ? (
           <SikaDailyBanner digest={todayDigest} />
-        )}
+        ) : null}
 
         {/* Virtual cycle card */}
         <div className="w-full md:max-w-[440px] md:mx-auto">
