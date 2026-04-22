@@ -1,0 +1,27 @@
+'use client';
+
+import { useState } from 'react';
+import { ShoppingBag } from 'lucide-react';
+import { DecisionSheet } from './decision-sheet';
+
+export function ShouldIBuyButton() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="w-full bg-[#141416] border border-[#27272A] rounded-2xl px-4 py-3 flex items-center gap-3 hover:bg-[#1C1C1F] hover:border-[#3F3F46] transition-colors text-left"
+      >
+        <div className="w-9 h-9 rounded-xl bg-[#00D9A3]/10 flex items-center justify-center shrink-0">
+          <ShoppingBag className="w-4 h-4 text-[#00D9A3]" />
+        </div>
+        <div className="flex-1">
+          <p className="text-[#FAFAFA] text-sm font-semibold">Should I buy it?</p>
+          <p className="text-[#71717A] text-xs">Let Sika run the math</p>
+        </div>
+      </button>
+      {open && <DecisionSheet onClose={() => setOpen(false)} />}
+    </>
+  );
+}

@@ -20,6 +20,7 @@ import { HealthRow } from '@/components/dashboard/health-row';
 import { SikaDailyBanner } from '@/components/dashboard/sika-daily-banner';
 import { SikaMonthlyBanner } from '@/components/dashboard/sika-monthly-banner';
 import { InsightStrip } from '@/components/dashboard/insight-strip';
+import { ShouldIBuyButton } from '@/components/decision/should-i-buy-button';
 import { SundayRecapCard } from '@/components/dashboard/sunday-recap-card';
 import { CycleCard } from '@/components/dashboard/cycle-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -322,6 +323,9 @@ function DashboardContent() {
             </>
           )}
         </div>
+
+        {/* Should I buy it? */}
+        <ShouldIBuyButton />
 
         {/* Sunday recap — only on Sundays */}
         <SundayRecapCard />
