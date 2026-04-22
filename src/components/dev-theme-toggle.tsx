@@ -12,7 +12,6 @@ export function DevThemeToggle() {
     setMounted(true);
   }, []);
 
-  if (process.env.NODE_ENV !== 'development') return null;
   if (!mounted) return null;
 
   const isLight = theme === 'light';
