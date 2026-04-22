@@ -1,24 +1,24 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { WeeklyRecap } from '@/components/weekly/weekly-recap';
-import type { WeeklyRecap as WeeklyRecapType } from '@/types/weekly';
+import { MonthlyRecap } from '@/components/monthly/monthly-recap';
+import type { MonthlyRecap as MonthlyRecapType } from '@/types/monthly';
 
-export default async function WeeklyPage() {
+export default async function MonthlyPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  let recap: WeeklyRecapType | null = null;
+  let recap: MonthlyRecapType | null = null;
 
   if (user) {
     const { data } = await supabase
-      .from('weekly_recaps')
+      .from('monthly_recaps')
       .select('*')
       .eq('user_id', user.id)
-      .order('week_start', { ascending: false })
+      .order('month_start', { ascending: false })
       .limit(1)
       .single();
-    recap = data as WeeklyRecapType | null;
+    recap = data as MonthlyRecapType | null;
   }
 
   return (
@@ -30,22 +30,22 @@ export default async function WeeklyPage() {
         >
           <ArrowLeft className="w-4 h-4" />
         </Link>
-        <h1 className="text-xl font-bold text-[#FAFAFA]">Your Week</h1>
+        <h1 className="text-xl font-bold text-[#FAFAFA]">Your Month</h1>
       </div>
 
       {recap ? (
-        <WeeklyRecap
+        <MonthlyRecap
           cards={recap.recap_data}
           recapId={recap.id}
-          weekStart={recap.week_start}
-          weekEnd={recap.week_end}
+          monthStart={recap.month_start}
+          monthEnd={recap.month_end}
         />
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center space-y-3">
           <div className="text-4xl">🔥</div>
-          <p className="text-[#FAFAFA] font-semibold">Your first recap drops Friday</p>
+          <p className="text-[#FAFAFA] font-semibold">Your first recap drops at cycle end</p>
           <p className="text-[#71717A] text-sm max-w-xs">
-            Log your transactions this week and Sika will write your money story. Check back Friday evening.
+            Log your transactions this month and Sika will write your money story on the last day of your budget cycle.
           </p>
         </div>
       )}

@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, Flame, Eye, Target, ArrowRight, Sparkles, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { WeeklyCard, WeeklyAccent } from '@/types/weekly';
+import type { MonthlyCard, MonthlyAccent } from '@/types/monthly';
 
 const ICON_MAP: Record<string, React.ElementType> = {
   TrendingUp, Flame, Eye, Target, ArrowRight, Sparkles,
 };
 
-const ACCENT_CLASS: Record<WeeklyAccent, string> = {
+const ACCENT_CLASS: Record<MonthlyAccent, string> = {
   green: 'text-[#00D9A3]',
   amber: 'text-[#FBBF24]',
   red: 'text-[#F43F5E]',
@@ -18,7 +18,7 @@ const ACCENT_CLASS: Record<WeeklyAccent, string> = {
   neutral: 'text-[#FAFAFA]',
 };
 
-const ACCENT_BG: Record<WeeklyAccent, string> = {
+const ACCENT_BG: Record<MonthlyAccent, string> = {
   green: 'bg-[#00D9A3]/10 border-[#00D9A3]/20',
   amber: 'bg-[#FBBF24]/10 border-[#FBBF24]/20',
   red: 'bg-[#F43F5E]/10 border-[#F43F5E]/20',
@@ -26,13 +26,13 @@ const ACCENT_BG: Record<WeeklyAccent, string> = {
   neutral: 'bg-[#1C1C1F] border-[#27272A]',
 };
 
-interface WeeklyCardItemProps {
-  card: WeeklyCard;
+interface MonthlyCardItemProps {
+  card: MonthlyCard;
   index: number;
 }
 
-function WeeklyCardItem({ card, index }: WeeklyCardItemProps) {
-  const accent: WeeklyAccent = card.accent_color ?? 'neutral';
+function MonthlyCardItem({ card, index }: MonthlyCardItemProps) {
+  const accent: MonthlyAccent = card.accent_color ?? 'neutral';
   const Icon = card.icon ? (ICON_MAP[card.icon] ?? Sparkles) : Sparkles;
   const isHeadline = card.type === 'headline';
 
@@ -84,42 +84,42 @@ function WeeklyCardItem({ card, index }: WeeklyCardItemProps) {
   );
 }
 
-interface WeeklyRecapProps {
-  cards: WeeklyCard[];
+interface MonthlyRecapProps {
+  cards: MonthlyCard[];
   recapId: string;
-  weekStart: string;
-  weekEnd: string;
+  monthStart: string;
+  monthEnd: string;
 }
 
-export function WeeklyRecap({ cards, recapId, weekStart, weekEnd }: WeeklyRecapProps) {
+export function MonthlyRecap({ cards, recapId, monthStart, monthEnd }: MonthlyRecapProps) {
   const [shared, setShared] = useState(false);
   const viewedRef = useRef(false);
 
   useEffect(() => {
     if (viewedRef.current) return;
     viewedRef.current = true;
-    fetch('/api/weekly/view', {
+    fetch('/api/monthly/view', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ recap_id: recapId }),
     });
   }, [recapId]);
 
-  const formatWeekRange = () => {
-    const s = new Date(weekStart);
-    const e = new Date(weekEnd);
+  const formatMonthRange = () => {
+    const s = new Date(monthStart);
+    const e = new Date(monthEnd);
     const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
     return `${s.toLocaleDateString('en-GB', opts)} — ${e.toLocaleDateString('en-GB', opts)}`;
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/weekly/share/${recapId}`;
-    const shareText = `My week in money 🔥 — tracked with Sika`;
+    const shareUrl = `${window.location.origin}/monthly-share/${recapId}`;
+    const shareText = `My month in money 🔥 — tracked with Sika`;
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'My Sika Week', text: shareText, url: shareUrl });
-        await fetch('/api/weekly/share', {
+        await navigator.share({ title: 'My Sika Month', text: shareText, url: shareUrl });
+        await fetch('/api/monthly/share', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ recap_id: recapId }),
@@ -131,7 +131,7 @@ export function WeeklyRecap({ cards, recapId, weekStart, weekEnd }: WeeklyRecapP
     } else {
       await navigator.clipboard.writeText(shareUrl);
       toast.success('Link copied');
-      await fetch('/api/weekly/share', {
+      await fetch('/api/monthly/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ recap_id: recapId }),
@@ -147,11 +147,11 @@ export function WeeklyRecap({ cards, recapId, weekStart, weekEnd }: WeeklyRecapP
         animate={{ opacity: 1 }}
         className="text-[#71717A] text-xs text-center pb-1"
       >
-        {formatWeekRange()}
+        {formatMonthRange()}
       </motion.p>
 
       {cards.map((card, i) => (
-        <WeeklyCardItem key={card.id} card={card} index={i} />
+        <MonthlyCardItem key={card.id} card={card} index={i} />
       ))}
 
       <motion.div
@@ -165,7 +165,7 @@ export function WeeklyRecap({ cards, recapId, weekStart, weekEnd }: WeeklyRecapP
           className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-[#141416] border border-[#27272A] text-[#A1A1AA] hover:border-[#00D9A3]/40 hover:text-[#00D9A3] transition-colors text-sm font-medium"
         >
           <Share2 className="w-4 h-4" />
-          {shared ? 'Shared ✓' : 'Share my week'}
+          {shared ? 'Shared ✓' : 'Share my month'}
         </button>
       </motion.div>
     </div>

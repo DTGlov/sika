@@ -7,10 +7,10 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { data } = await supabase
-    .from('weekly_recaps')
+    .from('monthly_recaps')
     .select('*')
     .eq('user_id', user.id)
-    .order('week_start', { ascending: false })
+    .order('month_start', { ascending: false })
     .limit(1)
     .single();
 

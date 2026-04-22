@@ -1,11 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export type WeekContext = {
+export type MonthContext = {
   user: {
     name: string;
     monthly_income: number;
   };
-  week: {
+  month: {
     start: string;
     end: string;
     total_in: number;
@@ -23,7 +23,7 @@ export type WeekContext = {
     bucket: string;
     total: number;
     txn_count: number;
-    delta_vs_prev_week: number;
+    delta_vs_prev_month: number;
   }>;
   goals: Array<{
     name: string;
@@ -34,9 +34,9 @@ export type WeekContext = {
   }>;
   streak: {
     current_days: number;
-    logged_this_week: number;
+    logged_this_month: number;
   };
-  prev_week: {
+  prev_month: {
     total_out: number;
     by_bucket_out: { needs: number; wants: number; future: number };
   };
@@ -50,19 +50,21 @@ const ICON_EMOJI: Record<string, string> = {
   gift: '🎁', scale: '⚖️', phone: '📞', book: '📚', music: '🎵',
 };
 
-export async function computeWeekContext(
+export async function computeMonthContext(
   supabase: SupabaseClient,
   userId: string,
-  weekStart: Date,
-  weekEnd: Date,
-): Promise<WeekContext> {
-  const weekStartStr = weekStart.toISOString().split('T')[0];
-  const weekEndStr = weekEnd.toISOString().split('T')[0];
+  monthStart: Date,
+  monthEnd: Date,
+): Promise<MonthContext> {
+  const weekStartStr = monthStart.toISOString().split('T')[0];
+  const weekEndStr = monthEnd.toISOString().split('T')[0];
 
-  const prevStart = new Date(weekStart);
-  prevStart.setUTCDate(prevStart.getUTCDate() - 7);
-  const prevEnd = new Date(weekEnd);
-  prevEnd.setUTCDate(prevEnd.getUTCDate() - 7);
+  // Prev month: same duration, shifted back ~30 days
+  const periodDays = Math.round((monthEnd.getTime() - monthStart.getTime()) / (1000 * 60 * 60 * 24));
+  const prevStart = new Date(monthStart);
+  prevStart.setUTCDate(prevStart.getUTCDate() - periodDays - 1);
+  const prevEnd = new Date(monthStart);
+  prevEnd.setUTCDate(prevEnd.getUTCDate() - 1);
 
   const [profileRes, bucketsRes, txnsRes, prevTxnsRes, goalsRes, streakRes] = await Promise.all([
     supabase.from('profiles').select('full_name, monthly_income, needs_percent, wants_percent, future_percent').eq('id', userId).single(),
@@ -93,7 +95,7 @@ export async function computeWeekContext(
   const streak = streakRes.data;
 
   const monthlyIncome = profile?.monthly_income ?? 0;
-  const weeklyBudget = monthlyIncome / 4.333;
+  const weeklyBudget = monthlyIncome;
 
   // Bucket ID → name map
   const bucketMap: Record<string, string> = {};
@@ -104,7 +106,7 @@ export async function computeWeekContext(
   const wantsPct = (profile?.wants_percent ?? 30) / 100;
   const futurePct = (profile?.future_percent ?? 20) / 100;
 
-  // Aggregate current week
+  // Aggregate current month
   let totalIn = 0, totalOut = 0;
   const bucketSpend: Record<string, number> = { needs: 0, wants: 0, future: 0 };
   const catMap: Record<string, { name: string; emoji: string; bucket: string; total: number; count: number }> = {};
@@ -137,7 +139,7 @@ export async function computeWeekContext(
     }
   }
 
-  // Aggregate prev week for deltas
+  // Aggregate prev month for deltas
   const prevCatTotals: Record<string, number> = {};
   let prevTotalOut = 0;
   const prevBucketSpend: Record<string, number> = { needs: 0, wants: 0, future: 0 };
@@ -161,7 +163,7 @@ export async function computeWeekContext(
       bucket: c.bucket,
       total: c.total,
       txn_count: c.count,
-      delta_vs_prev_week: c.total - (prevCatTotals[c.name] ?? 0),
+      delta_vs_prev_month: c.total - (prevCatTotals[c.name] ?? 0),
     }));
 
   const needsBudget = weeklyBudget * needsPct;
@@ -173,7 +175,7 @@ export async function computeWeekContext(
       name: profile?.full_name ?? 'Sika User',
       monthly_income: monthlyIncome,
     },
-    week: {
+    month: {
       start: weekStartStr,
       end: weekEndStr,
       total_in: totalIn,
@@ -207,9 +209,9 @@ export async function computeWeekContext(
     })),
     streak: {
       current_days: streak?.logging_current ?? 0,
-      logged_this_week: loggedDates.size,
+      logged_this_month: loggedDates.size,
     },
-    prev_week: {
+    prev_month: {
       total_out: prevTotalOut,
       by_bucket_out: {
         needs: prevBucketSpend.needs,

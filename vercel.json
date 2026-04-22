@@ -5,8 +5,8 @@
       "schedule": "0 6 * * *"
     },
     {
-      "path": "/api/cron/weekly-generate",
-      "schedule": "0 18 * * 5"
+      "path": "/api/cron/monthly-generate",
+      "schedule": "0 6 * * *"
     }
   ]
 }
