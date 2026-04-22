@@ -20,10 +20,10 @@ export function SideRail() {
   return (
     <nav
       aria-label="Main navigation"
-      className="hidden md:flex fixed left-0 top-0 bottom-0 z-30 flex-col bg-[#141416] border-r border-[#27272A] w-16 lg:w-60 transition-[width] duration-200"
+      className="hidden md:flex fixed left-0 top-0 bottom-0 z-30 flex-col bg-card border-r border-border w-16 lg:w-60 transition-[width] duration-200"
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-[#27272A] shrink-0">
+      <div className="flex items-center gap-3 px-4 h-16 border-b border-border shrink-0">
         <div className="w-8 h-8 rounded-lg bg-[#00D9A3] flex items-center justify-center shrink-0">
           <TrendingUp className="w-4 h-4 text-[#0A0A0B]" aria-hidden />
         </div>
@@ -41,7 +41,7 @@ export function SideRail() {
               key={href}
               href={href}
               aria-current={active ? 'page' : undefined}
-              className="relative flex items-center gap-3 px-3 py-3 rounded-xl transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
+              className="relative flex items-center gap-3 px-3 py-3 rounded-xl transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               {active && (
                 <>
@@ -54,13 +54,11 @@ export function SideRail() {
                 </>
               )}
               <Icon
-                className="w-5 h-5 shrink-0 relative z-10 transition-colors"
-                style={{ color: active ? '#00D9A3' : '#71717A' }}
+                className={`w-5 h-5 shrink-0 relative z-10 transition-colors ${active ? 'text-[#00D9A3]' : 'text-muted-foreground'}`}
                 aria-hidden
               />
               <span
-                className="text-sm font-medium relative z-10 transition-colors hidden lg:block"
-                style={{ color: active ? '#FAFAFA' : '#71717A' }}
+                className={`text-sm font-medium relative z-10 transition-colors hidden lg:block ${active ? 'text-foreground' : 'text-muted-foreground'}`}
               >
                 {label}
               </span>
