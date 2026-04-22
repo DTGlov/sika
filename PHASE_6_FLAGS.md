@@ -10,6 +10,10 @@ Phase 6, before Phase 6.10.
 |-----------|------|---------------|------------------|
 | HintCard | src/components/hint-card.tsx | accounts, dashboard, settings, goals, recurring, transaction-sheet | 6.1 |
 | NextCycleModal | src/components/goals/next-cycle-modal.tsx | goals, transaction-sheet | 6.3 |
+| BadgeCard | src/components/badges/badge-card.tsx | badges, dashboard/recent-badges | 6.5b |
+| BadgeUnlockModal | src/components/badges/badge-unlock-modal.tsx | badges (via celebration host), app-shell | 6.5b |
+| BadgeCelebrationHost | src/components/badges/badge-celebration-host.tsx | app-shell | 6.5b |
+| MomentumFloat / TierUpModal | src/components/momentum-float.tsx | momentum, dashboard, transaction-sheet, contribute-modal | 6.5b |
 
 ## How to use this file
 
