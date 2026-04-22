@@ -91,7 +91,6 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
       }
     }
     if (outcome === 'bought') {
-      // TODO: wire prefill when /transactions supports ?item=&amount=&bucket= params
       router.push('/transactions');
     }
     onClose();
@@ -106,18 +105,18 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
       <SheetContent
         side="bottom"
         showCloseButton={false}
-        className="bg-[#141416] border-t border-[#27272A] rounded-t-3xl px-4 pb-8 pt-4 max-h-[92svh] overflow-y-auto"
+        className="bg-card border-t border-border rounded-t-3xl px-4 pb-8 pt-4 max-h-[92svh] overflow-y-auto"
       >
-        <div className="w-10 h-1 bg-[#27272A] rounded-full mx-auto mb-4" />
+        <div className="w-10 h-1 bg-border rounded-full mx-auto mb-4" />
 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[#FAFAFA] text-lg font-bold">
+          <h2 className="text-foreground text-lg font-bold">
             {phase === 'result' ? "Here's the read" : 'Should I buy it?'}
           </h2>
           <button
             onClick={onClose}
-            className="text-[#52525B] hover:text-[#71717A] transition-colors p-1"
+            className="text-muted-foreground/70 hover:text-muted-foreground transition-colors p-1"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -128,21 +127,21 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
         {phase === 'input' && (
           <div className="space-y-5">
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">What is it?</label>
+              <label className="text-muted-foreground text-sm">What is it?</label>
               <Input
                 ref={itemRef}
                 placeholder="e.g. New headphones, Dinner at Kofe..."
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && canSubmit && handleAsk()}
-                className="h-12 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#52525B] focus-visible:ring-[#00D9A3]"
+                className="h-12 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-accent"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">How much? (₵)</label>
+              <label className="text-muted-foreground text-sm">How much? (₵)</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm pointer-events-none">₵</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm pointer-events-none">₵</span>
                 <Input
                   type="number"
                   inputMode="decimal"
@@ -152,13 +151,13 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && canSubmit && handleAsk()}
-                  className="h-12 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#52525B] focus-visible:ring-[#00D9A3]"
+                  className="h-12 pl-7 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-accent"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">Which bucket?</label>
+              <label className="text-muted-foreground text-sm">Which bucket?</label>
               <div className="flex gap-2">
                 {(Object.keys(BUCKET_CONFIG) as PurchaseDecisionBucket[]).map((b) => {
                   const cfg = BUCKET_CONFIG[b];
@@ -170,9 +169,9 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
                       onClick={() => setBucket(b)}
                       className="flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all"
                       style={{
-                        borderColor: active ? cfg.color : '#27272A',
-                        backgroundColor: active ? cfg.bg : '#1C1C1F',
-                        color: active ? cfg.color : '#71717A',
+                        borderColor: active ? cfg.color : 'var(--border)',
+                        backgroundColor: active ? cfg.bg : 'var(--input)',
+                        color: active ? cfg.color : 'var(--muted-foreground)',
                       }}
                     >
                       {cfg.label}
@@ -183,7 +182,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">Urgency?</label>
+              <label className="text-muted-foreground text-sm">Urgency?</label>
               <div className="flex gap-2">
                 {(Object.keys(URGENCY_CONFIG) as PurchaseUrgency[]).map((u) => {
                   const active = urgency === u;
@@ -194,9 +193,9 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
                       onClick={() => setUrgency(active ? '' : u)}
                       className="flex-1 py-2.5 rounded-xl text-xs font-medium border transition-all"
                       style={{
-                        borderColor: active ? '#00D9A3' : '#27272A',
-                        backgroundColor: active ? '#00D9A318' : '#1C1C1F',
-                        color: active ? '#00D9A3' : '#71717A',
+                        borderColor: active ? '#00D9A3' : 'var(--border)',
+                        backgroundColor: active ? '#00D9A318' : 'var(--input)',
+                        color: active ? '#00D9A3' : 'var(--muted-foreground)',
                       }}
                     >
                       {URGENCY_CONFIG[u].label}
@@ -220,14 +219,14 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
         {phase === 'loading' && (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
             <Loader2 className="w-8 h-8 text-[#00D9A3] animate-spin" />
-            <p className="text-[#71717A] text-sm">Sika is thinking...</p>
+            <p className="text-muted-foreground text-sm">Sika is thinking...</p>
           </div>
         )}
 
         {/* RESULT PHASE */}
         {phase === 'result' && decision && (
           <div className="space-y-4">
-            {/* Verdict banner */}
+            {/* Verdict banner — accent colors are semantic brand, stay untouched */}
             <div
               className="rounded-2xl px-4 py-4 border"
               style={{ backgroundColor: accent.bg, borderColor: accent.border + '40' }}
@@ -235,7 +234,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
               <div className="flex items-start gap-3">
                 <AccentIcon className="w-5 h-5 shrink-0 mt-0.5" style={{ color: accent.text }} />
                 <div>
-                  <p className="text-[#FAFAFA] font-bold text-base leading-snug">{decision.verdict_line}</p>
+                  <p className="text-foreground font-bold text-base leading-snug">{decision.verdict_line}</p>
                   <p
                     className="text-xs font-semibold mt-1 uppercase tracking-wider"
                     style={{ color: accent.text }}
@@ -247,14 +246,14 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
             </div>
 
             {/* The math */}
-            <div className="bg-[#1C1C1F] rounded-2xl px-4 py-4 space-y-3">
-              <p className="text-[#71717A] text-xs font-semibold uppercase tracking-wider">The math</p>
+            <div className="bg-muted rounded-2xl px-4 py-4 space-y-3">
+              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">The math</p>
 
               <div className="flex justify-between items-center">
-                <span className="text-[#A1A1AA] text-sm capitalize">{decision.impact.bucket_after.bucket} after</span>
+                <span className="text-muted-foreground text-sm capitalize">{decision.impact.bucket_after.bucket} after</span>
                 <span
                   className="text-sm font-bold tabular-nums"
-                  style={{ color: decision.impact.bucket_after.over_budget ? '#F43F5E' : '#FAFAFA' }}
+                  style={{ color: decision.impact.bucket_after.over_budget ? '#F43F5E' : 'var(--foreground)' }}
                 >
                   {decision.impact.bucket_after.pct_after}%
                   {decision.impact.bucket_after.over_budget && (
@@ -264,21 +263,21 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
               </div>
 
               {decision.impact.goal_impact && (
-                <div className="border-t border-[#27272A] pt-3">
+                <div className="border-t border-border pt-3">
                   <div className="flex justify-between items-start gap-2">
-                    <span className="text-[#A1A1AA] text-sm">{decision.impact.goal_impact.goal_name}</span>
-                    <span className="text-[#FAFAFA] text-sm font-semibold tabular-nums shrink-0">
+                    <span className="text-muted-foreground text-sm">{decision.impact.goal_impact.goal_name}</span>
+                    <span className="text-foreground text-sm font-semibold tabular-nums shrink-0">
                       {decision.impact.goal_impact.pct_of_goal}% of goal
                     </span>
                   </div>
-                  <p className="text-[#71717A] text-xs mt-1">{decision.impact.goal_impact.comment}</p>
+                  <p className="text-muted-foreground text-xs mt-1">{decision.impact.goal_impact.comment}</p>
                 </div>
               )}
 
               {decision.impact.opportunity_cost && (
-                <div className="border-t border-[#27272A] pt-3">
-                  <p className="text-[#71717A] text-xs">
-                    <span className="text-[#A1A1AA]">Alternatively: </span>
+                <div className="border-t border-border pt-3">
+                  <p className="text-muted-foreground text-xs">
+                    <span className="text-muted-foreground">Alternatively: </span>
                     {decision.impact.opportunity_cost}
                   </p>
                 </div>
@@ -286,9 +285,9 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
             </div>
 
             {/* Reasoning */}
-            <div className="bg-[#141416] border border-[#27272A] rounded-2xl px-4 py-4">
-              <p className="text-[#71717A] text-xs font-semibold uppercase tracking-wider mb-2">Sika says</p>
-              <p className="text-[#A1A1AA] text-sm leading-relaxed whitespace-pre-line">{decision.reasoning}</p>
+            <div className="bg-card border border-border rounded-2xl px-4 py-4">
+              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-2">Sika says</p>
+              <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">{decision.reasoning}</p>
             </div>
 
             {/* Action buttons */}
@@ -296,7 +295,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
               <Button
                 variant="outline"
                 onClick={() => handleOutcome('skipped')}
-                className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl"
+                className="flex-1 h-12 border-border text-muted-foreground hover:bg-muted rounded-xl"
               >
                 Nah, skip
               </Button>
@@ -314,10 +313,10 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
         {phase === 'error' && (
           <div className="flex flex-col items-center justify-center py-12 gap-4">
             <AlertTriangle className="w-8 h-8 text-[#F43F5E]" />
-            <p className="text-[#A1A1AA] text-sm text-center">{errorMsg || 'Something went wrong.'}</p>
+            <p className="text-muted-foreground text-sm text-center">{errorMsg || 'Something went wrong.'}</p>
             <Button
               onClick={() => setPhase('input')}
-              className="bg-[#1C1C1F] hover:bg-[#27272A] text-[#FAFAFA] border border-[#27272A] rounded-xl px-6"
+              className="bg-muted hover:bg-muted/80 text-foreground border border-border rounded-xl px-6"
             >
               Try again
             </Button>
