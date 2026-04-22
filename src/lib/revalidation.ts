@@ -30,6 +30,8 @@ export const REVALIDATION_MAP = {
   card_theme:            ['/dashboard', '/settings'],
   momentum_event:        ['/dashboard', '/momentum', '/health'],
   badge_unlocked:        ['/dashboard', '/badges', '/health'],
+  digest_read:           ['/dashboard', '/daily'],
+  digest_generated:      ['/dashboard', '/daily'],
 } as const;
 
 import { useTransactionStore } from '@/stores/transaction-store';

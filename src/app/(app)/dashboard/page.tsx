@@ -17,6 +17,7 @@ import { IncomeNudgeCard, PendingRecurringCard } from '@/components/dashboard/in
 import { HintCard, BucketsTooltip } from '@/components/hint-card';
 import { GoalsWidget } from '@/components/dashboard/goals-widget';
 import { HealthRow } from '@/components/dashboard/health-row';
+import { SikaDailyBanner } from '@/components/dashboard/sika-daily-banner';
 import { SundayRecapCard } from '@/components/dashboard/sunday-recap-card';
 import { CycleCard } from '@/components/dashboard/cycle-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -37,6 +38,7 @@ import { createClient } from '@/lib/supabase/client';
 import { fetchGoals, fetchGoalAmounts, computeGoalProgress } from '@/lib/goals';
 import type { BucketName, IncomeNudge, RecurringTransaction } from '@/types';
 import type { GoalProgress } from '@/types/goal';
+import type { DailyDigest } from '@/types/daily';
 
 const BUCKETS: BucketName[] = ['needs', 'wants', 'future'];
 
@@ -70,12 +72,37 @@ function DashboardContent() {
   const [showIncomeBreakdown, setShowIncomeBreakdown] = useState(false);
   const [nudges, setNudges] = useState<IncomeNudge[]>([]);
   const [goalProgresses, setGoalProgresses] = useState<GoalProgress[]>([]);
+  const [todayDigest, setTodayDigest] = useState<DailyDigest | null>(null);
+  const [digestRead, setDigestRead] = useState(false);
 
   useEffect(() => {
     if (profile && profile.monthly_income === 0 && incomeSources.length === 0) {
       setShowOnboarding(true);
     }
   }, [profile, incomeSources]);
+
+  // Fetch today's digest and read status
+  useEffect(() => {
+    if (!user) return;
+    const today = new Date().toISOString().slice(0, 10);
+    supabase
+      .from('sika_daily_digests')
+      .select('*')
+      .eq('digest_date', today)
+      .single()
+      .then(({ data: digest }) => {
+        if (!digest) return;
+        setTodayDigest(digest as DailyDigest);
+        supabase
+          .from('user_daily_reads')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('digest_date', today)
+          .single()
+          .then(({ data: read }) => setDigestRead(!!read));
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   // Check cycle-ended badges on dashboard load
   useEffect(() => {
@@ -203,6 +230,11 @@ function DashboardContent() {
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Sika Daily banner — shown when unread digest exists */}
+        {todayDigest && !digestRead && (
+          <SikaDailyBanner digest={todayDigest} />
+        )}
 
         {/* Virtual cycle card */}
         <div className="w-full md:max-w-[440px] md:mx-auto">
