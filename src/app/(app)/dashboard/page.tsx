@@ -247,17 +247,17 @@ function DashboardContent() {
           <button
             onClick={() => navigateCycle(-1)}
             aria-label="Previous month"
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
           <div className="text-center">
-            <h2 className="text-[#FAFAFA] font-bold text-lg leading-tight tabular-nums">
+            <h2 className="text-foreground font-bold text-lg leading-tight tabular-nums">
               {cycle.label}
             </h2>
             {!cycle.isCurrent && (
-              <span className="text-[#71717A] text-[10px] font-medium uppercase tracking-wider">
+              <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">
                 Past month
               </span>
             )}
@@ -267,8 +267,7 @@ function DashboardContent() {
             onClick={() => navigateCycle(1)}
             disabled={cycle.isCurrent}
             aria-label="Next month"
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
-            style={{ color: cycle.isCurrent ? '#3F3F46' : '#71717A' }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground disabled:opacity-40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -276,15 +275,15 @@ function DashboardContent() {
 
         {/* Sika Daily banner — skeleton while loading, banner/nothing once resolved */}
         {digestLoading ? (
-          <div className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-[#141416] to-[#1C1C1F] border border-[#00D9A3]/10">
+          <div className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-card border border-[#00D9A3]/10">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-[#1C1C1F] animate-pulse" />
+              <div className="w-6 h-6 rounded-full bg-muted animate-pulse" />
               <div className="space-y-1.5">
-                <div className="h-3.5 w-32 rounded bg-[#1C1C1F] animate-pulse" />
-                <div className="h-3 w-24 rounded bg-[#1C1C1F] animate-pulse" />
+                <div className="h-3.5 w-32 rounded bg-muted animate-pulse" />
+                <div className="h-3 w-24 rounded bg-muted animate-pulse" />
               </div>
             </div>
-            <div className="w-4 h-4 rounded bg-[#1C1C1F] animate-pulse" />
+            <div className="w-4 h-4 rounded bg-muted animate-pulse" />
           </div>
         ) : todayDigest && !digestRead ? (
           <SikaDailyBanner digest={todayDigest} />
@@ -302,7 +301,7 @@ function DashboardContent() {
         <div className="w-full md:max-w-[440px] md:mx-auto">
           {loading ? (
             <Skeleton
-              className="w-full bg-[#141416]"
+              className="w-full bg-card"
               style={{ aspectRatio: '85.6 / 54', borderRadius: 20 }}
             />
           ) : (
@@ -327,11 +326,11 @@ function DashboardContent() {
 
         {/* Should I buy it? */}
         {loading ? (
-          <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#141416] border border-[#27272A]">
-            <div className="w-9 h-9 rounded-xl bg-[#1C1C1F] animate-pulse shrink-0" />
+          <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-card border border-border">
+            <div className="w-9 h-9 rounded-xl bg-muted animate-pulse shrink-0" />
             <div className="space-y-1.5 flex-1">
-              <div className="h-3.5 w-28 rounded bg-[#1C1C1F] animate-pulse" />
-              <div className="h-3 w-36 rounded bg-[#1C1C1F] animate-pulse" />
+              <div className="h-3.5 w-28 rounded bg-muted animate-pulse" />
+              <div className="h-3 w-36 rounded bg-muted animate-pulse" />
             </div>
           </div>
         ) : (
@@ -351,24 +350,24 @@ function DashboardContent() {
               onClick={() => setShowIncomeBreakdown(v => !v)}
               className="flex items-center gap-1.5 text-sm transition-colors"
             >
-              <span className="text-[#FAFAFA] font-semibold tabular-nums">{formatGHS(monthlyIncome)}</span>
-              <span className="text-[#71717A]">/mo</span>
+              <span className="text-foreground font-semibold tabular-nums">{formatGHS(monthlyIncome)}</span>
+              <span className="text-muted-foreground">/mo</span>
               {activeSources.length > 1 && (
-                <span className="text-[#52525B] text-[10px] ml-0.5">
+                <span className="text-muted-foreground/70 text-[10px] ml-0.5">
                   {showIncomeBreakdown ? '▴' : '▾'}
                 </span>
               )}
             </button>
 
             {showIncomeBreakdown && activeSources.length > 1 && (
-              <div className="absolute top-full left-0 mt-1 z-20 bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 shadow-xl">
+              <div className="absolute top-full left-0 mt-1 z-20 bg-muted border border-border rounded-xl px-3 py-2.5 shadow-xl">
                 <div className="flex flex-wrap gap-x-3 gap-y-1">
                   {activeSources.map(s => (
-                    <span key={s.id} className="text-[#A1A1AA] text-xs whitespace-nowrap">
+                    <span key={s.id} className="text-muted-foreground text-xs whitespace-nowrap">
                       {s.name}{' '}
-                      <span className="text-[#FAFAFA]">{formatGHSCompact(s.amount)}</span>
+                      <span className="text-foreground">{formatGHSCompact(s.amount)}</span>
                       {s.frequency !== 'monthly' && (
-                        <span className="text-[#52525B]"> {FREQUENCY_LABELS[s.frequency].toLowerCase()}</span>
+                        <span className="text-muted-foreground/70"> {FREQUENCY_LABELS[s.frequency].toLowerCase()}</span>
                       )}
                     </span>
                   ))}
@@ -418,7 +417,7 @@ function DashboardContent() {
           {/* Bucket rings */}
           <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">Buckets</p>
+            <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Buckets</p>
             <BucketsTooltip />
           </div>
           <div className="grid grid-cols-3 gap-3">
@@ -428,7 +427,7 @@ function DashboardContent() {
                 .reduce((s, gp) => s + (gp.required_monthly_pace ?? 0), 0);
               return loading
                 ? Array.from({ length: 3 }).map((_, i) => (
-                    <Skeleton key={i} className="h-40 rounded-2xl bg-[#141416]" />
+                    <Skeleton key={i} className="h-40 rounded-2xl bg-card" />
                   ))
                 : BUCKETS.map((bucket, i) => (
                     <BucketRing
@@ -449,8 +448,8 @@ function DashboardContent() {
         <div className="grid grid-cols-2 gap-3">
           {loading ? (
             <>
-              <Skeleton className="h-24 rounded-2xl bg-[#141416]" />
-              <Skeleton className="h-24 rounded-2xl bg-[#141416]" />
+              <Skeleton className="h-24 rounded-2xl bg-card" />
+              <Skeleton className="h-24 rounded-2xl bg-card" />
             </>
           ) : (
             <>
@@ -474,7 +473,7 @@ function DashboardContent() {
         {accounts.length > 0 && (
           <div className="hidden md:block">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">Accounts</p>
+              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Accounts</p>
               <Link href="/accounts" className="text-[#00D9A3] text-xs hover:text-[#00F5B8] transition-colors">
                 See all
               </Link>
@@ -487,12 +486,12 @@ function DashboardContent() {
                   <Link
                     key={acc.id}
                     href="/accounts"
-                    className="flex-shrink-0 bg-[#141416] border border-[#27272A] rounded-2xl p-3 min-w-[120px] hover:border-[#3F3F46] transition-colors"
+                    className="flex-shrink-0 bg-card border border-border rounded-2xl p-3 min-w-[120px] hover:border-border transition-colors"
                     style={{ borderLeftColor: cfg.color, borderLeftWidth: 3 }}
                   >
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="text-base">{cfg.emoji}</span>
-                      <span className="text-[#A1A1AA] text-xs truncate">{acc.name}</span>
+                      <span className="text-muted-foreground text-xs truncate">{acc.name}</span>
                     </div>
                     <p className="text-sm font-bold tabular-nums" style={{ color: cfg.color }}>
                       {formatGHSCompact(balance)}
@@ -509,7 +508,7 @@ function DashboardContent() {
 
         {/* Weekly chart */}
         {loading ? (
-          <Skeleton className="h-52 rounded-2xl bg-[#141416]" />
+          <Skeleton className="h-52 rounded-2xl bg-card" />
         ) : (
           <WeeklyChart data={dashboardStats?.weeklySpend ?? []} />
         )}
@@ -517,7 +516,7 @@ function DashboardContent() {
         {/* Recent transactions — desktop only */}
         <div className="hidden md:block">
           {loading ? (
-            <Skeleton className="h-64 rounded-2xl bg-[#141416]" />
+            <Skeleton className="h-64 rounded-2xl bg-card" />
           ) : (
             <RecentTransactions transactions={dashboardStats?.recentTransactions ?? []} />
           )}
@@ -534,10 +533,10 @@ export default function DashboardPage() {
     <Suspense
       fallback={
         <div className="max-w-2xl mx-auto px-4 pt-6 md:px-8 space-y-4">
-          <Skeleton className="h-8 w-48 rounded-xl bg-[#141416]" />
+          <Skeleton className="h-8 w-48 rounded-xl bg-card" />
           <div className="grid grid-cols-3 gap-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-40 rounded-2xl bg-[#141416]" />
+              <Skeleton key={i} className="h-40 rounded-2xl bg-card" />
             ))}
           </div>
         </div>
