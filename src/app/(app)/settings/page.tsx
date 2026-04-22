@@ -33,6 +33,7 @@ import {
   ICON_OPTIONS,
 } from "@/components/settings/category-modal";
 import { CardThemePicker } from "@/components/settings/card-theme-picker";
+import { AppearanceSection } from "@/components/settings/appearance-section";
 import type { Category, CardTheme } from "@/types";
 
 const profileSchema = z
@@ -155,7 +156,6 @@ export default function SettingsPage() {
   const archivedCats = categories.filter((c) => c.is_archived);
   const totalIncome = totalMonthlyIncome(incomeSources);
 
-  // Conditions for contextual hints
   const hasNoIncomeSources = incomeSources.length === 0;
   const hasOnlyDefaultCats = activeCats.every(c => c.is_default || c.user_id === null);
 
@@ -180,7 +180,6 @@ export default function SettingsPage() {
     return ct === "adjustment";
   });
 
-  // Group expense categories by bucket
   const expenseByBucket: Record<string, Category[]> = {};
   const expenseNoBucket: Category[] = [];
   for (const cat of expenseCats) {
@@ -197,7 +196,10 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto pb-24">
       <div className="px-4 pt-6 md:px-8">
-        <h1 className="text-2xl font-bold text-[#FAFAFA] mb-6">Settings</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-6">Settings</h1>
+
+        {/* Appearance */}
+        <AppearanceSection />
 
         {/* Income Sources */}
         <div className="mb-6">
@@ -229,16 +231,16 @@ export default function SettingsPage() {
 
         <form onSubmit={handleSubmit(onSaveProfile)} className="space-y-6">
           {/* Total Monthly Income (read-only) */}
-          <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-            <h2 className="text-[#FAFAFA] font-semibold mb-1">
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <h2 className="text-foreground font-semibold mb-1">
               Total Monthly Income
             </h2>
-            <p className="text-[#71717A] text-xs mb-3">
+            <p className="text-muted-foreground text-xs mb-3">
               Computed from your active income sources above
             </p>
-            <div className="h-12 px-4 bg-[#1C1C1F] border border-[#27272A] rounded-xl flex items-center">
-              <span className="text-[#A1A1AA] font-mono mr-2">₵</span>
-              <span className="text-[#FAFAFA] font-semibold text-base">
+            <div className="h-12 px-4 bg-muted border border-border rounded-xl flex items-center">
+              <span className="text-muted-foreground font-mono mr-2">₵</span>
+              <span className="text-foreground font-semibold text-base">
                 {totalIncome > 0
                   ? totalIncome.toLocaleString("en-GH", {
                       minimumFractionDigits: 2,
@@ -250,21 +252,21 @@ export default function SettingsPage() {
           </div>
 
           {/* Budget Cycle */}
-          <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-            <h2 className="text-[#FAFAFA] font-semibold mb-1">Budget Month</h2>
-            <p className="text-[#71717A] text-xs mb-4">
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <h2 className="text-foreground font-semibold mb-1">Budget Month</h2>
+            <p className="text-muted-foreground text-xs mb-4">
               Which day of the month does your month start? (1–28)
             </p>
             <div className="space-y-1.5">
-              <Label className="text-[#A1A1AA] text-sm">Month start day</Label>
+              <Label className="text-muted-foreground text-sm">Month start day</Label>
               <Input
                 type="number"
                 min="1"
                 max="28"
-                className="h-11 w-28 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                className="h-11 w-28 bg-input border-border text-foreground focus-visible:ring-accent amount"
                 {...register("cycle_start_day", { valueAsNumber: true })}
               />
-              <p className="text-[#52525B] text-[11px]">
+              <p className="text-muted-foreground/70 text-[11px]">
                 Tip: set this to your salary day so your budget resets when you
                 get paid.
               </p>
@@ -272,11 +274,11 @@ export default function SettingsPage() {
           </div>
 
           {/* Budget Split */}
-          <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-            <h2 className="text-[#FAFAFA] font-semibold mb-1">
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <h2 className="text-foreground font-semibold mb-1">
               Budget Split (%)
             </h2>
-            <p className="text-[#71717A] text-xs mb-4">Must add up to 100</p>
+            <p className="text-muted-foreground text-xs mb-4">Must add up to 100</p>
             <div className="grid grid-cols-3 gap-3">
               {(["needs", "wants", "future"] as const).map((bucket) => {
                 const colors = {
@@ -304,13 +306,13 @@ export default function SettingsPage() {
                       type="number"
                       min="0"
                       max="100"
-                      className="h-10 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] text-center amount"
+                      className="h-10 bg-input border-border text-foreground focus-visible:ring-accent text-center amount"
                       {...register(`${bucket}_percent`, {
                         valueAsNumber: true,
                       })}
                     />
                     {totalIncome > 0 && (
-                      <p className="text-[#52525B] text-[10px] text-center">
+                      <p className="text-muted-foreground/70 text-[10px] text-center">
                         {formatGHS((totalIncome * pct) / 100)}
                       </p>
                     )}
@@ -349,9 +351,9 @@ export default function SettingsPage() {
             className="mt-4"
           />
         )}
-        <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5 mt-6">
+        <div className="bg-card border border-border rounded-2xl p-5 mt-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[#FAFAFA] font-semibold">Categories</h2>
+            <h2 className="text-foreground font-semibold">Categories</h2>
             <Button
               onClick={() => {
                 setEditingCat(undefined);
@@ -409,7 +411,7 @@ export default function SettingsPage() {
             {/* Expense categories without a bucket */}
             {expenseNoBucket.length > 0 && (
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-[#71717A] mb-2">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2">
                   Spending (no bucket)
                 </p>
                 <div className="space-y-1">
@@ -459,8 +461,8 @@ export default function SettingsPage() {
             {adjustmentCats.length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <span className="text-[#A1A1AA] text-xs">⚖️</span>
-                  <p className="text-xs font-medium uppercase tracking-wider text-[#A1A1AA]">
+                  <span className="text-muted-foreground text-xs">⚖️</span>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     Adjustments
                   </p>
                 </div>
@@ -486,7 +488,7 @@ export default function SettingsPage() {
               <div>
                 <button
                   onClick={() => setShowArchived((v) => !v)}
-                  className="flex items-center gap-1.5 text-xs text-[#52525B] hover:text-[#71717A] transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors"
                 >
                   <ChevronDown
                     className="w-3.5 h-3.5 transition-transform"
@@ -501,13 +503,13 @@ export default function SettingsPage() {
                     {archivedCats.map((cat) => (
                       <div
                         key={cat.id}
-                        className="flex items-center justify-between px-3 py-2 bg-[#1C1C1F] rounded-xl opacity-50"
+                        className="flex items-center justify-between px-3 py-2 bg-muted rounded-xl opacity-50"
                       >
                         <div className="flex items-center gap-2">
                           <span className="text-base">
                             {getIconEmoji(cat.icon)}
                           </span>
-                          <span className="text-[#A1A1AA] text-sm">
+                          <span className="text-muted-foreground text-sm">
                             {cat.name}
                           </span>
                         </div>
@@ -527,14 +529,14 @@ export default function SettingsPage() {
         </div>
 
         {/* App preferences */}
-        <div className="mt-6 bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-          <h2 className="text-[#FAFAFA] font-semibold mb-1">App preferences</h2>
-          <p className="text-[#71717A] text-xs mb-4">Show all dismissed hints again. Useful if you want a refresher.</p>
+        <div className="mt-6 bg-card border border-border rounded-2xl p-5">
+          <h2 className="text-foreground font-semibold mb-1">App preferences</h2>
+          <p className="text-muted-foreground text-xs mb-4">Show all dismissed hints again. Useful if you want a refresher.</p>
           <Button
             type="button"
             variant="outline"
             onClick={handleResetHints}
-            className="h-10 px-4 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] hover:text-[#FAFAFA] rounded-xl text-sm gap-2"
+            className="h-10 px-4 border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-xl text-sm gap-2"
           >
             <RotateCcw className="w-3.5 h-3.5" /> Reset onboarding hints
           </Button>
@@ -545,7 +547,7 @@ export default function SettingsPage() {
           <Button
             variant="outline"
             onClick={handleSignOut}
-            className="w-full h-12 border-[#27272A] text-[#F43F5E] hover:bg-[#F43F5E]/10 hover:border-[#F43F5E]/50 rounded-xl"
+            className="w-full h-12 border-border text-[#F43F5E] hover:bg-[#F43F5E]/10 hover:border-[#F43F5E]/50 rounded-xl"
           >
             <LogOut className="w-4 h-4 mr-2" /> Sign out
           </Button>
@@ -579,21 +581,21 @@ function CategoryRow({
   getIconEmoji,
 }: CategoryRowProps) {
   return (
-    <div className="flex items-center justify-between px-3 py-2 bg-[#1C1C1F] rounded-xl group">
+    <div className="flex items-center justify-between px-3 py-2 bg-muted rounded-xl group">
       <div className="flex items-center gap-2">
         <span className="text-base">{getIconEmoji(cat.icon)}</span>
-        <span className="text-[#FAFAFA] text-sm">{cat.name}</span>
+        <span className="text-foreground text-sm">{cat.name}</span>
       </div>
       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={onEdit}
-          className="w-7 h-7 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
+          className="w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors"
         >
           <Pencil className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={onArchive}
-          className="w-7 h-7 rounded-lg text-[#71717A] hover:text-[#FBBF24] flex items-center justify-center transition-colors"
+          className="w-7 h-7 rounded-lg text-muted-foreground hover:text-[#FBBF24] flex items-center justify-center transition-colors"
         >
           <Archive className="w-3.5 h-3.5" />
         </button>
