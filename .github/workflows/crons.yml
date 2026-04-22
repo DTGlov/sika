@@ -1,0 +1,64 @@
+name: Sika Crons
+
+on:
+  schedule:
+    # Sika Daily (news digest) — 06:00 UTC daily
+    - cron: '0 6 * * *'
+    # Sika Monthly (cycle-aligned recap) — 06:05 UTC daily
+    # (offset by 5 min to not collide with Sika Daily)
+    - cron: '5 6 * * *'
+    # Dashboard Insights — 00:30 UTC daily
+    - cron: '30 0 * * *'
+  workflow_dispatch: # Allow manual trigger from GitHub UI for testing
+
+jobs:
+  sika-daily:
+    if: github.event.schedule == '0 6 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Sika Daily digest generation
+        run: |
+          RESPONSE=$(curl -s -o response.txt -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://sika-dlrl.vercel.app/api/cron/generate-digest)
+          echo "HTTP Status: $RESPONSE"
+          echo "Response body:"
+          cat response.txt
+          if [ "$RESPONSE" != "200" ]; then
+            echo "::error::Sika Daily generation failed with status $RESPONSE"
+            exit 1
+          fi
+
+  sika-monthly:
+    if: github.event.schedule == '5 6 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Sika Monthly recap generation
+        run: |
+          RESPONSE=$(curl -s -o response.txt -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://sika-dlrl.vercel.app/api/cron/monthly-generate)
+          echo "HTTP Status: $RESPONSE"
+          echo "Response body:"
+          cat response.txt
+          if [ "$RESPONSE" != "200" ]; then
+            echo "::error::Sika Monthly generation failed with status $RESPONSE"
+            exit 1
+          fi
+
+  dashboard-insights:
+    if: github.event.schedule == '30 0 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Dashboard Insights generation
+        run: |
+          RESPONSE=$(curl -s -o response.txt -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://sika-dlrl.vercel.app/api/cron/insights-generate)
+          echo "HTTP Status: $RESPONSE"
+          echo "Response body:"
+          cat response.txt
+          if [ "$RESPONSE" != "200" ]; then
+            echo "::error::Dashboard Insights generation failed with status $RESPONSE"
+            exit 1
+          fi
