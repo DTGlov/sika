@@ -173,16 +173,16 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="bg-[#141416] border-[#27272A] text-[#FAFAFA] max-w-sm max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-card border-border text-foreground max-w-sm max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[#FAFAFA]">
+          <DialogTitle className="text-foreground">
             {editItem ? 'Edit recurring' : 'New recurring transaction'}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
           {/* Type toggle */}
-          <div className="grid grid-cols-2 gap-1 bg-[#1C1C1F] rounded-xl p-1">
+          <div className="grid grid-cols-2 gap-1 bg-muted rounded-xl p-1">
             {(['expense', 'income'] as const).map(t => (
               <button
                 key={t}
@@ -191,7 +191,7 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
                 className="h-9 rounded-lg text-sm font-medium transition-colors capitalize"
                 style={{
                   backgroundColor: txType === t ? (t === 'expense' ? '#F43F5E18' : '#00D9A318') : 'transparent',
-                  color: txType === t ? (t === 'expense' ? '#F43F5E' : '#00D9A3') : '#71717A',
+                  color: txType === t ? (t === 'expense' ? '#F43F5E' : '#00D9A3') : 'var(--muted-foreground)',
                 }}
               >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -201,12 +201,12 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
 
           {/* Amount */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Amount</Label>
+            <Label className="text-muted-foreground text-sm">Amount</Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">{CURRENCY_SYMBOL}</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{CURRENCY_SYMBOL}</span>
               <Input
                 type="number" min="0.01" step="0.01" placeholder="0.00"
-                className="h-11 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                className="h-11 pl-7 bg-input border-border text-foreground focus-visible:ring-accent amount"
                 {...register('amount', { valueAsNumber: true })}
               />
             </div>
@@ -215,15 +215,15 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
 
           {/* Account */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Account</Label>
+            <Label className="text-muted-foreground text-sm">Account</Label>
             <Select
               value={watch('account_id')}
               onValueChange={(v) => { if (v) setValue('account_id', v); }}
             >
-              <SelectTrigger className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA]">
+              <SelectTrigger className="h-11 bg-input border-border text-foreground">
                 <SelectValue placeholder="Select account" />
               </SelectTrigger>
-              <SelectContent className="bg-[#141416] border-[#27272A]">
+              <SelectContent className="bg-card border-border">
                 {accounts.map(a => (
                   <SelectItem key={a.id} value={a.id}>
                     {ACCOUNT_TYPE_CONFIG[a.type].emoji} {a.name}
@@ -236,15 +236,15 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
 
           {/* Category */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Category (optional)</Label>
+            <Label className="text-muted-foreground text-sm">Category (optional)</Label>
             <Select
               value={watch('category_id') ?? 'none'}
               onValueChange={(v) => setValue('category_id', v === 'none' ? null : v)}
             >
-              <SelectTrigger className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA]">
+              <SelectTrigger className="h-11 bg-input border-border text-foreground">
                 <SelectValue placeholder="No category" />
               </SelectTrigger>
-              <SelectContent className="bg-[#141416] border-[#27272A]">
+              <SelectContent className="bg-card border-border">
                 <SelectItem value="none">No category</SelectItem>
                 {filteredCategories.map(c => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -255,17 +255,17 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
 
           {/* Note */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Note (optional)</Label>
+            <Label className="text-muted-foreground text-sm">Note (optional)</Label>
             <Input
               placeholder="e.g. Monthly rent"
-              className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#52525B] focus-visible:ring-[#00D9A3]"
+              className="h-11 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-accent"
               {...register('note')}
             />
           </div>
 
           {/* Frequency */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Frequency</Label>
+            <Label className="text-muted-foreground text-sm">Frequency</Label>
             <div className="grid grid-cols-3 gap-1.5">
               {FREQUENCIES.map(({ value, label }) => (
                 <button
@@ -274,9 +274,9 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
                   onClick={() => { setValue('frequency', value); setValue('schedule_day', null); }}
                   className="h-9 rounded-xl border text-xs font-medium transition-all"
                   style={{
-                    borderColor: frequency === value ? '#00D9A3' : '#27272A',
-                    backgroundColor: frequency === value ? '#00D9A318' : '#1C1C1F',
-                    color: frequency === value ? '#00D9A3' : '#71717A',
+                    borderColor: frequency === value ? '#00D9A3' : 'var(--border)',
+                    backgroundColor: frequency === value ? '#00D9A318' : 'var(--input)',
+                    color: frequency === value ? '#00D9A3' : 'var(--muted-foreground)',
                   }}
                 >
                   {label}
@@ -288,7 +288,7 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
           {/* Day-of-week picker — weekly / biweekly */}
           {(frequency === 'weekly' || frequency === 'biweekly') && (
             <div className="space-y-1.5">
-              <Label className="text-[#A1A1AA] text-sm">Day of week</Label>
+              <Label className="text-muted-foreground text-sm">Day of week</Label>
               <div className="grid grid-cols-7 gap-1">
                 {DAY_OF_WEEK_LABELS.map((day, i) => (
                   <button
@@ -297,8 +297,8 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
                     onClick={() => setValue('schedule_day', i)}
                     className="h-9 rounded-lg text-xs font-medium transition-all"
                     style={{
-                      backgroundColor: scheduleDay === i ? '#00D9A3' : '#1C1C1F',
-                      color: scheduleDay === i ? '#0A0A0B' : '#71717A',
+                      backgroundColor: scheduleDay === i ? '#00D9A3' : 'var(--input)',
+                      color: scheduleDay === i ? '#0A0A0B' : 'var(--muted-foreground)',
                     }}
                   >
                     {day[0]}
@@ -311,11 +311,11 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
           {/* Day-of-month picker — monthly */}
           {frequency === 'monthly' && (
             <div className="space-y-1.5">
-              <Label className="text-[#A1A1AA] text-sm">Day of month</Label>
+              <Label className="text-muted-foreground text-sm">Day of month</Label>
               <div className="flex gap-2 items-center">
                 <Input
                   type="number" min="1" max="28" placeholder="1–28"
-                  className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] w-24"
+                  className="h-11 bg-input border-border text-foreground focus-visible:ring-accent w-24"
                   value={scheduleDay != null && scheduleDay !== -1 ? scheduleDay : ''}
                   onChange={e => {
                     const v = parseInt(e.target.value);
@@ -327,9 +327,9 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
                   onClick={() => setValue('schedule_day', scheduleDay === -1 ? null : -1)}
                   className="h-11 px-3 rounded-xl border text-xs font-medium transition-all"
                   style={{
-                    borderColor: scheduleDay === -1 ? '#00D9A3' : '#27272A',
-                    backgroundColor: scheduleDay === -1 ? '#00D9A318' : '#1C1C1F',
-                    color: scheduleDay === -1 ? '#00D9A3' : '#71717A',
+                    borderColor: scheduleDay === -1 ? '#00D9A3' : 'var(--border)',
+                    backgroundColor: scheduleDay === -1 ? '#00D9A318' : 'var(--input)',
+                    color: scheduleDay === -1 ? '#00D9A3' : 'var(--muted-foreground)',
                   }}
                 >
                   Last day
@@ -340,10 +340,10 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
 
           {/* Start date */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Start date</Label>
+            <Label className="text-muted-foreground text-sm">Start date</Label>
             <Input
               type="date"
-              className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3]"
+              className="h-11 bg-input border-border text-foreground focus-visible:ring-accent"
               {...register('start_date')}
             />
           </div>
@@ -351,10 +351,10 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
           {/* End date */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label className="text-[#A1A1AA] text-sm">End date</Label>
+              <Label className="text-muted-foreground text-sm">End date</Label>
               {endDate && (
                 <button type="button" onClick={() => setValue('end_date', null)}
-                  className="text-xs text-[#71717A] hover:text-[#FAFAFA] transition-colors">
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                   Remove
                 </button>
               )}
@@ -362,7 +362,7 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
             {endDate ? (
               <Input
                 type="date"
-                className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3]"
+                className="h-11 bg-input border-border text-foreground focus-visible:ring-accent"
                 value={endDate ?? ''}
                 onChange={e => setValue('end_date', e.target.value || null)}
               />
@@ -370,7 +370,7 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
               <button
                 type="button"
                 onClick={() => setValue('end_date', format(new Date(), 'yyyy-MM-dd'))}
-                className="h-11 w-full rounded-xl border border-dashed border-[#27272A] text-[#52525B] text-sm hover:border-[#3F3F46] hover:text-[#71717A] transition-colors"
+                className="h-11 w-full rounded-xl border border-dashed border-border text-muted-foreground/70 text-sm hover:border-border hover:text-muted-foreground transition-colors"
               >
                 + Add end date (optional)
               </button>
@@ -380,8 +380,8 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
           {/* Auto-log toggle */}
           <div className="flex items-start justify-between gap-3">
             <div>
-              <Label className="text-[#A1A1AA] text-sm">Auto-log</Label>
-              <p className="text-[#52525B] text-[11px] mt-0.5">
+              <Label className="text-muted-foreground text-sm">Auto-log</Label>
+              <p className="text-muted-foreground/70 text-[11px] mt-0.5">
                 Auto-log for fixed amounts (rent, salary). Turn off for variable amounts — Sika will nudge you to confirm instead.
               </p>
             </div>
@@ -389,7 +389,7 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
               type="button"
               onClick={() => setValue('auto_log', !autoLog)}
               className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 mt-0.5"
-              style={{ backgroundColor: autoLog ? '#00D9A3' : '#27272A' }}
+              style={{ backgroundColor: autoLog ? '#00D9A3' : 'var(--border)' }}
             >
               <span
                 className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
@@ -401,12 +401,12 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
           {/* Paused toggle — edit only */}
           {editItem && (
             <div className="flex items-center justify-between">
-              <Label className="text-[#A1A1AA] text-sm">Paused</Label>
+              <Label className="text-muted-foreground text-sm">Paused</Label>
               <button
                 type="button"
                 onClick={() => setValue('is_paused', !isPaused)}
                 className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0"
-                style={{ backgroundColor: isPaused ? '#FBBF24' : '#27272A' }}
+                style={{ backgroundColor: isPaused ? '#FBBF24' : 'var(--border)' }}
               >
                 <span
                   className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
