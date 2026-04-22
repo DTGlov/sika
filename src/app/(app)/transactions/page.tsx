@@ -222,18 +222,18 @@ function TransactionsContent() {
   return (
     <div className="max-w-2xl mx-auto pb-24">
       <div className="px-4 pt-6 pb-4 md:px-8">
-        <h1 className="text-2xl font-bold text-[#FAFAFA] mb-4">Transactions</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-4">Transactions</h1>
 
         {/* Period tabs */}
-        <div className="flex gap-1 mb-3 bg-[#141416] border border-[#27272A] rounded-xl p-1 overflow-x-auto scrollbar-none">
+        <div className="flex gap-1 mb-3 bg-muted border border-border rounded-xl p-1 overflow-x-auto scrollbar-none">
           {PERIOD_TABS.map(({ value, label }) => (
             <button
               key={value}
               onClick={() => updateParam('period', value)}
               className="flex-shrink-0 flex-1 h-8 rounded-lg text-xs font-medium transition-colors min-w-[60px]"
               style={{
-                backgroundColor: urlPeriod === value ? '#1C1C1F' : 'transparent',
-                color: urlPeriod === value ? '#FAFAFA' : '#71717A',
+                backgroundColor: urlPeriod === value ? 'var(--card)' : 'transparent',
+                color: urlPeriod === value ? 'var(--foreground)' : 'var(--muted-foreground)',
               }}
             >
               {label}
@@ -244,21 +244,21 @@ function TransactionsContent() {
         {/* Search + filter toggle */}
         <div className="flex gap-2 mb-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#71717A]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search by note or amount…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-10 bg-[#141416] border-[#27272A] text-[#FAFAFA] placeholder:text-[#71717A] focus-visible:ring-[#00D9A3]"
+              className="pl-9 h-10 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-accent"
             />
           </div>
           <button
             onClick={() => setShowFilters(v => !v)}
             className="relative h-10 px-3 rounded-xl border transition-colors flex items-center gap-1.5 text-sm font-medium shrink-0"
             style={{
-              borderColor: showFilters || activeFilterCount > 0 ? '#00D9A3' : '#27272A',
-              backgroundColor: showFilters || activeFilterCount > 0 ? '#00D9A318' : '#141416',
-              color: showFilters || activeFilterCount > 0 ? '#00D9A3' : '#71717A',
+              borderColor: showFilters || activeFilterCount > 0 ? '#00D9A3' : 'var(--border)',
+              backgroundColor: showFilters || activeFilterCount > 0 ? '#00D9A318' : 'var(--muted)',
+              color: showFilters || activeFilterCount > 0 ? '#00D9A3' : 'var(--muted-foreground)',
             }}
           >
             <SlidersHorizontal className="w-4 h-4" />
@@ -273,10 +273,10 @@ function TransactionsContent() {
 
         {/* Collapsible filter panel */}
         {showFilters && (
-          <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-4 space-y-4 mb-2">
+          <div className="bg-muted border border-border rounded-2xl p-4 space-y-4 mb-2">
             {/* Type filter */}
             <div>
-              <p className="text-[#71717A] text-xs font-medium mb-2">Type</p>
+              <p className="text-muted-foreground text-xs font-medium mb-2">Type</p>
               <div className="flex flex-wrap gap-1.5">
                 {['all', 'expense', 'income', 'transfer', 'adjustment'].map(t => (
                   <button
@@ -284,9 +284,9 @@ function TransactionsContent() {
                     onClick={() => updateParam('type', t)}
                     className="h-7 px-3 rounded-lg text-xs font-medium capitalize border transition-all"
                     style={{
-                      borderColor: urlType === t ? '#00D9A3' : '#27272A',
-                      backgroundColor: urlType === t ? '#00D9A318' : '#1C1C1F',
-                      color: urlType === t ? '#00D9A3' : '#71717A',
+                      borderColor: urlType === t ? '#00D9A3' : 'var(--border)',
+                      backgroundColor: urlType === t ? '#00D9A318' : 'var(--card)',
+                      color: urlType === t ? '#00D9A3' : 'var(--muted-foreground)',
                     }}
                   >
                     {t === 'all' ? 'All types' : t}
@@ -298,15 +298,15 @@ function TransactionsContent() {
             {/* Account filter */}
             {accounts.length > 1 && (
               <div>
-                <p className="text-[#71717A] text-xs font-medium mb-2">Account</p>
+                <p className="text-muted-foreground text-xs font-medium mb-2">Account</p>
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     onClick={() => updateParam('account', 'all')}
                     className="h-7 px-3 rounded-lg text-xs font-medium border transition-all"
                     style={{
-                      borderColor: urlAccount === 'all' ? '#00D9A3' : '#27272A',
-                      backgroundColor: urlAccount === 'all' ? '#00D9A318' : '#1C1C1F',
-                      color: urlAccount === 'all' ? '#00D9A3' : '#71717A',
+                      borderColor: urlAccount === 'all' ? '#00D9A3' : 'var(--border)',
+                      backgroundColor: urlAccount === 'all' ? '#00D9A318' : 'var(--card)',
+                      color: urlAccount === 'all' ? '#00D9A3' : 'var(--muted-foreground)',
                     }}
                   >
                     All accounts
@@ -317,9 +317,9 @@ function TransactionsContent() {
                       onClick={() => updateParam('account', a.id)}
                       className="h-7 px-3 rounded-lg text-xs font-medium border transition-all"
                       style={{
-                        borderColor: urlAccount === a.id ? '#00D9A3' : '#27272A',
-                        backgroundColor: urlAccount === a.id ? '#00D9A318' : '#1C1C1F',
-                        color: urlAccount === a.id ? '#00D9A3' : '#71717A',
+                        borderColor: urlAccount === a.id ? '#00D9A3' : 'var(--border)',
+                        backgroundColor: urlAccount === a.id ? '#00D9A318' : 'var(--card)',
+                        color: urlAccount === a.id ? '#00D9A3' : 'var(--muted-foreground)',
                       }}
                     >
                       {a.name}
@@ -332,7 +332,7 @@ function TransactionsContent() {
             {/* Bucket filter */}
             {allBuckets.length > 0 && (
               <div>
-                <p className="text-[#71717A] text-xs font-medium mb-2">Bucket</p>
+                <p className="text-muted-foreground text-xs font-medium mb-2">Bucket</p>
                 <div className="flex flex-wrap gap-1.5">
                   {['all', ...allBuckets].map(b => (
                     <button
@@ -340,9 +340,9 @@ function TransactionsContent() {
                       onClick={() => updateParam('bucket', b)}
                       className="h-7 px-3 rounded-lg text-xs font-medium capitalize border transition-all"
                       style={{
-                        borderColor: urlBucket === b ? '#00D9A3' : '#27272A',
-                        backgroundColor: urlBucket === b ? '#00D9A318' : '#1C1C1F',
-                        color: urlBucket === b ? '#00D9A3' : '#71717A',
+                        borderColor: urlBucket === b ? '#00D9A3' : 'var(--border)',
+                        backgroundColor: urlBucket === b ? '#00D9A318' : 'var(--card)',
+                        color: urlBucket === b ? '#00D9A3' : 'var(--muted-foreground)',
                       }}
                     >
                       {b === 'all' ? 'All buckets' : b}
@@ -354,15 +354,15 @@ function TransactionsContent() {
 
             {/* Category filter */}
             <div>
-              <p className="text-[#71717A] text-xs font-medium mb-2">Category</p>
+              <p className="text-muted-foreground text-xs font-medium mb-2">Category</p>
               <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
                 <button
                   onClick={() => updateParam('category', 'all')}
                   className="h-7 px-3 rounded-lg text-xs font-medium border transition-all"
                   style={{
-                    borderColor: urlCategory === 'all' ? '#00D9A3' : '#27272A',
-                    backgroundColor: urlCategory === 'all' ? '#00D9A318' : '#1C1C1F',
-                    color: urlCategory === 'all' ? '#00D9A3' : '#71717A',
+                    borderColor: urlCategory === 'all' ? '#00D9A3' : 'var(--border)',
+                    backgroundColor: urlCategory === 'all' ? '#00D9A318' : 'var(--card)',
+                    color: urlCategory === 'all' ? '#00D9A3' : 'var(--muted-foreground)',
                   }}
                 >
                   All categories
@@ -373,9 +373,9 @@ function TransactionsContent() {
                     onClick={() => updateParam('category', c.id)}
                     className="h-7 px-3 rounded-lg text-xs font-medium border transition-all"
                     style={{
-                      borderColor: urlCategory === c.id ? '#00D9A3' : '#27272A',
-                      backgroundColor: urlCategory === c.id ? '#00D9A318' : '#1C1C1F',
-                      color: urlCategory === c.id ? '#00D9A3' : '#71717A',
+                      borderColor: urlCategory === c.id ? '#00D9A3' : 'var(--border)',
+                      backgroundColor: urlCategory === c.id ? '#00D9A318' : 'var(--card)',
+                      color: urlCategory === c.id ? '#00D9A3' : 'var(--muted-foreground)',
                     }}
                   >
                     {c.name}
@@ -386,25 +386,25 @@ function TransactionsContent() {
 
             {/* Amount range */}
             <div>
-              <p className="text-[#71717A] text-xs font-medium mb-2">Amount range</p>
+              <p className="text-muted-foreground text-xs font-medium mb-2">Amount range</p>
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#52525B] text-xs">₵</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 text-xs">₵</span>
                   <Input
                     type="number" min="0" step="0.01" placeholder="Min"
                     value={urlAmountMin}
                     onChange={e => updateParam('amtMin', e.target.value)}
-                    className="pl-6 h-9 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] text-sm focus-visible:ring-[#00D9A3]"
+                    className="pl-6 h-9 bg-input border-border text-foreground text-sm focus-visible:ring-accent"
                   />
                 </div>
-                <span className="text-[#52525B] text-xs">–</span>
+                <span className="text-muted-foreground/60 text-xs">–</span>
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#52525B] text-xs">₵</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 text-xs">₵</span>
                   <Input
                     type="number" min="0" step="0.01" placeholder="Max"
                     value={urlAmountMax}
                     onChange={e => updateParam('amtMax', e.target.value)}
-                    className="pl-6 h-9 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] text-sm focus-visible:ring-[#00D9A3]"
+                    className="pl-6 h-9 bg-input border-border text-foreground text-sm focus-visible:ring-accent"
                   />
                 </div>
               </div>
@@ -412,7 +412,7 @@ function TransactionsContent() {
 
             {/* Sort */}
             <div>
-              <p className="text-[#71717A] text-xs font-medium mb-2">Sort</p>
+              <p className="text-muted-foreground text-xs font-medium mb-2">Sort</p>
               <div className="flex flex-wrap gap-1.5">
                 {SORT_OPTIONS.map(({ value, label }) => (
                   <button
@@ -420,9 +420,9 @@ function TransactionsContent() {
                     onClick={() => updateParam('sort', value)}
                     className="h-7 px-3 rounded-lg text-xs font-medium border transition-all"
                     style={{
-                      borderColor: urlSort === value ? '#00D9A3' : '#27272A',
-                      backgroundColor: urlSort === value ? '#00D9A318' : '#1C1C1F',
-                      color: urlSort === value ? '#00D9A3' : '#71717A',
+                      borderColor: urlSort === value ? '#00D9A3' : 'var(--border)',
+                      backgroundColor: urlSort === value ? '#00D9A318' : 'var(--card)',
+                      color: urlSort === value ? '#00D9A3' : 'var(--muted-foreground)',
                     }}
                   >
                     {label}
@@ -456,12 +456,12 @@ function TransactionsContent() {
       {loading ? (
         <div className="px-4 md:px-8 space-y-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 rounded-xl bg-[#141416]" />
+            <Skeleton key={i} className="h-16 rounded-xl bg-muted" />
           ))}
         </div>
       ) : grouped.length === 0 ? (
         <div className="text-center py-20 px-4">
-          <p className="text-[#71717A] text-sm">No transactions match your filters.</p>
+          <p className="text-muted-foreground text-sm">No transactions match your filters.</p>
           {(activeFilterCount > 0 || search) && (
             <button
               onClick={() => { clearAllFilters(); setSearch(''); }}
@@ -475,13 +475,13 @@ function TransactionsContent() {
         <>
           <div className="space-y-4">
             {grouped.map(([date, txns]) => (
-              <div key={date} className="bg-[#141416] border border-[#27272A] rounded-2xl mx-4 md:mx-8 overflow-hidden">
-                <div className="px-4 py-2.5 border-b border-[#27272A]">
-                  <p className="text-xs font-medium text-[#71717A] uppercase tracking-wider">
+              <div key={date} className="bg-card border border-border rounded-2xl mx-4 md:mx-8 overflow-hidden">
+                <div className="px-4 py-2.5 border-b border-border">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     {formatTransactionDate(date)} · {format(new Date(date + 'T00:00:00'), 'MMM d, yyyy')}
                   </p>
                 </div>
-                <div className="divide-y divide-[#27272A]">
+                <div className="divide-y divide-border">
                   {txns.map((txn) => (
                     <TransactionItem key={txn.id} transaction={txn} />
                   ))}
@@ -496,7 +496,7 @@ function TransactionsContent() {
                 onClick={loadMore}
                 disabled={loadingMore}
                 variant="outline"
-                className="border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl"
+                className="border-border text-muted-foreground hover:bg-muted rounded-xl"
               >
                 {loadingMore ? (
                   <RefreshCw className="w-4 h-4 animate-spin mr-2" />
@@ -518,9 +518,9 @@ export default function TransactionsPage() {
     <Suspense
       fallback={
         <div className="max-w-2xl mx-auto px-4 pt-6 md:px-8 space-y-3">
-          <Skeleton className="h-8 w-40 rounded-xl bg-[#141416]" />
+          <Skeleton className="h-8 w-40 rounded-xl bg-muted" />
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 rounded-xl bg-[#141416]" />
+            <Skeleton key={i} className="h-16 rounded-xl bg-muted" />
           ))}
         </div>
       }
