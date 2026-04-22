@@ -102,9 +102,9 @@ export default function GoalDetailPage() {
       <div className="max-w-2xl mx-auto pb-8">
         <TopBar />
         <div className="px-4 md:px-8 space-y-4">
-          <Skeleton className="h-10 w-32 rounded-xl bg-[#141416]" />
-          <Skeleton className="h-36 rounded-2xl bg-[#141416]" />
-          <Skeleton className="h-48 rounded-2xl bg-[#141416]" />
+          <Skeleton className="h-10 w-32 rounded-xl bg-muted" />
+          <Skeleton className="h-36 rounded-2xl bg-muted" />
+          <Skeleton className="h-48 rounded-2xl bg-muted" />
         </div>
       </div>
     );
@@ -127,20 +127,20 @@ export default function GoalDetailPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.back()}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex-1" />
           <button
             onClick={() => setShowEdit(true)}
-            className="h-8 px-3 rounded-lg flex items-center gap-1.5 text-[#71717A] text-sm hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors"
+            className="h-8 px-3 rounded-lg flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground hover:bg-muted transition-colors"
           >
             <Pencil className="w-3.5 h-3.5" /> Edit
           </button>
           <button
             onClick={() => setConfirming(confirming === 'archive' ? null : 'archive')}
-            className="h-8 px-3 rounded-lg flex items-center gap-1.5 text-[#71717A] text-sm hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors"
+            className="h-8 px-3 rounded-lg flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground hover:bg-muted transition-colors"
           >
             <Archive className="w-3.5 h-3.5" /> Archive
           </button>
@@ -154,17 +154,17 @@ export default function GoalDetailPage() {
 
         {/* Confirm strips */}
         {confirming === 'archive' && (
-          <div className="flex items-center gap-3 bg-[#1C1C1F] border border-[#27272A] rounded-2xl px-4 py-3 text-sm">
-            <p className="text-[#A1A1AA] flex-1">Archive this goal? It won't appear in your list.</p>
+          <div className="flex items-center gap-3 bg-muted border border-border rounded-2xl px-4 py-3 text-sm">
+            <p className="text-muted-foreground flex-1">Archive this goal? It won't appear in your list.</p>
             <button onClick={handleArchive} className="text-[#FBBF24] font-medium hover:text-[#FCD34D]">Archive</button>
-            <button onClick={() => setConfirming(null)} className="text-[#71717A] hover:text-[#A1A1AA]">Cancel</button>
+            <button onClick={() => setConfirming(null)} className="text-muted-foreground hover:text-foreground">Cancel</button>
           </div>
         )}
         {confirming === 'delete' && (
-          <div className="flex items-center gap-3 bg-[#1C1C1F] border border-[#F43F5E]/30 rounded-2xl px-4 py-3 text-sm">
-            <p className="text-[#A1A1AA] flex-1">Delete permanently? Contributions stay as transactions.</p>
+          <div className="flex items-center gap-3 bg-muted border border-[#F43F5E]/30 rounded-2xl px-4 py-3 text-sm">
+            <p className="text-muted-foreground flex-1">Delete permanently? Contributions stay as transactions.</p>
             <button onClick={handleDelete} className="text-[#F43F5E] font-medium hover:text-[#FB7185]">Delete</button>
-            <button onClick={() => setConfirming(null)} className="text-[#71717A] hover:text-[#A1A1AA]">Cancel</button>
+            <button onClick={() => setConfirming(null)} className="text-muted-foreground hover:text-foreground">Cancel</button>
           </div>
         )}
 
@@ -172,7 +172,7 @@ export default function GoalDetailPage() {
         {previousGoal && (
           <button
             onClick={() => router.push(`/goals/${previousGoal.id}`)}
-            className="flex items-center gap-1.5 text-xs text-[#71717A] hover:text-[#A1A1AA] transition-colors"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-3 h-3" />
             Previous cycle: {previousGoal.name}
@@ -187,12 +187,12 @@ export default function GoalDetailPage() {
           <div className="flex items-center gap-3">
             <span className="text-3xl">{goal.icon ?? '🎯'}</span>
             <div>
-              <h1 className="text-[#FAFAFA] font-bold text-xl">{goal.name}</h1>
+              <h1 className="text-foreground font-bold text-xl">{goal.name}</h1>
               {goal.description && (
-                <p className="text-[#A1A1AA] text-sm mt-0.5">{goal.description}</p>
+                <p className="text-muted-foreground text-sm mt-0.5">{goal.description}</p>
               )}
               {isTarget && goal.cycle_count > 1 && (
-                <p className="text-[#71717A] text-xs mt-0.5">Cycle {goal.cycle_count}</p>
+                <p className="text-muted-foreground text-xs mt-0.5">Cycle {goal.cycle_count}</p>
               )}
             </div>
           </div>
@@ -204,7 +204,7 @@ export default function GoalDetailPage() {
                 {formatGHS(current_amount)}
               </span>
               {goal.target_amount && (
-                <span className="text-[#71717A] self-end">
+                <span className="text-muted-foreground self-end">
                   of {formatGHS(goal.target_amount)}
                 </span>
               )}
@@ -213,11 +213,11 @@ export default function GoalDetailPage() {
             {/* For target goals: show contribution / payment breakdown */}
             {isTarget && (totalContributions > 0 || totalPayments > 0) && (
               <div className="flex gap-3 text-xs">
-                <span className="text-[#71717A]">
+                <span className="text-muted-foreground">
                   <span style={{ color: accentColor }}>+{formatGHSCompact(totalContributions)}</span> saved
                 </span>
                 {totalPayments > 0 && (
-                  <span className="text-[#71717A]">
+                  <span className="text-muted-foreground">
                     <span className="text-[#F97316]">−{formatGHSCompact(totalPayments)}</span> paid
                   </span>
                 )}
@@ -226,7 +226,7 @@ export default function GoalDetailPage() {
 
             {!isPerpetual && progress_percent != null && (
               <>
-                <div className="h-3 bg-[#27272A] rounded-full overflow-hidden">
+                <div className="h-3 bg-muted rounded-full overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
                     style={{ background: accentColor }}
@@ -242,7 +242,7 @@ export default function GoalDetailPage() {
             )}
 
             {isPerpetual && (
-              <div className="flex items-center gap-1.5 text-xs text-[#71717A]">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Repeat className="w-3.5 h-3.5" style={{ color: accentColor }} />
                 Perpetual goal · all contributions count
               </div>
@@ -306,7 +306,7 @@ export default function GoalDetailPage() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <ArrowUpRight className="w-3.5 h-3.5" style={{ color: accentColor }} />
-              <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">
+              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
                 Contributions
               </p>
             </div>
@@ -323,7 +323,7 @@ export default function GoalDetailPage() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <ArrowDownLeft className="w-3.5 h-3.5 text-[#F97316]" />
-              <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">
+              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
                 Payments
               </p>
             </div>
@@ -355,8 +355,8 @@ export default function GoalDetailPage() {
 
 function StatTile({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div className="bg-[#141416]/60 rounded-xl p-3">
-      <p className="text-[#71717A] text-xs">{label}</p>
+    <div className="bg-card/60 rounded-xl p-3">
+      <p className="text-muted-foreground text-xs">{label}</p>
       <p className="font-semibold text-sm mt-0.5" style={{ color }}>{value}</p>
     </div>
   );
@@ -372,13 +372,13 @@ function TxRow({ tx, goal, type, accentColor }: { tx: Transaction; goal: Goal; t
     : (tx.account as { name: string } | null)?.name;
 
   return (
-    <div className="bg-[#141416] border border-[#27272A] rounded-xl px-4 py-3 flex items-center justify-between">
+    <div className="bg-card border border-border rounded-xl px-4 py-3 flex items-center justify-between">
       <div>
-        <p className="text-[#FAFAFA] text-sm">{label}</p>
-        <p className="text-[#71717A] text-xs mt-0.5">
+        <p className="text-foreground text-sm">{label}</p>
+        <p className="text-muted-foreground text-xs mt-0.5">
           {format(parseISO(tx.transaction_date), 'MMM d, yyyy')}
           {fromAccount && (
-            <span className="text-[#52525B]"> · {fromAccount}</span>
+            <span className="text-muted-foreground/70"> · {fromAccount}</span>
           )}
         </p>
       </div>
