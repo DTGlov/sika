@@ -26,11 +26,11 @@ export default async function MonthlyPage() {
       <div className="flex items-center gap-3 pt-6 mb-6">
         <Link
           href="/dashboard"
-          className="w-9 h-9 rounded-xl bg-[#141416] border border-[#27272A] flex items-center justify-center text-[#A1A1AA] hover:text-[#FAFAFA] hover:border-[#3F3F46] transition-colors"
+          className="w-9 h-9 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
         </Link>
-        <h1 className="text-xl font-bold text-[#FAFAFA]">Your Month</h1>
+        <h1 className="text-xl font-bold text-foreground">Your Month</h1>
       </div>
 
       {recap ? (
@@ -43,8 +43,8 @@ export default async function MonthlyPage() {
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center space-y-3">
           <div className="text-4xl">🔥</div>
-          <p className="text-[#FAFAFA] font-semibold">Your first recap drops at cycle end</p>
-          <p className="text-[#71717A] text-sm max-w-xs">
+          <p className="text-foreground font-semibold">Your first recap drops at cycle end</p>
+          <p className="text-muted-foreground text-sm max-w-xs">
             Log your transactions this month and Sika will write your money story on the last day of your budget cycle.
           </p>
         </div>
