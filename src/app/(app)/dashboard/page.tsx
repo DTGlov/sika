@@ -19,6 +19,7 @@ import { GoalsWidget } from '@/components/dashboard/goals-widget';
 import { HealthRow } from '@/components/dashboard/health-row';
 import { SikaDailyBanner } from '@/components/dashboard/sika-daily-banner';
 import { SikaMonthlyBanner } from '@/components/dashboard/sika-monthly-banner';
+import { InsightStrip } from '@/components/dashboard/insight-strip';
 import { SundayRecapCard } from '@/components/dashboard/sunday-recap-card';
 import { CycleCard } from '@/components/dashboard/cycle-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -40,6 +41,7 @@ import { fetchGoals, fetchGoalAmounts, computeGoalProgress } from '@/lib/goals';
 import type { BucketName, IncomeNudge, RecurringTransaction } from '@/types';
 import type { GoalProgress } from '@/types/goal';
 import type { DailyDigest } from '@/types/daily';
+import type { DailyInsightRow } from '@/types/insight';
 
 const BUCKETS: BucketName[] = ['needs', 'wants', 'future'];
 
@@ -77,6 +79,7 @@ function DashboardContent() {
   const [digestRead, setDigestRead] = useState(false);
   const [digestLoading, setDigestLoading] = useState(true);
   const [monthlyRecapId, setMonthlyRecapId] = useState<string | null>(null);
+  const [todayInsight, setTodayInsight] = useState<DailyInsightRow | null>(null);
 
   useEffect(() => {
     if (profile && profile.monthly_income === 0 && incomeSources.length === 0) {
@@ -127,6 +130,18 @@ function DashboardContent() {
       .then(({ data }) => {
         if (data) setMonthlyRecapId(data.id);
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Fetch today's AI insight
+  useEffect(() => {
+    if (!user) return;
+    fetch('/api/insights/today')
+      .then(r => r.json())
+      .then(({ insight }) => {
+        if (insight && !insight.dismissed_at) setTodayInsight(insight);
+      })
+      .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -272,6 +287,11 @@ function DashboardContent() {
         ) : todayDigest && !digestRead ? (
           <SikaDailyBanner digest={todayDigest} />
         ) : null}
+
+        {/* AI insight strip */}
+        {todayInsight && (
+          <InsightStrip row={todayInsight} onDismiss={() => setTodayInsight(null)} />
+        )}
 
         {/* Sika Monthly banner */}
         {monthlyRecapId && <SikaMonthlyBanner recapId={monthlyRecapId} />}
