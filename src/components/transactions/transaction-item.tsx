@@ -53,24 +53,24 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="flex items-center justify-between px-4 py-3.5 hover:bg-[#1C1C1F] transition-colors group"
+          className="flex items-center justify-between px-4 py-3.5 hover:bg-muted transition-colors group"
         >
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
               style={{
                 background: txn.type === 'adjustment'
-                  ? '#A1A1AA18'
+                  ? 'color-mix(in srgb, var(--muted-foreground) 10%, transparent)'
                   : txn.category?.bucket
                   ? `${txn.category.bucket.color}22`
-                  : '#1C1C1F',
+                  : 'var(--card)',
               }}
             >
-              {txn.type === 'adjustment' ? <Scale className="w-5 h-5 text-[#A1A1AA]" /> : getIconEmoji(txn.category?.icon ?? null)}
+              {txn.type === 'adjustment' ? <Scale className="w-5 h-5 text-muted-foreground" /> : getIconEmoji(txn.category?.icon ?? null)}
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <p className="text-[#FAFAFA] text-sm font-medium">
+                <p className="text-foreground text-sm font-medium">
                   {txn.type === 'transfer'
                     ? `${txn.account?.name ?? '?'} → ${txn.to_account?.name ?? '?'}`
                     : txn.type === 'adjustment'
@@ -78,14 +78,14 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
                     : (txn.category?.name ?? 'Uncategorized')}
                 </p>
                 {txn.type === 'adjustment' && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#A1A1AA18] text-[#A1A1AA] font-medium">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">
                     adj
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {txn.type !== 'transfer' && txn.account && (
-                  <span className="text-[#52525B] text-xs">{txn.account.name}</span>
+                  <span className="text-muted-foreground/70 text-xs">{txn.account.name}</span>
                 )}
                 {txn.generated_from_recurring && (
                   <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#60A5FA18] text-[#60A5FA] font-medium">
@@ -97,18 +97,18 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
                     🎯 From fund
                   </span>
                 )}
-                {txn.note && <p className="text-[#71717A] text-xs">{txn.note}</p>}
+                {txn.note && <p className="text-muted-foreground text-xs">{txn.note}</p>}
               </div>
-              <p className="text-[#71717A] text-xs">{formatTransactionDate(txn.transaction_date)}</p>
+              <p className="text-muted-foreground text-xs">{formatTransactionDate(txn.transaction_date)}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <p className={`amount text-sm font-semibold ${
               txn.type === 'income' ? 'text-[#00D9A3]' :
-              txn.type === 'transfer' ? 'text-[#A1A1AA]' :
+              txn.type === 'transfer' ? 'text-muted-foreground' :
               txn.type === 'adjustment' ? (txn.amount >= 0 ? 'text-[#00D9A3]' : 'text-[#F43F5E]') :
-              'text-[#FAFAFA]'
+              'text-foreground'
             }`}>
               {txn.type === 'income' ? '+' :
                txn.type === 'transfer' ? '' :
@@ -118,13 +118,13 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => openLogSheet(txn)}
-                className="w-8 h-8 rounded-lg bg-[#1C1C1F] text-[#A1A1AA] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-lg bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors"
               >
                 <Pencil className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={handleDelete}
-                className="w-8 h-8 rounded-lg bg-[#1C1C1F] text-[#A1A1AA] hover:text-[#F43F5E] flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-lg bg-muted text-muted-foreground hover:text-[#F43F5E] flex items-center justify-center transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
