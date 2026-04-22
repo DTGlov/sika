@@ -35,7 +35,7 @@ export function BadgeUnlockModal({ open, badgeId, onClose }: BadgeUnlockModalPro
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
         showCloseButton
-        className="max-w-[calc(100vw-32px)] sm:max-w-sm bg-[#0A0A0B] p-6 text-center"
+        className="max-w-[calc(100vw-32px)] sm:max-w-sm bg-card p-6 text-center"
         style={{
           borderColor: `${config.frameColor}40`,
           boxShadow: `0 0 60px ${config.frameColor}30, 0 0 20px ${config.frameColor}15`,
@@ -61,18 +61,18 @@ export function BadgeUnlockModal({ open, badgeId, onClose }: BadgeUnlockModalPro
           </div>
         </motion.div>
 
-        <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 text-[#71717A]">
+        <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 text-muted-foreground">
           Badge Unlocked
         </p>
         <h2 className="text-2xl font-bold mb-1" style={{ color: config.frameColor }}>
           {badge.name}
         </h2>
-        <p className="text-sm text-[#A1A1AA] leading-relaxed mb-6">{badge.description}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-6">{badge.description}</p>
 
         <button
           onClick={onClose}
           className="w-full h-11 rounded-xl font-semibold text-sm transition-colors hover:opacity-90"
-          style={{ background: config.frameColor, color: badge.rarity === 'rare' ? '#0A0A0B' : '#0A0A0B' }}
+          style={{ background: config.frameColor, color: '#0A0A0B' }}
         >
           Continue
         </button>

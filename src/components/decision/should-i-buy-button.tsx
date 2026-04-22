@@ -18,7 +18,7 @@ export function ShouldIBuyButton() {
         </div>
         <div className="flex-1">
           <p className="text-foreground text-sm font-semibold">Should I buy it?</p>
-          <p className="text-muted-foreground text-xs">Let Sika run the math</p>
+          <p className="text-muted-foreground text-xs leading-relaxed">Got a purchase in mind? Sika tells you if it&apos;s the right time to buy it</p>
         </div>
       </button>
       {open && <DecisionSheet onClose={() => setOpen(false)} />}
