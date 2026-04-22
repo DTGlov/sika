@@ -8,8 +8,8 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await supabase
-    .from('weekly_recaps')
-    .update({ viewed_at: new Date().toISOString() })
+    .from('monthly_recaps')
+    .update({ shared_at: new Date().toISOString() })
     .eq('id', recap_id)
     .eq('user_id', user.id);
 

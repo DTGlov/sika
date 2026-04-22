@@ -1,9 +1,9 @@
 import { ImageResponse } from 'next/og';
 import { createServiceClient } from '@/lib/supabase/service';
-import type { WeeklyCard } from '@/types/weekly';
+import type { MonthlyCard } from '@/types/monthly';
 
 export const runtime = 'nodejs';
-export const alt = 'My Sika Week';
+export const alt = 'My Sika Month';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -12,12 +12,12 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const supabase = createServiceClient();
 
   const { data: recap } = await supabase
-    .from('weekly_recaps')
-    .select('recap_data, week_start, week_end')
+    .from('monthly_recaps')
+    .select('recap_data, month_start, month_end')
     .eq('id', id)
     .single();
 
-  const cards: WeeklyCard[] = recap?.recap_data ?? [];
+  const cards: MonthlyCard[] = recap?.recap_data ?? [];
   const headlineCard = cards.find((c) => c.type === 'headline') ?? cards[0];
   const winCard = cards.find((c) => c.type === 'win') ?? null;
 
@@ -27,7 +27,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   };
 
   const weekLabel = recap
-    ? `${formatDate(recap.week_start)} — ${formatDate(recap.week_end)}`
+    ? `${formatDate(recap.month_start)} — ${formatDate(recap.month_end)}`
     : '';
 
   return new ImageResponse(
@@ -117,7 +117,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         {/* Footer */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 40 }}>
           <span style={{ color: '#52525B', fontSize: 16 }}>sika.app — track your money</span>
-          <span style={{ color: '#27272A', fontSize: 16 }}>weekly recap</span>
+          <span style={{ color: '#27272A', fontSize: 16 }}>monthly recap</span>
         </div>
       </div>
     ),

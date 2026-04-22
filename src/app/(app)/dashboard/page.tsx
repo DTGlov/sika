@@ -18,7 +18,7 @@ import { HintCard, BucketsTooltip } from '@/components/hint-card';
 import { GoalsWidget } from '@/components/dashboard/goals-widget';
 import { HealthRow } from '@/components/dashboard/health-row';
 import { SikaDailyBanner } from '@/components/dashboard/sika-daily-banner';
-import { SikaWeeklyBanner } from '@/components/dashboard/sika-weekly-banner';
+import { SikaMonthlyBanner } from '@/components/dashboard/sika-monthly-banner';
 import { SundayRecapCard } from '@/components/dashboard/sunday-recap-card';
 import { CycleCard } from '@/components/dashboard/cycle-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -76,7 +76,7 @@ function DashboardContent() {
   const [todayDigest, setTodayDigest] = useState<DailyDigest | null>(null);
   const [digestRead, setDigestRead] = useState(false);
   const [digestLoading, setDigestLoading] = useState(true);
-  const [weeklyRecapId, setWeeklyRecapId] = useState<string | null>(null);
+  const [monthlyRecapId, setMonthlyRecapId] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile && profile.monthly_income === 0 && incomeSources.length === 0) {
@@ -110,22 +110,22 @@ function DashboardContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Fetch latest unread weekly recap
+  // Fetch latest unread monthly recap
   useEffect(() => {
     if (!user) return;
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     supabase
-      .from('weekly_recaps')
+      .from('monthly_recaps')
       .select('id, viewed_at, generated_at')
       .eq('user_id', user.id)
       .is('viewed_at', null)
-      .gte('generated_at', sevenDaysAgo.toISOString())
-      .order('week_start', { ascending: false })
+      .gte('generated_at', thirtyDaysAgo.toISOString())
+      .order('month_start', { ascending: false })
       .limit(1)
       .single()
       .then(({ data }) => {
-        if (data) setWeeklyRecapId(data.id);
+        if (data) setMonthlyRecapId(data.id);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -273,8 +273,8 @@ function DashboardContent() {
           <SikaDailyBanner digest={todayDigest} />
         ) : null}
 
-        {/* Sika Weekly banner */}
-        {weeklyRecapId && <SikaWeeklyBanner recapId={weeklyRecapId} />}
+        {/* Sika Monthly banner */}
+        {monthlyRecapId && <SikaMonthlyBanner recapId={monthlyRecapId} />}
 
         {/* Virtual cycle card */}
         <div className="w-full md:max-w-[440px] md:mx-auto">

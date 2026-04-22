@@ -1,25 +1,25 @@
-export type WeeklyCardType =
+export type MonthlyCardType =
   | 'headline' | 'win' | 'side_eye' | 'trend'
   | 'goal_check' | 'next_move' | 'reflection';
 
-export type WeeklyAccent = 'green' | 'amber' | 'red' | 'blue' | 'neutral';
+export type MonthlyAccent = 'green' | 'amber' | 'red' | 'blue' | 'neutral';
 
-export type WeeklyCard = {
+export type MonthlyCard = {
   id: string;
-  type: WeeklyCardType;
+  type: MonthlyCardType;
   headline: string;
   body: string;
-  accent_color?: WeeklyAccent;
+  accent_color?: MonthlyAccent;
   stat?: { label: string; value: string };
   icon?: string;
 };
 
-export type WeeklyRecap = {
+export type MonthlyRecap = {
   id: string;
   user_id: string;
-  week_start: string;
-  week_end: string;
-  recap_data: WeeklyCard[];
+  month_start: string;
+  month_end: string;
+  recap_data: MonthlyCard[];
   generated_at: string;
   viewed_at: string | null;
   shared_at: string | null;
