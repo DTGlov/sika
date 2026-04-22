@@ -12,6 +12,19 @@ export function AppearanceSection() {
     setMounted(true);
   }, []);
 
+  const handleThemeChange = async (newTheme: 'light' | 'dark') => {
+    setTheme(newTheme);
+    try {
+      await fetch('/api/profile/theme', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme: newTheme }),
+      });
+    } catch {
+      // silent fail — UI already updated
+    }
+  };
+
   if (!mounted) {
     return (
       <div className="bg-card border border-border rounded-2xl p-5 mb-4">
@@ -37,7 +50,7 @@ export function AppearanceSection() {
       </p>
       <div className="grid grid-cols-2 gap-2">
         <button
-          onClick={() => setTheme('light')}
+          onClick={() => handleThemeChange('light')}
           className={`flex flex-col items-center gap-2 py-4 px-2 rounded-xl border transition-colors ${
             isLight
               ? 'border-accent bg-accent/10'
@@ -51,7 +64,7 @@ export function AppearanceSection() {
           </span>
         </button>
         <button
-          onClick={() => setTheme('dark')}
+          onClick={() => handleThemeChange('dark')}
           className={`flex flex-col items-center gap-2 py-4 px-2 rounded-xl border transition-colors ${
             !isLight
               ? 'border-accent bg-accent/10'

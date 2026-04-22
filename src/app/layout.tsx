@@ -4,7 +4,7 @@ import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 import { PwaRegister } from '@/components/pwa-register';
 import { PwaSplash } from '@/components/pwa-splash';
-import { DevThemeToggle } from '@/components/dev-theme-toggle';
+import { createClient } from '@/lib/supabase/server';
 import './globals.css';
 
 const geistSans = Geist({
@@ -42,7 +42,29 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+async function getUserTheme(): Promise<'light' | 'dark'> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return 'dark';
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('theme_preference')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    const pref = profile?.theme_preference;
+    if (pref === 'light' || pref === 'dark') return pref;
+    return 'dark';
+  } catch {
+    return 'dark';
+  }
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const userTheme = await getUserTheme();
+
   return (
     <html
       lang="en"
@@ -52,7 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full antialiased">
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme={userTheme}
           enableSystem={false}
           disableTransitionOnChange
           storageKey="sika-theme"
@@ -61,7 +83,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <Toaster richColors position="top-center" />
           <PwaRegister />
-          <DevThemeToggle />
         </ThemeProvider>
       </body>
     </html>
