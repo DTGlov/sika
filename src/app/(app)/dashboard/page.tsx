@@ -405,41 +405,44 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Buckets intro — shown once until dismissed */}
-        <HintCard
-          hintId="dashboard_buckets_intro"
-          title="How buckets work"
-          body="Your income is split 50/30/20 by default: Needs (must-haves like rent, food, transport), Wants (eating out, entertainment, gym), Future (savings, investments, emergency fund). Customize the split in Settings."
-          cta="Got it"
-        />
+        {/* Buckets — desktop only */}
+        <div className="hidden md:block space-y-4">
+          {/* Buckets intro — shown once until dismissed */}
+          <HintCard
+            hintId="dashboard_buckets_intro"
+            title="How buckets work"
+            body="Your income is split 50/30/20 by default: Needs (must-haves like rent, food, transport), Wants (eating out, entertainment, gym), Future (savings, investments, emergency fund). Customize the split in Settings."
+            cta="Got it"
+          />
 
-        {/* Bucket rings */}
-        <div>
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">Buckets</p>
-          <BucketsTooltip />
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          {(() => {
-            const sinkingFundEarmarked = goalProgresses
-              .filter(gp => gp.goal.goal_type === 'target' && !gp.goal.completed_at && gp.required_monthly_pace != null)
-              .reduce((s, gp) => s + (gp.required_monthly_pace ?? 0), 0);
-            return loading
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-40 rounded-2xl bg-[#141416]" />
-                ))
-              : BUCKETS.map((bucket, i) => (
-                  <BucketRing
-                    key={bucket}
-                    bucket={bucket}
-                    spent={dashboardStats?.bucketSpend[bucket] ?? 0}
-                    limit={dashboardStats?.bucketLimits[bucket] ?? 0}
-                    index={i}
-                    earmarked={bucket === 'future' ? sinkingFundEarmarked : undefined}
-                  />
-                ));
-          })()}
-        </div>
+          {/* Bucket rings */}
+          <div>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">Buckets</p>
+            <BucketsTooltip />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {(() => {
+              const sinkingFundEarmarked = goalProgresses
+                .filter(gp => gp.goal.goal_type === 'target' && !gp.goal.completed_at && gp.required_monthly_pace != null)
+                .reduce((s, gp) => s + (gp.required_monthly_pace ?? 0), 0);
+              return loading
+                ? Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-40 rounded-2xl bg-[#141416]" />
+                  ))
+                : BUCKETS.map((bucket, i) => (
+                    <BucketRing
+                      key={bucket}
+                      bucket={bucket}
+                      spent={dashboardStats?.bucketSpend[bucket] ?? 0}
+                      limit={dashboardStats?.bucketLimits[bucket] ?? 0}
+                      index={i}
+                      earmarked={bucket === 'future' ? sinkingFundEarmarked : undefined}
+                    />
+                  ));
+            })()}
+          </div>
+          </div>
         </div>
 
         {/* Spend summary cards */}
