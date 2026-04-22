@@ -52,7 +52,7 @@ function VerifyEmailContent() {
         </div>
       </div>
 
-      <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-6 text-center">
+      <div className="bg-card border border-border rounded-2xl p-6 text-center">
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -62,12 +62,12 @@ function VerifyEmailContent() {
           <MailCheck className="w-8 h-8 text-[#00D9A3]" />
         </motion.div>
 
-        <h1 className="text-xl font-bold text-[#FAFAFA] mb-2">Check your email</h1>
+        <h1 className="text-xl font-bold text-foreground mb-2">Check your email</h1>
 
-        <p className="text-[#A1A1AA] text-sm leading-relaxed mb-6">
+        <p className="text-muted-foreground text-sm leading-relaxed mb-6">
           We sent a verification link to{' '}
           {email ? (
-            <span className="text-[#FAFAFA] font-medium">{email}</span>
+            <span className="text-foreground font-medium">{email}</span>
           ) : (
             'your email address'
           )}
@@ -82,14 +82,14 @@ function VerifyEmailContent() {
           {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend verification email'}
         </Button>
 
-        <p className="mt-4 text-sm text-[#71717A]">
+        <p className="mt-4 text-sm text-muted-foreground">
           Wrong email?{' '}
           <Link href="/signup" className="text-[#00D9A3] hover:text-[#00F5B8] font-medium transition-colors">
             Sign up again
           </Link>
         </p>
 
-        <p className="mt-5 text-xs text-[#71717A]">
+        <p className="mt-5 text-xs text-muted-foreground">
           Check your spam folder if you don&apos;t see it within a minute.
         </p>
       </div>
@@ -108,11 +108,11 @@ function VerifyEmailSkeleton() {
           <span className="text-2xl font-bold tracking-tight">Sika</span>
         </div>
       </div>
-      <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-6 text-center space-y-4">
-        <Skeleton className="w-16 h-16 rounded-2xl mx-auto bg-[#27272A]" />
-        <Skeleton className="h-6 w-40 rounded-lg mx-auto bg-[#27272A]" />
-        <Skeleton className="h-4 w-64 rounded-lg mx-auto bg-[#27272A]" />
-        <Skeleton className="h-12 w-full rounded-xl bg-[#27272A]" />
+      <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-4">
+        <Skeleton className="w-16 h-16 rounded-2xl mx-auto bg-muted" />
+        <Skeleton className="h-6 w-40 rounded-lg mx-auto bg-muted" />
+        <Skeleton className="h-4 w-64 rounded-lg mx-auto bg-muted" />
+        <Skeleton className="h-12 w-full rounded-xl bg-muted" />
       </div>
     </div>
   );
