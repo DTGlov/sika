@@ -2,7 +2,81 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+/* ── Theme variables ────────────────────────────────────────────────
+   Applied via [data-theme] attribute on <html>.
+   ThemeProvider sets data-theme="dark" or "light" on mount.
+   Auto mode follows OS preference (defaults to dark on server).
+───────────────────────────────────────────────────────────────────── */
+
+[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-page: #0A0A0B;
+  --bg-surface: #141416;
+  --bg-elevated: #1C1C1F;
+  --bg-muted: #18181B;
+  /* Text */
+  --text-fg: #F5F5F5;
+  --text-fg-secondary: #A1A1AA;
+  --text-fg-muted: #71717A;
+  --text-fg-disabled: #52525B;
+  --text-fg-subtle: #3F3F46;
+  /* Shadcn overrides */
+  --background: #0A0A0B;
+  --foreground: #F5F5F5;
+  --card: #141416;
+  --card-foreground: #F5F5F5;
+  --popover: #141416;
+  --popover-foreground: #F5F5F5;
+  --primary: #00D9A3;
+  --primary-foreground: #0A0A0B;
+  --secondary: #1C1C1F;
+  --secondary-foreground: #F5F5F5;
+  --muted: #1C1C1F;
+  --muted-foreground: #71717A;
+  --accent: #00D9A3;
+  --accent-foreground: #0A0A0B;
+  --destructive: #F43F5E;
+  --border: #27272A;
+  --input: #1C1C1F;
+  --ring: #00D9A3;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  /* Backgrounds — premium warm off-whites */
+  --bg-page: #FAFAF7;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-muted: #F5F5F2;
+  /* Text — warm near-blacks */
+  --text-fg: #1A1A1A;
+  --text-fg-secondary: #525252;
+  --text-fg-muted: #999999;
+  --text-fg-disabled: #C4C4C4;
+  --text-fg-subtle: #D4D4D4;
+  /* Shadcn overrides */
+  --background: #FAFAF7;
+  --foreground: #1A1A1A;
+  --card: #FFFFFF;
+  --card-foreground: #1A1A1A;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1A1A;
+  --primary: #059669;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F5F5F2;
+  --secondary-foreground: #1A1A1A;
+  --muted: #F5F5F2;
+  --muted-foreground: #999999;
+  --accent: #059669;
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --border: rgba(0, 0, 0, 0.12);
+  --input: #F5F5F2;
+  --ring: #059669;
+  color-scheme: light;
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -28,22 +102,23 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-sika-base: #0A0A0B;
-  --color-sika-elevated: #141416;
-  --color-sika-hover: #1C1C1F;
-  --color-sika-text: #FAFAFA;
-  --color-sika-secondary: #A1A1AA;
-  --color-sika-muted: #71717A;
-  --color-sika-accent: #00D9A3;
-  --color-sika-accent-hover: #00B088;
-  --color-sika-accent-glow: #00F5B8;
-  --color-sika-success: #00D9A3;
-  --color-sika-warning: #FBBF24;
-  --color-sika-danger: #F43F5E;
-  --color-sika-border: #27272A;
+  /* Dynamic Sika tokens — these respond to [data-theme] changes */
+  --color-page: var(--bg-page);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-muted-bg: var(--bg-muted);
+  --color-fg: var(--text-fg);
+  --color-fg-secondary: var(--text-fg-secondary);
+  --color-fg-muted: var(--text-fg-muted);
+  --color-fg-disabled: var(--text-fg-disabled);
+  --color-fg-subtle: var(--text-fg-subtle);
+
+  /* Static Sika semantic colors — same in both themes */
   --color-sika-needs: #00D9A3;
   --color-sika-wants: #FBBF24;
   --color-sika-future: #60A5FA;
+  --color-sika-danger: #F43F5E;
+  --color-sika-warning: #FBBF24;
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -54,17 +129,18 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Default shadcn token values (active before ThemeProvider mounts — dark default) */
 :root {
   --background: #0A0A0B;
-  --foreground: #FAFAFA;
+  --foreground: #F5F5F5;
   --card: #141416;
-  --card-foreground: #FAFAFA;
+  --card-foreground: #F5F5F5;
   --popover: #141416;
-  --popover-foreground: #FAFAFA;
+  --popover-foreground: #F5F5F5;
   --primary: #00D9A3;
   --primary-foreground: #0A0A0B;
   --secondary: #1C1C1F;
-  --secondary-foreground: #FAFAFA;
+  --secondary-foreground: #F5F5F5;
   --muted: #1C1C1F;
   --muted-foreground: #71717A;
   --accent: #00D9A3;
@@ -74,27 +150,16 @@
   --input: #1C1C1F;
   --ring: #00D9A3;
   --radius: 0.75rem;
-}
-
-.dark {
-  --background: #0A0A0B;
-  --foreground: #FAFAFA;
-  --card: #141416;
-  --card-foreground: #FAFAFA;
-  --popover: #141416;
-  --popover-foreground: #FAFAFA;
-  --primary: #00D9A3;
-  --primary-foreground: #0A0A0B;
-  --secondary: #1C1C1F;
-  --secondary-foreground: #FAFAFA;
-  --muted: #1C1C1F;
-  --muted-foreground: #71717A;
-  --accent: #00D9A3;
-  --accent-foreground: #0A0A0B;
-  --destructive: #F43F5E;
-  --border: #27272A;
-  --input: #1C1C1F;
-  --ring: #00D9A3;
+  /* Sika theme vars — default dark */
+  --bg-page: #0A0A0B;
+  --bg-surface: #141416;
+  --bg-elevated: #1C1C1F;
+  --bg-muted: #18181B;
+  --text-fg: #F5F5F5;
+  --text-fg-secondary: #A1A1AA;
+  --text-fg-muted: #71717A;
+  --text-fg-disabled: #52525B;
+  --text-fg-subtle: #3F3F46;
 }
 
 @layer base {
@@ -102,27 +167,20 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-[#0A0A0B] text-[#FAFAFA] antialiased;
+    background: var(--bg-page);
+    color: var(--text-fg);
+    @apply antialiased;
   }
   html {
     @apply font-sans;
-    color-scheme: dark;
   }
 
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #27272A;
-    border-radius: 9999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #00D9A3;
-  }
+  [data-theme="dark"] ::-webkit-scrollbar-thumb { background: #27272A; }
+  [data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 }
 
 @layer utilities {
@@ -135,8 +193,11 @@
   .glow-accent {
     box-shadow: 0 0 20px rgba(0, 217, 163, 0.25);
   }
+  [data-theme="light"] .glow-accent {
+    box-shadow: 0 0 20px rgba(5, 150, 105, 0.12);
+  }
 
   .gradient-card {
-    background: linear-gradient(135deg, #141416 0%, #1C1C1F 100%);
+    background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%);
   }
 }

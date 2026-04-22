@@ -35,7 +35,7 @@ export function HealthRow() {
 
   if (!healthScore) {
     return (
-      <div className="w-full bg-[#141416] border border-[#27272A] rounded-2xl px-4 py-3 h-[62px] animate-pulse" />
+      <div className="w-full bg-surface border border-border rounded-2xl px-4 py-3 h-[62px] animate-pulse" />
     );
   }
 
@@ -44,14 +44,14 @@ export function HealthRow() {
   return (
     <button
       onClick={() => router.push('/health')}
-      className="w-full text-left bg-[#141416] border border-[#27272A] rounded-2xl px-4 py-3 hover:border-[#3F3F46] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
+      className="w-full text-left bg-surface border border-border rounded-2xl px-4 py-3 hover:border-border/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[#A1A1AA] text-sm">Your Sika score:</span>
-            <span className="text-[#FAFAFA] text-sm font-bold tabular-nums">{healthScore.total}</span>
-            <span className="text-[#52525B] text-sm">·</span>
+            <span className="text-fg-secondary text-sm">Your Sika score:</span>
+            <span className="text-fg text-sm font-bold tabular-nums">{healthScore.total}</span>
+            <span className="text-fg-disabled text-sm">·</span>
             <span className="text-sm font-semibold" style={{ color: labelCfg.color }}>
               {labelCfg.displayName}
             </span>
@@ -65,27 +65,27 @@ export function HealthRow() {
                   transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
                   className="flex items-center"
                 >
-                  <Flame className="w-3.5 h-3.5 text-[#F97316]" />
+                  <Flame className="w-3.5 h-3.5 text-orange-500" />
                 </motion.div>
-                <span className="text-[#71717A] text-xs tabular-nums">{loggingStreak}d</span>
+                <span className="text-fg-muted text-xs tabular-nums">{loggingStreak}d</span>
               </>
             )}
             {tier && (
               <>
-                {loggingStreak > 0 && <span className="text-[#3F3F46] text-xs">·</span>}
+                {loggingStreak > 0 && <span className="text-fg-disabled text-xs">·</span>}
                 <TierIcon tier={tier.id} size={14} />
-                <span className="text-[#71717A] text-xs">{tier.name}</span>
+                <span className="text-fg-muted text-xs">{tier.name}</span>
               </>
             )}
             {earnedBadges > 0 && (
               <>
-                <span className="text-[#3F3F46] text-xs">·</span>
-                <span className="text-[#71717A] text-xs">{earnedBadges}/{TOTAL_BADGES} badges</span>
+                <span className="text-fg-disabled text-xs">·</span>
+                <span className="text-fg-muted text-xs">{earnedBadges}/{TOTAL_BADGES} badges</span>
               </>
             )}
           </div>
         </div>
-        <ChevronRight className="w-4 h-4 text-[#52525B] shrink-0 ml-2" />
+        <ChevronRight className="w-4 h-4 text-fg-disabled shrink-0 ml-2" />
       </div>
     </button>
   );

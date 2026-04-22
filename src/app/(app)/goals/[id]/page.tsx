@@ -66,7 +66,6 @@ export default function GoalDetailPage() {
     setContributions(contribList);
     setPayments(paymentList);
 
-    // Fetch previous cycle goal if exists
     if (goal.previous_goal_id) {
       const { data: prev } = await supabase
         .from('goals')
@@ -102,9 +101,9 @@ export default function GoalDetailPage() {
       <div className="max-w-2xl mx-auto pb-8">
         <TopBar />
         <div className="px-4 md:px-8 space-y-4">
-          <Skeleton className="h-10 w-32 rounded-xl bg-[#141416]" />
-          <Skeleton className="h-36 rounded-2xl bg-[#141416]" />
-          <Skeleton className="h-48 rounded-2xl bg-[#141416]" />
+          <Skeleton className="h-10 w-32 rounded-xl bg-surface" />
+          <Skeleton className="h-36 rounded-2xl bg-surface" />
+          <Skeleton className="h-48 rounded-2xl bg-surface" />
         </div>
       </div>
     );
@@ -113,7 +112,7 @@ export default function GoalDetailPage() {
   if (!goalProgress) return null;
 
   const { goal, current_amount, progress_percent, days_remaining, required_monthly_pace, is_on_track } = goalProgress;
-  const accentColor = goal.color ?? '#00D9A3';
+  const accentColor = goal.color ?? 'var(--accent)';
   const isPerpetual = goal.goal_type === 'perpetual';
   const isTarget = goal.goal_type === 'target';
   const totalContributions = contributions.reduce((s, t) => s + t.amount, 0);
@@ -127,26 +126,26 @@ export default function GoalDetailPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.back()}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-fg-muted hover:text-fg hover:bg-elevated transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex-1" />
           <button
             onClick={() => setShowEdit(true)}
-            className="h-8 px-3 rounded-lg flex items-center gap-1.5 text-[#71717A] text-sm hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors"
+            className="h-8 px-3 rounded-lg flex items-center gap-1.5 text-fg-muted text-sm hover:text-fg hover:bg-elevated transition-colors"
           >
             <Pencil className="w-3.5 h-3.5" /> Edit
           </button>
           <button
             onClick={() => setConfirming(confirming === 'archive' ? null : 'archive')}
-            className="h-8 px-3 rounded-lg flex items-center gap-1.5 text-[#71717A] text-sm hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors"
+            className="h-8 px-3 rounded-lg flex items-center gap-1.5 text-fg-muted text-sm hover:text-fg hover:bg-elevated transition-colors"
           >
             <Archive className="w-3.5 h-3.5" /> Archive
           </button>
           <button
             onClick={() => setConfirming(confirming === 'delete' ? null : 'delete')}
-            className="h-8 px-3 rounded-lg flex items-center gap-1.5 text-[#F43F5E] text-sm hover:bg-[#F43F5E]/10 transition-colors"
+            className="h-8 px-3 rounded-lg flex items-center gap-1.5 text-destructive text-sm hover:bg-destructive/10 transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -154,17 +153,17 @@ export default function GoalDetailPage() {
 
         {/* Confirm strips */}
         {confirming === 'archive' && (
-          <div className="flex items-center gap-3 bg-[#1C1C1F] border border-[#27272A] rounded-2xl px-4 py-3 text-sm">
-            <p className="text-[#A1A1AA] flex-1">Archive this goal? It won't appear in your list.</p>
-            <button onClick={handleArchive} className="text-[#FBBF24] font-medium hover:text-[#FCD34D]">Archive</button>
-            <button onClick={() => setConfirming(null)} className="text-[#71717A] hover:text-[#A1A1AA]">Cancel</button>
+          <div className="flex items-center gap-3 bg-elevated border border-border rounded-2xl px-4 py-3 text-sm">
+            <p className="text-fg-secondary flex-1">Archive this goal? It won&apos;t appear in your list.</p>
+            <button onClick={handleArchive} className="text-sika-wants font-medium hover:text-sika-wants/80">Archive</button>
+            <button onClick={() => setConfirming(null)} className="text-fg-muted hover:text-fg-secondary">Cancel</button>
           </div>
         )}
         {confirming === 'delete' && (
-          <div className="flex items-center gap-3 bg-[#1C1C1F] border border-[#F43F5E]/30 rounded-2xl px-4 py-3 text-sm">
-            <p className="text-[#A1A1AA] flex-1">Delete permanently? Contributions stay as transactions.</p>
-            <button onClick={handleDelete} className="text-[#F43F5E] font-medium hover:text-[#FB7185]">Delete</button>
-            <button onClick={() => setConfirming(null)} className="text-[#71717A] hover:text-[#A1A1AA]">Cancel</button>
+          <div className="flex items-center gap-3 bg-elevated border border-destructive/30 rounded-2xl px-4 py-3 text-sm">
+            <p className="text-fg-secondary flex-1">Delete permanently? Contributions stay as transactions.</p>
+            <button onClick={handleDelete} className="text-destructive font-medium hover:text-destructive/80">Delete</button>
+            <button onClick={() => setConfirming(null)} className="text-fg-muted hover:text-fg-secondary">Cancel</button>
           </div>
         )}
 
@@ -172,7 +171,7 @@ export default function GoalDetailPage() {
         {previousGoal && (
           <button
             onClick={() => router.push(`/goals/${previousGoal.id}`)}
-            className="flex items-center gap-1.5 text-xs text-[#71717A] hover:text-[#A1A1AA] transition-colors"
+            className="flex items-center gap-1.5 text-xs text-fg-muted hover:text-fg-secondary transition-colors"
           >
             <ArrowLeft className="w-3 h-3" />
             Previous cycle: {previousGoal.name}
@@ -187,12 +186,12 @@ export default function GoalDetailPage() {
           <div className="flex items-center gap-3">
             <span className="text-3xl">{goal.icon ?? '🎯'}</span>
             <div>
-              <h1 className="text-[#FAFAFA] font-bold text-xl">{goal.name}</h1>
+              <h1 className="text-fg font-bold text-xl">{goal.name}</h1>
               {goal.description && (
-                <p className="text-[#A1A1AA] text-sm mt-0.5">{goal.description}</p>
+                <p className="text-fg-secondary text-sm mt-0.5">{goal.description}</p>
               )}
               {isTarget && goal.cycle_count > 1 && (
-                <p className="text-[#71717A] text-xs mt-0.5">Cycle {goal.cycle_count}</p>
+                <p className="text-fg-muted text-xs mt-0.5">Cycle {goal.cycle_count}</p>
               )}
             </div>
           </div>
@@ -204,21 +203,20 @@ export default function GoalDetailPage() {
                 {formatGHS(current_amount)}
               </span>
               {goal.target_amount && (
-                <span className="text-[#71717A] self-end">
+                <span className="text-fg-muted self-end">
                   of {formatGHS(goal.target_amount)}
                 </span>
               )}
             </div>
 
-            {/* For target goals: show contribution / payment breakdown */}
             {isTarget && (totalContributions > 0 || totalPayments > 0) && (
               <div className="flex gap-3 text-xs">
-                <span className="text-[#71717A]">
+                <span className="text-fg-muted">
                   <span style={{ color: accentColor }}>+{formatGHSCompact(totalContributions)}</span> saved
                 </span>
                 {totalPayments > 0 && (
-                  <span className="text-[#71717A]">
-                    <span className="text-[#F97316]">−{formatGHSCompact(totalPayments)}</span> paid
+                  <span className="text-fg-muted">
+                    <span className="text-orange-500">−{formatGHSCompact(totalPayments)}</span> paid
                   </span>
                 )}
               </div>
@@ -226,7 +224,7 @@ export default function GoalDetailPage() {
 
             {!isPerpetual && progress_percent != null && (
               <>
-                <div className="h-3 bg-[#27272A] rounded-full overflow-hidden">
+                <div className="h-3 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                   <motion.div
                     className="h-full rounded-full"
                     style={{ background: accentColor }}
@@ -242,7 +240,7 @@ export default function GoalDetailPage() {
             )}
 
             {isPerpetual && (
-              <div className="flex items-center gap-1.5 text-xs text-[#71717A]">
+              <div className="flex items-center gap-1.5 text-xs text-fg-muted">
                 <Repeat className="w-3.5 h-3.5" style={{ color: accentColor }} />
                 Perpetual goal · all contributions count
               </div>
@@ -261,7 +259,7 @@ export default function GoalDetailPage() {
               <StatTile
                 label="Status"
                 value={is_on_track ? 'On Track' : 'Behind'}
-                color={is_on_track ? '#00D9A3' : '#F97316'}
+                color={is_on_track ? 'var(--accent)' : '#F97316'}
               />
             )}
             {goal.completed_at && (
@@ -284,8 +282,8 @@ export default function GoalDetailPage() {
           {!goal.completed_at && (
             <button
               onClick={() => setShowContribute(true)}
-              className="w-full h-11 rounded-xl font-semibold text-sm text-[#0A0A0B] transition-colors hover:opacity-90"
-              style={{ background: accentColor }}
+              className="w-full h-11 rounded-xl font-semibold text-sm transition-colors hover:opacity-90"
+              style={{ background: accentColor, color: '#0A0A0B' }}
             >
               + Add Contribution
             </button>
@@ -306,7 +304,7 @@ export default function GoalDetailPage() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <ArrowUpRight className="w-3.5 h-3.5" style={{ color: accentColor }} />
-              <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">
+              <p className="text-fg-muted text-xs font-medium uppercase tracking-wider">
                 Contributions
               </p>
             </div>
@@ -322,8 +320,8 @@ export default function GoalDetailPage() {
         {isTarget && payments.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <ArrowDownLeft className="w-3.5 h-3.5 text-[#F97316]" />
-              <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">
+              <ArrowDownLeft className="w-3.5 h-3.5 text-orange-500" />
+              <p className="text-fg-muted text-xs font-medium uppercase tracking-wider">
                 Payments
               </p>
             </div>
@@ -355,8 +353,8 @@ export default function GoalDetailPage() {
 
 function StatTile({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div className="bg-[#141416]/60 rounded-xl p-3">
-      <p className="text-[#71717A] text-xs">{label}</p>
+    <div className="bg-surface/60 rounded-xl p-3">
+      <p className="text-fg-muted text-xs">{label}</p>
       <p className="font-semibold text-sm mt-0.5" style={{ color }}>{value}</p>
     </div>
   );
@@ -367,18 +365,16 @@ function TxRow({ tx, goal, type, accentColor }: { tx: Transaction; goal: Goal; t
     ? (tx.note || `Contribution to ${goal.name}`)
     : (tx.note || (tx as { category?: { name?: string } }).category?.name || `Payment from ${goal.name}`);
 
-  const fromAccount = type === 'contribution'
-    ? (tx.account as { name: string } | null)?.name
-    : (tx.account as { name: string } | null)?.name;
+  const fromAccount = (tx.account as { name: string } | null)?.name;
 
   return (
-    <div className="bg-[#141416] border border-[#27272A] rounded-xl px-4 py-3 flex items-center justify-between">
+    <div className="bg-surface border border-border rounded-xl px-4 py-3 flex items-center justify-between">
       <div>
-        <p className="text-[#FAFAFA] text-sm">{label}</p>
-        <p className="text-[#71717A] text-xs mt-0.5">
+        <p className="text-fg text-sm">{label}</p>
+        <p className="text-fg-muted text-xs mt-0.5">
           {format(parseISO(tx.transaction_date), 'MMM d, yyyy')}
           {fromAccount && (
-            <span className="text-[#52525B]"> · {fromAccount}</span>
+            <span className="text-fg-disabled"> · {fromAccount}</span>
           )}
         </p>
       </div>

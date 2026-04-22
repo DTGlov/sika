@@ -53,14 +53,14 @@ export function BadgeCard({ badge, size = 'md' }: BadgeCardProps) {
           />
         )}
         {!badge.unlocked && (
-          <Lock className="absolute -bottom-1 -right-1 w-3 h-3 text-[#52525B] bg-[#0A0A0B] rounded-full p-0.5" />
+          <Lock className="absolute -bottom-1 -right-1 w-3 h-3 text-fg-disabled bg-page rounded-full p-0.5" />
         )}
       </div>
       <div className="space-y-0.5">
-        <p className={cn('text-xs font-semibold', badge.unlocked ? 'text-[#FAFAFA]' : 'text-[#71717A]')}>
+        <p className={cn('text-xs font-semibold', badge.unlocked ? 'text-fg' : 'text-fg-muted')}>
           {badge.name}
         </p>
-        <p className="text-[10px] text-[#52525B] leading-tight max-w-[120px]">
+        <p className="text-[10px] text-fg-disabled leading-tight max-w-[120px]">
           {badge.description}
         </p>
       </div>

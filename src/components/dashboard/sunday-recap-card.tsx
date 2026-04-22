@@ -31,7 +31,6 @@ export function SundayRecapCard() {
   const [data, setData] = useState<RecapData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Only show on Sundays
   const isSunday = new Date().getDay() === 0;
   const isDismissed = dismissedHints.includes(hintId);
 
@@ -43,7 +42,6 @@ export function SundayRecapCard() {
     const weekEnd = format(endOfISOWeek(now), 'yyyy-MM-dd');
 
     Promise.all([
-      // Distinct logging days this week
       supabase
         .from('transactions')
         .select('transaction_date')
@@ -51,7 +49,6 @@ export function SundayRecapCard() {
         .gte('transaction_date', weekStart)
         .lte('transaction_date', weekEnd)
         .neq('type', 'adjustment'),
-      // Goal contributions this week
       supabase
         .from('transactions')
         .select('amount, goal_id')
@@ -89,13 +86,13 @@ export function SundayRecapCard() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
-      className="bg-gradient-to-br from-[#141416] to-[#1A1A20] border border-[#00D9A3]/20 rounded-2xl p-4"
+      className="bg-gradient-to-br from-surface to-elevated border border-accent/20 rounded-2xl p-4"
     >
       <div className="flex items-start justify-between mb-3">
-        <p className="text-[#FAFAFA] text-sm font-semibold">📊 Your week in money</p>
+        <p className="text-fg text-sm font-semibold">📊 Your week in money</p>
         <button
           onClick={handleDismiss}
-          className="text-[#52525B] hover:text-[#A1A1AA] transition-colors shrink-0"
+          className="text-fg-disabled hover:text-fg-secondary transition-colors shrink-0"
           aria-label="Dismiss weekly recap"
         >
           <X className="w-3.5 h-3.5" />
@@ -105,18 +102,18 @@ export function SundayRecapCard() {
       <div className="space-y-1.5">
         <div className="flex items-center gap-2 text-sm">
           <span>🔥</span>
-          <span className="text-[#A1A1AA]">Logging:</span>
-          <span className="text-[#FAFAFA] font-medium">{data.loggingDays}/7 days</span>
+          <span className="text-fg-secondary">Logging:</span>
+          <span className="text-fg font-medium">{data.loggingDays}/7 days</span>
         </div>
 
         {data.savedTotal > 0 && (
           <div className="flex items-center gap-2 text-sm">
             <span>💰</span>
-            <span className="text-[#A1A1AA]">Saved:</span>
-            <span className="text-[#FAFAFA] font-medium">
+            <span className="text-fg-secondary">Saved:</span>
+            <span className="text-fg font-medium">
               {formatGHS(data.savedTotal)}
               {data.goalsCount > 0 && (
-                <span className="text-[#71717A] font-normal">
+                <span className="text-fg-muted font-normal">
                   {' '}to {data.goalsCount} goal{data.goalsCount !== 1 ? 's' : ''}
                 </span>
               )}
@@ -125,7 +122,7 @@ export function SundayRecapCard() {
         )}
 
         {data.loggingDays === 0 && data.savedTotal === 0 && (
-          <p className="text-[#71717A] text-xs">Quiet week — that&apos;s okay. Fresh start tomorrow.</p>
+          <p className="text-fg-muted text-xs">Quiet week — that&apos;s okay. Fresh start tomorrow.</p>
         )}
       </div>
     </motion.div>

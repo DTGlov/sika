@@ -54,7 +54,7 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
   const numAmount = parseFloat(amount) || 0;
   const afterAmount = current_amount + numAmount;
   const afterPercent = target_amount ? Math.min(100, (afterAmount / target_amount) * 100) : null;
-  const accentColor = goal.color ?? '#00D9A3';
+  const accentColor = goal.color ?? 'var(--accent)';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -73,7 +73,6 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
         currentAmount: current_amount,
       });
       revalidateForEntity('goal_contribution');
-      // Update savings streak + check streak badges
       updateSavingsStreak(supabase, user.id).then(result => {
         if (result.streaks) setStreaks(result.streaks);
         if (result.milestone_hit) {
@@ -85,14 +84,12 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
           if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
         });
       });
-      // Award momentum
       awardMomentum(supabase, user.id, 'goal_contribution').then(result => {
         setMomentum(result.momentum);
         const floatId = `${Date.now()}-${Math.random()}`;
         setMomentumFloats(prev => [...prev, { id: floatId, points: result.points_awarded }]);
         if (result.tier_changed) setTierUpTier(result.new_tier);
       });
-      // Check contribution + safety_net badges
       checkAndUnlockBadges(supabase, user.id, 'contribution_made').then(({ newlyUnlocked }) => {
         if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
       });
@@ -122,16 +119,16 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-            className="fixed inset-x-4 bottom-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-sm z-50 bg-[#141416] border border-[#27272A] rounded-3xl shadow-2xl overflow-hidden"
+            className="fixed inset-x-4 bottom-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-sm z-50 bg-surface border border-border rounded-3xl shadow-2xl overflow-hidden"
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#27272A]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <div className="flex items-center gap-2">
                 <span className="text-lg">{goal.icon ?? '🎯'}</span>
-                <h2 className="text-[#FAFAFA] font-semibold text-base">Contribute</h2>
+                <h2 className="text-fg font-semibold text-base">Contribute</h2>
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#27272A] transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-fg-muted hover:text-fg hover:bg-elevated transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -139,17 +136,17 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
 
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               {/* Live progress preview */}
-              <div className="bg-[#1C1C1F] rounded-2xl p-4 space-y-3">
+              <div className="bg-elevated rounded-2xl p-4 space-y-3">
                 <div className="flex justify-between text-xs">
-                  <span className="text-[#71717A]">{goal.name}</span>
+                  <span className="text-fg-muted">{goal.name}</span>
                   {target_amount && (
-                    <span className="text-[#A1A1AA]">
+                    <span className="text-fg-secondary">
                       {formatGHS(afterAmount)} / {formatGHS(target_amount)}
                     </span>
                   )}
                 </div>
                 {afterPercent != null && (
-                  <div className="h-2 bg-[#27272A] rounded-full overflow-hidden">
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                     <motion.div
                       className="h-full rounded-full"
                       style={{ background: accentColor }}
@@ -160,8 +157,8 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
                   </div>
                 )}
                 <div className="flex justify-between text-xs">
-                  <span className="text-[#71717A]">
-                    Current: <span className="text-[#FAFAFA]">{formatGHS(current_amount)}</span>
+                  <span className="text-fg-muted">
+                    Current: <span className="text-fg">{formatGHS(current_amount)}</span>
                   </span>
                   {numAmount > 0 && (
                     <span style={{ color: accentColor }}>+{formatGHS(numAmount)}</span>
@@ -171,11 +168,11 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
 
               {/* From account */}
               <div>
-                <label className="text-[#71717A] text-xs font-medium block mb-1.5">From Account</label>
+                <label className="text-fg-muted text-xs font-medium block mb-1.5">From Account</label>
                 <select
                   value={fromAccountId}
                   onChange={e => setFromAccountId(e.target.value)}
-                  className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#00D9A3] transition-colors"
+                  className="w-full bg-elevated border border-border rounded-xl px-3 py-2.5 text-sm text-fg focus:outline-none focus:border-accent transition-colors"
                 >
                   <option value="">Select account</option>
                   {sourceAccounts.map(a => (
@@ -186,7 +183,7 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
 
               {/* Amount */}
               <div>
-                <label className="text-[#71717A] text-xs font-medium block mb-1.5">Amount</label>
+                <label className="text-fg-muted text-xs font-medium block mb-1.5">Amount</label>
                 <input
                   type="number"
                   min="0.01"
@@ -194,37 +191,37 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
                   placeholder="0.00"
-                  className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] placeholder-[#52525B] focus:outline-none focus:border-[#00D9A3] transition-colors"
+                  className="w-full bg-elevated border border-border rounded-xl px-3 py-2.5 text-sm text-fg placeholder-fg-disabled focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
 
               {/* Date */}
               <div>
-                <label className="text-[#71717A] text-xs font-medium block mb-1.5">Date</label>
+                <label className="text-fg-muted text-xs font-medium block mb-1.5">Date</label>
                 <input
                   type="date"
                   value={transactionDate}
                   onChange={e => setTransactionDate(e.target.value)}
-                  className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#00D9A3] transition-colors"
+                  className="w-full bg-elevated border border-border rounded-xl px-3 py-2.5 text-sm text-fg focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
 
               {/* Note */}
               <div>
-                <label className="text-[#71717A] text-xs font-medium block mb-1.5">Note (optional)</label>
+                <label className="text-fg-muted text-xs font-medium block mb-1.5">Note (optional)</label>
                 <input
                   value={note}
                   onChange={e => setNote(e.target.value)}
                   placeholder={`Contribution to ${goal.name}`}
-                  className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] placeholder-[#52525B] focus:outline-none focus:border-[#00D9A3] transition-colors"
+                  className="w-full bg-elevated border border-border rounded-xl px-3 py-2.5 text-sm text-fg placeholder-fg-disabled focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full h-11 rounded-xl font-semibold text-sm text-[#0A0A0B] transition-colors disabled:opacity-50"
-                style={{ background: accentColor }}
+                className="w-full h-11 rounded-xl font-semibold text-sm transition-colors disabled:opacity-50"
+                style={{ background: accentColor, color: '#0A0A0B' }}
               >
                 {saving ? 'Adding…' : 'Add Contribution'}
               </button>

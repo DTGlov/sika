@@ -39,32 +39,32 @@ export default function BadgesPage() {
   return (
     <div className="max-w-2xl mx-auto pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#0A0A0B] border-b border-[#141416]">
+      <div className="sticky top-0 z-10 bg-page border-b border-surface">
         <div className="flex items-center gap-3 px-4 h-14">
           <button
             onClick={() => router.back()}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-fg-muted hover:text-fg hover:bg-elevated transition-colors"
             aria-label="Go back"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-[#FAFAFA] font-semibold text-base">Your Badges</h1>
+          <h1 className="text-fg font-semibold text-base">Your Badges</h1>
         </div>
       </div>
 
       <div className="px-4 md:px-8 pt-6 space-y-8">
         {/* Progress count */}
-        <p className="text-sm text-[#71717A]">
+        <p className="text-sm text-fg-muted">
           Earned:{' '}
-          <span className="text-[#FAFAFA] font-semibold">{earned.length}</span>
+          <span className="text-fg font-semibold">{earned.length}</span>
           {' '}of{' '}
-          <span className="text-[#FAFAFA] font-semibold">{allBadges.length}</span>
+          <span className="text-fg font-semibold">{allBadges.length}</span>
         </p>
 
         {/* Earned section */}
         {earned.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-[#FAFAFA] font-semibold text-sm uppercase tracking-wider">Earned</h2>
+            <h2 className="text-fg font-semibold text-sm uppercase tracking-wider">Earned</h2>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-6">
               {earned.map(badge => (
                 <BadgeCard key={badge.id} badge={badge} size="md" />
@@ -76,7 +76,7 @@ export default function BadgesPage() {
         {/* Locked section */}
         {locked.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-[#71717A] font-semibold text-sm uppercase tracking-wider">Locked</h2>
+            <h2 className="text-fg-muted font-semibold text-sm uppercase tracking-wider">Locked</h2>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-6">
               {locked.map(badge => (
                 <BadgeCard key={badge.id} badge={badge} size="md" />

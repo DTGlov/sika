@@ -124,15 +124,15 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-            className="fixed inset-x-4 bottom-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg z-50 bg-[#141416] border border-[#27272A] rounded-3xl shadow-2xl overflow-hidden"
+            className="fixed inset-x-4 bottom-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg z-50 bg-surface border border-border rounded-3xl shadow-2xl overflow-hidden"
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#27272A]">
-              <h2 className="text-[#FAFAFA] font-semibold text-base">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <h2 className="text-fg font-semibold text-base">
                 {goal ? 'Edit Goal' : 'New Goal'}
               </h2>
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#27272A] transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-fg-muted hover:text-fg hover:bg-elevated transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -142,7 +142,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
               {/* Icon + Color row */}
               <div className="flex gap-4">
                 <div>
-                  <label className="text-[#71717A] text-xs font-medium block mb-2">Icon</label>
+                  <label className="text-fg-muted text-xs font-medium block mb-2">Icon</label>
                   <div className="flex flex-wrap gap-1.5 w-48">
                     {ICON_OPTIONS.map(ic => (
                       <button
@@ -151,8 +151,8 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
                         onClick={() => setIcon(ic)}
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-base transition-colors"
                         style={{
-                          background: icon === ic ? color + '33' : '#1C1C1F',
-                          border: `1px solid ${icon === ic ? color : '#27272A'}`,
+                          background: icon === ic ? color + '33' : 'var(--bg-elevated)',
+                          border: `1px solid ${icon === ic ? color : 'var(--border)'}`,
                         }}
                       >
                         {ic}
@@ -162,7 +162,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
                 </div>
 
                 <div className="flex-1">
-                  <label className="text-[#71717A] text-xs font-medium block mb-2">Color</label>
+                  <label className="text-fg-muted text-xs font-medium block mb-2">Color</label>
                   <div className="flex flex-wrap gap-2">
                     {GOAL_COLORS.map(c => (
                       <button
@@ -181,31 +181,31 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
 
               {/* Name */}
               <div>
-                <label className="text-[#71717A] text-xs font-medium block mb-1.5">Name *</label>
+                <label className="text-fg-muted text-xs font-medium block mb-1.5">Name *</label>
                 <input
                   value={name}
                   onChange={e => setName(e.target.value)}
                   maxLength={80}
                   placeholder="e.g. Life Savings"
-                  className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] placeholder-[#52525B] focus:outline-none focus:border-[#00D9A3] transition-colors"
+                  className="w-full bg-elevated border border-border rounded-xl px-3 py-2.5 text-sm text-fg placeholder:text-fg-disabled focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="text-[#71717A] text-xs font-medium block mb-1.5">Description</label>
+                <label className="text-fg-muted text-xs font-medium block mb-1.5">Description</label>
                 <textarea
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   rows={2}
                   placeholder="Optional note about this goal"
-                  className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] placeholder-[#52525B] focus:outline-none focus:border-[#00D9A3] transition-colors resize-none"
+                  className="w-full bg-elevated border border-border rounded-xl px-3 py-2.5 text-sm text-fg placeholder:text-fg-disabled focus:outline-none focus:border-accent transition-colors resize-none"
                 />
               </div>
 
               {/* Goal type */}
               <div>
-                <label className="text-[#71717A] text-xs font-medium block mb-2">Type *</label>
+                <label className="text-fg-muted text-xs font-medium block mb-2">Type *</label>
                 <div className="space-y-2">
                   {GOAL_TYPE_OPTIONS.map(opt => (
                     <button
@@ -214,21 +214,21 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
                       onClick={() => setGoalType(opt.value)}
                       className="w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-colors"
                       style={{
-                        background: goalType === opt.value ? color + '15' : '#1C1C1F',
-                        borderColor: goalType === opt.value ? color : '#27272A',
+                        background: goalType === opt.value ? color + '15' : 'var(--bg-elevated)',
+                        borderColor: goalType === opt.value ? color : 'var(--border)',
                       }}
                     >
                       <div
                         className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5"
-                        style={{ borderColor: goalType === opt.value ? color : '#52525B' }}
+                        style={{ borderColor: goalType === opt.value ? color : 'var(--text-fg-disabled)' }}
                       >
                         {goalType === opt.value && (
                           <div className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
                         )}
                       </div>
                       <div>
-                        <p className="text-[#FAFAFA] text-sm font-medium">{opt.label}</p>
-                        <p className="text-[#71717A] text-xs mt-0.5">{opt.description}</p>
+                        <p className="text-fg text-sm font-medium">{opt.label}</p>
+                        <p className="text-fg-muted text-xs mt-0.5">{opt.description}</p>
                       </div>
                     </button>
                   ))}
@@ -239,7 +239,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
               {needsTarget && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[#71717A] text-xs font-medium block mb-1.5">Target Amount *</label>
+                    <label className="text-fg-muted text-xs font-medium block mb-1.5">Target Amount *</label>
                     <input
                       type="number"
                       min="0.01"
@@ -247,16 +247,16 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
                       value={targetAmount}
                       onChange={e => setTargetAmount(e.target.value)}
                       placeholder="0.00"
-                      className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] placeholder-[#52525B] focus:outline-none focus:border-[#00D9A3] transition-colors"
+                      className="w-full bg-elevated border border-border rounded-xl px-3 py-2.5 text-sm text-fg placeholder:text-fg-disabled focus:outline-none focus:border-accent transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="text-[#71717A] text-xs font-medium block mb-1.5">Deadline *</label>
+                    <label className="text-fg-muted text-xs font-medium block mb-1.5">Deadline *</label>
                     <input
                       type="date"
                       value={deadline}
                       onChange={e => setDeadline(e.target.value)}
-                      className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#00D9A3] transition-colors"
+                      className="w-full bg-elevated border border-border rounded-xl px-3 py-2.5 text-sm text-fg focus:outline-none focus:border-accent transition-colors"
                     />
                   </div>
                 </div>
@@ -264,11 +264,11 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
 
               {/* Funding account */}
               <div>
-                <label className="text-[#71717A] text-xs font-medium block mb-1.5">Funding Account *</label>
+                <label className="text-fg-muted text-xs font-medium block mb-1.5">Funding Account *</label>
                 <select
                   value={fundingAccountId}
                   onChange={e => setFundingAccountId(e.target.value)}
-                  className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#00D9A3] transition-colors"
+                  className="w-full bg-elevated border border-border rounded-xl px-3 py-2.5 text-sm text-fg focus:outline-none focus:border-accent transition-colors"
                 >
                   <option value="">Select account</option>
                   {accounts.map(a => (
@@ -279,9 +279,9 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
 
               {/* Priority */}
               <div>
-                <label className="text-[#71717A] text-xs font-medium block mb-1.5">
-                  Priority: <span className="text-[#FAFAFA]">{priority}</span>
-                  <span className="text-[#52525B] ml-1">(1 = highest)</span>
+                <label className="text-fg-muted text-xs font-medium block mb-1.5">
+                  Priority: <span className="text-fg">{priority}</span>
+                  <span className="text-fg-disabled ml-1">(1 = highest)</span>
                 </label>
                 <input
                   type="range"
@@ -289,15 +289,16 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
                   max={10}
                   value={priority}
                   onChange={e => setPriority(Number(e.target.value))}
-                  className="w-full accent-[#00D9A3]"
+                  className="w-full"
+                  style={{ accentColor: 'var(--accent)' }}
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full h-11 rounded-xl font-semibold text-sm text-[#0A0A0B] transition-colors disabled:opacity-50"
-                style={{ background: color }}
+                className="w-full h-11 rounded-xl font-semibold text-sm transition-colors disabled:opacity-50"
+                style={{ background: color, color: '#0A0A0B' }}
               >
                 {saving ? 'Saving…' : goal ? 'Save Changes' : 'Create Goal'}
               </button>

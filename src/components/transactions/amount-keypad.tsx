@@ -31,11 +31,11 @@ export function AmountKeypad({ value, onChange, type, onTypeChange }: AmountKeyp
     <div className="flex flex-col gap-4">
       <div className="text-center">
         <div className="flex items-baseline justify-center gap-1">
-          <span className="text-3xl font-mono text-[#A1A1AA]">{CURRENCY_SYMBOL}</span>
+          <span className="text-3xl font-mono text-fg-secondary">{CURRENCY_SYMBOL}</span>
           <span
             className={cn(
               'amount text-5xl font-bold tracking-tight',
-              type === 'income' ? 'text-[#00D9A3]' : 'text-[#FAFAFA]'
+              type === 'income' ? 'text-accent' : 'text-fg'
             )}
           >
             {value || '0'}
@@ -51,8 +51,8 @@ export function AmountKeypad({ value, onChange, type, onTypeChange }: AmountKeyp
             className={cn(
               'px-3 py-1 rounded-full text-xs font-medium capitalize transition-colors',
               type === t
-                ? 'bg-[#00D9A3] text-[#0A0A0B]'
-                : 'bg-[#1C1C1F] text-[#A1A1AA] hover:bg-[#27272A]'
+                ? 'bg-accent text-accent-foreground'
+                : 'bg-elevated text-fg-secondary hover:bg-border/50'
             )}
           >
             {t}
@@ -68,8 +68,8 @@ export function AmountKeypad({ value, onChange, type, onTypeChange }: AmountKeyp
             className={cn(
               'h-14 rounded-xl text-xl font-semibold transition-colors active:scale-95',
               key === '⌫'
-                ? 'bg-[#1C1C1F] text-[#A1A1AA] hover:bg-[#27272A]'
-                : 'bg-[#1C1C1F] text-[#FAFAFA] hover:bg-[#27272A]'
+                ? 'bg-elevated text-fg-secondary hover:bg-border/50'
+                : 'bg-elevated text-fg hover:bg-border/50'
             )}
           >
             {key === '⌫' ? <Delete className="w-5 h-5 mx-auto" /> : key}

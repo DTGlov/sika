@@ -33,7 +33,6 @@ export default function AccountsPage() {
   const [reassignToId, setReassignToId] = useState<string>('');
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Compute balances — re-runs on any mutation (transfers, new transactions, etc.)
   useEffect(() => {
     if (!user || accounts.length === 0) return;
 
@@ -47,13 +46,11 @@ export default function AccountsPage() {
       setBalancesLoading(false);
     }
     loadBalances();
-  // mutationCount ensures balances re-fetch after any transaction mutation
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, accounts, mutationCount]);
 
   const totalBalance = accounts.reduce((sum, a) => sum + (balances[a.id] ?? a.opening_balance), 0);
 
-  // Show accounts_intro hint only when all accounts still have the default 0 opening balance
   const allBalancesAreZero = accounts.length > 0 && accounts.every(a => a.opening_balance === 0);
 
   async function startDelete(acc: Account) {
@@ -110,16 +107,15 @@ export default function AccountsPage() {
   return (
     <div className="max-w-2xl mx-auto pb-8 px-4 pt-6 md:px-8">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-[#FAFAFA]">Accounts</h1>
+        <h1 className="text-2xl font-bold text-fg">Accounts</h1>
         <Button
           onClick={() => { setEditAccount(undefined); setModalOpen(true); }}
-          className="h-9 px-3 text-sm bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-medium rounded-xl gap-1.5"
+          className="h-9 px-3 text-sm bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-xl gap-1.5"
         >
           <Plus className="w-4 h-4" /> Add
         </Button>
       </div>
 
-      {/* Accounts intro hint — only when all accounts are still at ₵0 opening balance */}
       {allBalancesAreZero && (
         <HintCard
           hintId="accounts_intro"
@@ -131,7 +127,6 @@ export default function AccountsPage() {
         />
       )}
 
-      {/* Reconcile reminder hint */}
       <HintCard
         hintId="accounts_reconcile_reminder"
         title="Keep balances accurate"
@@ -142,20 +137,20 @@ export default function AccountsPage() {
       />
 
       {/* Total balance */}
-      <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5 mb-4">
-        <p className="text-[#71717A] text-sm mb-1">Total balance</p>
+      <div className="bg-surface border border-border rounded-2xl p-5 mb-4">
+        <p className="text-fg-muted text-sm mb-1">Total balance</p>
         {balancesLoading ? (
-          <Skeleton className="h-9 w-40 bg-[#1C1C1F]" />
+          <Skeleton className="h-9 w-40 bg-elevated" />
         ) : (
-          <p className="text-3xl font-bold text-[#FAFAFA] tabular-nums">{formatGHS(totalBalance)}</p>
+          <p className="text-3xl font-bold text-fg tabular-nums">{formatGHS(totalBalance)}</p>
         )}
-        <p className="text-sm text-[#71717A] mt-1">The money currently in your accounts.</p>
+        <p className="text-sm text-fg-muted mt-1">The money currently in your accounts.</p>
       </div>
 
       {/* Account list */}
       {accounts.length === 0 ? (
-        <div className="text-center py-16 text-[#71717A] text-sm">
-          No accounts yet. Tap "Add" to create one.
+        <div className="text-center py-16 text-fg-muted text-sm">
+          No accounts yet. Tap &quot;Add&quot; to create one.
         </div>
       ) : (
         <div className="space-y-3">
@@ -165,7 +160,7 @@ export default function AccountsPage() {
             return (
               <div
                 key={acc.id}
-                className="bg-[#141416] border border-[#27272A] rounded-2xl p-4"
+                className="bg-surface border border-border rounded-2xl p-4"
                 style={{ borderLeftColor: cfg.color, borderLeftWidth: 3 }}
               >
                 <div className="flex items-start justify-between">
@@ -178,7 +173,7 @@ export default function AccountsPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-[#FAFAFA] font-semibold text-sm">{acc.name}</p>
+                        <p className="text-fg font-semibold text-sm">{acc.name}</p>
                         {acc.is_default && (
                           <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-md font-medium"
                             style={{ backgroundColor: cfg.color + '22', color: cfg.color }}>
@@ -186,28 +181,28 @@ export default function AccountsPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-[#71717A] text-xs capitalize">{cfg.label}</p>
+                      <p className="text-fg-muted text-xs capitalize">{cfg.label}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => openReconcileSheet({ accountId: acc.id, sikaBalance: balance })}
-                      className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#A1A1AA] flex items-center justify-center transition-colors"
+                      className="w-8 h-8 rounded-lg text-fg-muted hover:text-fg-secondary flex items-center justify-center transition-colors"
                       title="Reconcile balance"
                     >
                       <Scale className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => { setEditAccount(acc); setModalOpen(true); }}
-                      className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
+                      className="w-8 h-8 rounded-lg text-fg-muted hover:text-fg flex items-center justify-center transition-colors"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     {!acc.is_default && (
                       <button
                         onClick={() => startDelete(acc)}
-                        className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#F43F5E] flex items-center justify-center transition-colors"
+                        className="w-8 h-8 rounded-lg text-fg-muted hover:text-destructive flex items-center justify-center transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -215,9 +210,9 @@ export default function AccountsPage() {
                   </div>
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-[#27272A]">
+                <div className="mt-3 pt-3 border-t border-border">
                   {balancesLoading ? (
-                    <Skeleton className="h-6 w-28 bg-[#1C1C1F]" />
+                    <Skeleton className="h-6 w-28 bg-elevated" />
                   ) : (
                     <p className="text-xl font-bold tabular-nums" style={{ color: cfg.color }}>
                       {formatGHS(balance)}
@@ -230,7 +225,6 @@ export default function AccountsPage() {
         </div>
       )}
 
-      {/* Add/Edit modal */}
       <AccountModal
         open={modalOpen}
         onClose={() => { setModalOpen(false); setEditAccount(undefined); }}
@@ -243,11 +237,11 @@ export default function AccountsPage() {
       {deletingId && deletingAcc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDeletingId(null)} />
-          <div className="relative z-10 bg-[#141416] border border-[#27272A] rounded-2xl p-6 w-full max-w-sm">
-            <h3 className="text-[#FAFAFA] font-bold text-base mb-2">Delete &quot;{deletingAcc.name}&quot;?</h3>
+          <div className="relative z-10 bg-surface border border-border rounded-2xl p-6 w-full max-w-sm">
+            <h3 className="text-fg font-bold text-base mb-2">Delete &quot;{deletingAcc.name}&quot;?</h3>
             {txnCountForDelete > 0 ? (
               <>
-                <p className="text-[#A1A1AA] text-sm mb-4">
+                <p className="text-fg-secondary text-sm mb-4">
                   This account has {txnCountForDelete} transaction{txnCountForDelete !== 1 ? 's' : ''}.
                   Choose an account to reassign them to:
                 </p>
@@ -258,27 +252,27 @@ export default function AccountsPage() {
                       onClick={() => setReassignToId(a.id)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all text-left"
                       style={{
-                        borderColor: reassignToId === a.id ? ACCOUNT_TYPE_CONFIG[a.type].color : '#27272A',
-                        backgroundColor: reassignToId === a.id ? ACCOUNT_TYPE_CONFIG[a.type].color + '11' : '#1C1C1F',
+                        borderColor: reassignToId === a.id ? ACCOUNT_TYPE_CONFIG[a.type].color : 'var(--border)',
+                        backgroundColor: reassignToId === a.id ? ACCOUNT_TYPE_CONFIG[a.type].color + '11' : 'var(--bg-elevated)',
                       }}
                     >
                       <span className="text-lg">{ACCOUNT_TYPE_CONFIG[a.type].emoji}</span>
-                      <span className="text-[#FAFAFA] text-sm">{a.name}</span>
+                      <span className="text-fg text-sm">{a.name}</span>
                     </button>
                   ))}
                 </div>
               </>
             ) : (
-              <p className="text-[#71717A] text-sm mb-4">This account has no transactions. It will be permanently deleted.</p>
+              <p className="text-fg-muted text-sm mb-4">This account has no transactions. It will be permanently deleted.</p>
             )}
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setDeletingId(null)}
-                className="flex-1 h-11 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
+                className="flex-1 h-11 border-border text-fg-secondary hover:bg-elevated rounded-xl">
                 Cancel
               </Button>
               <Button onClick={confirmDelete}
                 disabled={deleteLoading || (txnCountForDelete > 0 && !reassignToId)}
-                className="flex-1 h-11 bg-[#F43F5E] hover:bg-[#E03354] text-white font-semibold rounded-xl">
+                className="flex-1 h-11 bg-destructive hover:bg-destructive/90 text-white font-semibold rounded-xl">
                 {deleteLoading ? 'Deleting…' : 'Delete'}
               </Button>
             </div>

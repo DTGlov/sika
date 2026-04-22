@@ -16,49 +16,49 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.55, ease: 'easeOut' }}
-      className="bg-[#141416] border border-[#27272A] rounded-2xl overflow-hidden"
+      className="bg-surface border border-border rounded-2xl overflow-hidden"
     >
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#27272A]">
-        <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">Recent</p>
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+        <p className="text-fg-muted text-xs font-medium uppercase tracking-wider">Recent</p>
         <Link
           href="/transactions"
-          className="flex items-center gap-1 text-[#00D9A3] text-xs font-medium hover:text-[#00F5B8] transition-colors"
+          className="flex items-center gap-1 text-accent text-xs font-medium hover:text-accent/80 transition-colors"
         >
           View all <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
 
       {transactions.length === 0 ? (
-        <div className="px-5 py-10 text-center text-[#71717A] text-sm">
+        <div className="px-5 py-10 text-center text-fg-muted text-sm">
           No transactions yet. Tap + to log one.
         </div>
       ) : (
-        <div className="divide-y divide-[#27272A]">
+        <div className="divide-y divide-border">
           {transactions.map((txn) => (
-            <div key={txn.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-[#1C1C1F] transition-colors">
+            <div key={txn.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-elevated transition-colors">
               <div className="flex items-center gap-3">
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
                   style={{
                     background: txn.category?.bucket
                       ? `${txn.category.bucket.color}22`
-                      : '#1C1C1F',
+                      : 'var(--bg-elevated)',
                   }}
                 >
                   {txn.category?.icon ? (
                     <span className="text-sm">{getIconEmoji(txn.category.icon)}</span>
                   ) : (
-                    <span className="text-[#71717A] text-xs">?</span>
+                    <span className="text-fg-muted text-xs">?</span>
                   )}
                 </div>
                 <div>
-                  <p className="text-[#FAFAFA] text-sm font-medium">
+                  <p className="text-fg text-sm font-medium">
                     {txn.category?.name ?? 'Uncategorized'}
                   </p>
-                  <p className="text-[#71717A] text-xs">{formatTransactionDate(txn.transaction_date)}</p>
+                  <p className="text-fg-muted text-xs">{formatTransactionDate(txn.transaction_date)}</p>
                 </div>
               </div>
-              <p className={`amount text-sm font-semibold ${txn.type === 'income' ? 'text-[#00D9A3]' : 'text-[#FAFAFA]'}`}>
+              <p className={`amount text-sm font-semibold ${txn.type === 'income' ? 'text-accent' : 'text-fg'}`}>
                 {txn.type === 'income' ? '+' : '-'}{formatGHS(txn.amount)}
               </p>
             </div>

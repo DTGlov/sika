@@ -15,6 +15,9 @@ import {
   Briefcase,
   Tag,
   RotateCcw,
+  Monitor,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -33,6 +36,8 @@ import {
   ICON_OPTIONS,
 } from "@/components/settings/category-modal";
 import { CardThemePicker } from "@/components/settings/card-theme-picker";
+import { useTheme } from "@/components/theme-provider";
+import type { Theme } from "@/components/theme-provider";
 import type { Category, CardTheme } from "@/types";
 
 const profileSchema = z
@@ -50,10 +55,16 @@ const profileSchema = z
 type ProfileForm = z.infer<typeof profileSchema>;
 
 const BUCKET_COLORS: Record<string, string> = {
-  needs: "#00D9A3",
-  wants: "#FBBF24",
-  future: "#60A5FA",
+  needs: "var(--color-sika-needs)",
+  wants: "var(--color-sika-wants)",
+  future: "var(--color-sika-future)",
 };
+
+const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Monitor }[] = [
+  { value: "auto", label: "Auto", icon: Monitor },
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+];
 
 function getIconEmoji(icon: string | null): string {
   return ICON_OPTIONS.find((o) => o.key === icon)?.emoji ?? "💸";
@@ -64,6 +75,7 @@ export default function SettingsPage() {
   const { user, profile, incomeSources, reset } = useAuthStore();
   const { setCategories, categories, bumpMutation } = useTransactionStore();
   const { refetch } = useProfile();
+  const { theme, setTheme } = useTheme();
   const supabase = createClient();
 
   const [catModalOpen, setCatModalOpen] = useState(false);
@@ -155,7 +167,6 @@ export default function SettingsPage() {
   const archivedCats = categories.filter((c) => c.is_archived);
   const totalIncome = totalMonthlyIncome(incomeSources);
 
-  // Conditions for contextual hints
   const hasNoIncomeSources = incomeSources.length === 0;
   const hasOnlyDefaultCats = activeCats.every(c => c.is_default || c.user_id === null);
 
@@ -180,7 +191,6 @@ export default function SettingsPage() {
     return ct === "adjustment";
   });
 
-  // Group expense categories by bucket
   const expenseByBucket: Record<string, Category[]> = {};
   const expenseNoBucket: Category[] = [];
   for (const cat of expenseCats) {
@@ -197,7 +207,40 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto pb-24">
       <div className="px-4 pt-6 md:px-8">
-        <h1 className="text-2xl font-bold text-[#FAFAFA] mb-6">Settings</h1>
+        <h1 className="text-2xl font-bold text-fg mb-6">Settings</h1>
+
+        {/* Appearance */}
+        <div className="bg-surface border border-border rounded-2xl p-5 mb-6">
+          <h2 className="text-fg font-semibold mb-1">Appearance</h2>
+          <p className="text-fg-muted text-xs mb-4">Choose your preferred colour scheme.</p>
+          <div className="grid grid-cols-3 gap-2">
+            {THEME_OPTIONS.map(({ value, label, icon: Icon }) => {
+              const active = theme === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => setTheme(value)}
+                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  style={{
+                    borderColor: active ? 'var(--accent)' : 'var(--border)',
+                    background: active ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : 'transparent',
+                  }}
+                >
+                  <Icon
+                    className="w-4 h-4"
+                    style={{ color: active ? 'var(--accent)' : 'var(--text-fg-muted)' }}
+                  />
+                  <span
+                    className="text-xs font-medium"
+                    style={{ color: active ? 'var(--accent)' : 'var(--text-fg-muted)' }}
+                  >
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Income Sources */}
         <div className="mb-6">
@@ -229,16 +272,16 @@ export default function SettingsPage() {
 
         <form onSubmit={handleSubmit(onSaveProfile)} className="space-y-6">
           {/* Total Monthly Income (read-only) */}
-          <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-            <h2 className="text-[#FAFAFA] font-semibold mb-1">
+          <div className="bg-surface border border-border rounded-2xl p-5">
+            <h2 className="text-fg font-semibold mb-1">
               Total Monthly Income
             </h2>
-            <p className="text-[#71717A] text-xs mb-3">
+            <p className="text-fg-muted text-xs mb-3">
               Computed from your active income sources above
             </p>
-            <div className="h-12 px-4 bg-[#1C1C1F] border border-[#27272A] rounded-xl flex items-center">
-              <span className="text-[#A1A1AA] font-mono mr-2">₵</span>
-              <span className="text-[#FAFAFA] font-semibold text-base">
+            <div className="h-12 px-4 bg-elevated border border-border rounded-xl flex items-center">
+              <span className="text-fg-secondary font-mono mr-2">₵</span>
+              <span className="text-fg font-semibold text-base">
                 {totalIncome > 0
                   ? totalIncome.toLocaleString("en-GH", {
                       minimumFractionDigits: 2,
@@ -250,21 +293,21 @@ export default function SettingsPage() {
           </div>
 
           {/* Budget Cycle */}
-          <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-            <h2 className="text-[#FAFAFA] font-semibold mb-1">Budget Month</h2>
-            <p className="text-[#71717A] text-xs mb-4">
+          <div className="bg-surface border border-border rounded-2xl p-5">
+            <h2 className="text-fg font-semibold mb-1">Budget Month</h2>
+            <p className="text-fg-muted text-xs mb-4">
               Which day of the month does your month start? (1–28)
             </p>
             <div className="space-y-1.5">
-              <Label className="text-[#A1A1AA] text-sm">Month start day</Label>
+              <Label className="text-fg-secondary text-sm">Month start day</Label>
               <Input
                 type="number"
                 min="1"
                 max="28"
-                className="h-11 w-28 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                className="h-11 w-28 bg-elevated border-border text-fg focus-visible:ring-ring amount"
                 {...register("cycle_start_day", { valueAsNumber: true })}
               />
-              <p className="text-[#52525B] text-[11px]">
+              <p className="text-fg-disabled text-[11px]">
                 Tip: set this to your salary day so your budget resets when you
                 get paid.
               </p>
@@ -272,18 +315,13 @@ export default function SettingsPage() {
           </div>
 
           {/* Budget Split */}
-          <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-            <h2 className="text-[#FAFAFA] font-semibold mb-1">
+          <div className="bg-surface border border-border rounded-2xl p-5">
+            <h2 className="text-fg font-semibold mb-1">
               Budget Split (%)
             </h2>
-            <p className="text-[#71717A] text-xs mb-4">Must add up to 100</p>
+            <p className="text-fg-muted text-xs mb-4">Must add up to 100</p>
             <div className="grid grid-cols-3 gap-3">
               {(["needs", "wants", "future"] as const).map((bucket) => {
-                const colors = {
-                  needs: "#00D9A3",
-                  wants: "#FBBF24",
-                  future: "#60A5FA",
-                };
                 const labels = {
                   needs: "Needs",
                   wants: "Wants",
@@ -296,7 +334,7 @@ export default function SettingsPage() {
                   <div key={bucket} className="space-y-1.5">
                     <Label
                       className="text-xs"
-                      style={{ color: colors[bucket] }}
+                      style={{ color: BUCKET_COLORS[bucket] }}
                     >
                       {labels[bucket]}
                     </Label>
@@ -304,13 +342,13 @@ export default function SettingsPage() {
                       type="number"
                       min="0"
                       max="100"
-                      className="h-10 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] text-center amount"
+                      className="h-10 bg-elevated border-border text-fg focus-visible:ring-ring text-center amount"
                       {...register(`${bucket}_percent`, {
                         valueAsNumber: true,
                       })}
                     />
                     {totalIncome > 0 && (
-                      <p className="text-[#52525B] text-[10px] text-center">
+                      <p className="text-fg-disabled text-[10px] text-center">
                         {formatGHS((totalIncome * pct) / 100)}
                       </p>
                     )}
@@ -319,7 +357,7 @@ export default function SettingsPage() {
               })}
             </div>
             {errors.needs_percent && (
-              <p className="text-[#F43F5E] text-xs mt-2">
+              <p className="text-destructive text-xs mt-2">
                 {errors.needs_percent.message}
               </p>
             )}
@@ -328,7 +366,7 @@ export default function SettingsPage() {
           <Button
             type="submit"
             disabled={isSubmitting || !isDirty}
-            className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+            className="w-full h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl"
           >
             {isSubmitting ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -349,15 +387,15 @@ export default function SettingsPage() {
             className="mt-4"
           />
         )}
-        <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5 mt-6">
+        <div className="bg-surface border border-border rounded-2xl p-5 mt-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[#FAFAFA] font-semibold">Categories</h2>
+            <h2 className="text-fg font-semibold">Categories</h2>
             <Button
               onClick={() => {
                 setEditingCat(undefined);
                 setCatModalOpen(true);
               }}
-              className="h-8 px-3 text-xs bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-medium rounded-xl gap-1"
+              className="h-8 px-3 text-xs bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-xl gap-1"
             >
               <Plus className="w-3.5 h-3.5" /> Add
             </Button>
@@ -409,7 +447,7 @@ export default function SettingsPage() {
             {/* Expense categories without a bucket */}
             {expenseNoBucket.length > 0 && (
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-[#71717A] mb-2">
+                <p className="text-xs font-medium uppercase tracking-wider text-fg-muted mb-2">
                   Spending (no bucket)
                 </p>
                 <div className="space-y-1">
@@ -433,8 +471,8 @@ export default function SettingsPage() {
             {incomeCats.length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <span className="text-[#00D9A3] text-xs font-bold">+</span>
-                  <p className="text-xs font-medium uppercase tracking-wider text-[#00D9A3]">
+                  <span className="text-accent text-xs font-bold">+</span>
+                  <p className="text-xs font-medium uppercase tracking-wider text-accent">
                     Income
                   </p>
                 </div>
@@ -459,8 +497,8 @@ export default function SettingsPage() {
             {adjustmentCats.length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <span className="text-[#A1A1AA] text-xs">⚖️</span>
-                  <p className="text-xs font-medium uppercase tracking-wider text-[#A1A1AA]">
+                  <span className="text-fg-secondary text-xs">⚖️</span>
+                  <p className="text-xs font-medium uppercase tracking-wider text-fg-secondary">
                     Adjustments
                   </p>
                 </div>
@@ -486,7 +524,7 @@ export default function SettingsPage() {
               <div>
                 <button
                   onClick={() => setShowArchived((v) => !v)}
-                  className="flex items-center gap-1.5 text-xs text-[#52525B] hover:text-[#71717A] transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-fg-disabled hover:text-fg-muted transition-colors"
                 >
                   <ChevronDown
                     className="w-3.5 h-3.5 transition-transform"
@@ -501,19 +539,19 @@ export default function SettingsPage() {
                     {archivedCats.map((cat) => (
                       <div
                         key={cat.id}
-                        className="flex items-center justify-between px-3 py-2 bg-[#1C1C1F] rounded-xl opacity-50"
+                        className="flex items-center justify-between px-3 py-2 bg-elevated rounded-xl opacity-50"
                       >
                         <div className="flex items-center gap-2">
                           <span className="text-base">
                             {getIconEmoji(cat.icon)}
                           </span>
-                          <span className="text-[#A1A1AA] text-sm">
+                          <span className="text-fg-secondary text-sm">
                             {cat.name}
                           </span>
                         </div>
                         <button
                           onClick={() => handleRestoreCategory(cat.id)}
-                          className="text-xs text-[#00D9A3] hover:text-[#00F5B8] transition-colors"
+                          className="text-xs text-accent hover:text-accent/80 transition-colors"
                         >
                           Restore
                         </button>
@@ -527,14 +565,14 @@ export default function SettingsPage() {
         </div>
 
         {/* App preferences */}
-        <div className="mt-6 bg-[#141416] border border-[#27272A] rounded-2xl p-5">
-          <h2 className="text-[#FAFAFA] font-semibold mb-1">App preferences</h2>
-          <p className="text-[#71717A] text-xs mb-4">Show all dismissed hints again. Useful if you want a refresher.</p>
+        <div className="mt-6 bg-surface border border-border rounded-2xl p-5">
+          <h2 className="text-fg font-semibold mb-1">App preferences</h2>
+          <p className="text-fg-muted text-xs mb-4">Show all dismissed hints again. Useful if you want a refresher.</p>
           <Button
             type="button"
             variant="outline"
             onClick={handleResetHints}
-            className="h-10 px-4 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] hover:text-[#FAFAFA] rounded-xl text-sm gap-2"
+            className="h-10 px-4 border-border text-fg-secondary hover:bg-elevated hover:text-fg rounded-xl text-sm gap-2"
           >
             <RotateCcw className="w-3.5 h-3.5" /> Reset onboarding hints
           </Button>
@@ -545,7 +583,7 @@ export default function SettingsPage() {
           <Button
             variant="outline"
             onClick={handleSignOut}
-            className="w-full h-12 border-[#27272A] text-[#F43F5E] hover:bg-[#F43F5E]/10 hover:border-[#F43F5E]/50 rounded-xl"
+            className="w-full h-12 border-border text-destructive hover:bg-destructive/10 hover:border-destructive/50 rounded-xl"
           >
             <LogOut className="w-4 h-4 mr-2" /> Sign out
           </Button>
@@ -579,21 +617,21 @@ function CategoryRow({
   getIconEmoji,
 }: CategoryRowProps) {
   return (
-    <div className="flex items-center justify-between px-3 py-2 bg-[#1C1C1F] rounded-xl group">
+    <div className="flex items-center justify-between px-3 py-2 bg-elevated rounded-xl group">
       <div className="flex items-center gap-2">
         <span className="text-base">{getIconEmoji(cat.icon)}</span>
-        <span className="text-[#FAFAFA] text-sm">{cat.name}</span>
+        <span className="text-fg text-sm">{cat.name}</span>
       </div>
       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={onEdit}
-          className="w-7 h-7 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
+          className="w-7 h-7 rounded-lg text-fg-muted hover:text-fg flex items-center justify-center transition-colors"
         >
           <Pencil className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={onArchive}
-          className="w-7 h-7 rounded-lg text-[#71717A] hover:text-[#FBBF24] flex items-center justify-center transition-colors"
+          className="w-7 h-7 rounded-lg text-fg-muted hover:text-sika-wants flex items-center justify-center transition-colors"
         >
           <Archive className="w-3.5 h-3.5" />
         </button>

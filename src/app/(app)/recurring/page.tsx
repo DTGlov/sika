@@ -50,32 +50,30 @@ interface DueDateInfo {
 function getDueDateInfo(item: RecurringTransaction, today: Date): DueDateInfo {
   const todayStart = startOfDay(today);
 
-  // Check for overdue: first missed occurrence before today (only relevant for nudge-mode)
   if (!item.auto_log) {
     const overdueFrom = item.last_generated_date
       ? addDays(parseDateStr(item.last_generated_date), 1)
       : parseDateStr(item.start_date);
-    // Call with last_generated_date: null to bypass internal guard and get first occurrence from overdueFrom
     const firstMissed = getNextDueDate({ ...item, last_generated_date: null }, overdueFrom);
     if (firstMissed && isBefore(startOfDay(firstMissed), todayStart)) {
       return {
         label: `OVERDUE since ${format(firstMissed, 'MMM d')}`,
-        color: '#F43F5E',
+        color: 'var(--destructive)',
         bold: true,
       };
     }
   }
 
   const nextDue = getNextDueDate(item, today);
-  if (!nextDue) return { label: 'No future occurrences', color: '#52525B', bold: false };
+  if (!nextDue) return { label: 'No future occurrences', color: 'var(--text-fg-disabled)', bold: false };
 
   const diffDays = differenceInCalendarDays(startOfDay(nextDue), todayStart);
 
-  if (diffDays === 0) return { label: 'TODAY', color: '#00D9A3', bold: true };
-  if (diffDays === 1) return { label: 'Tomorrow', color: '#FAFAFA', bold: false };
-  if (diffDays <= 7) return { label: `in ${diffDays} days (${format(nextDue, 'EEE MMM d')})`, color: '#FAFAFA', bold: false };
-  if (diffDays <= 30) return { label: format(nextDue, 'EEE MMM d'), color: '#71717A', bold: false };
-  return { label: format(nextDue, 'MMM d, yyyy'), color: '#52525B', bold: false };
+  if (diffDays === 0) return { label: 'TODAY', color: 'var(--accent)', bold: true };
+  if (diffDays === 1) return { label: 'Tomorrow', color: 'var(--text-fg)', bold: false };
+  if (diffDays <= 7) return { label: `in ${diffDays} days (${format(nextDue, 'EEE MMM d')})`, color: 'var(--text-fg)', bold: false };
+  if (diffDays <= 30) return { label: format(nextDue, 'EEE MMM d'), color: 'var(--text-fg-muted)', bold: false };
+  return { label: format(nextDue, 'MMM d, yyyy'), color: 'var(--text-fg-disabled)', bold: false };
 }
 
 function getNextDueTimestamp(item: RecurringTransaction, today: Date): number {
@@ -97,7 +95,7 @@ function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDele
   const name = item.note ?? item.category?.name ?? FREQUENCY_LABELS[item.frequency];
 
   return (
-    <div className="bg-[#141416] border border-[#27272A] rounded-2xl overflow-hidden"
+    <div className="bg-surface border border-border rounded-2xl overflow-hidden"
       style={{ borderLeftColor: accentColor, borderLeftWidth: 3 }}
     >
       {/* Due date header */}
@@ -110,20 +108,20 @@ function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDele
         </p>
         <div className="flex items-center gap-1">
           {!item.auto_log && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#A1A1AA18] text-[#A1A1AA] font-medium">
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-fg-secondary/10 text-fg-secondary font-medium">
               Nudge
             </span>
           )}
         </div>
       </div>
 
-      <div className="h-px bg-[#27272A]" />
+      <div className="h-px bg-border" />
 
       {/* Name + amount + actions */}
       <div className="px-4 py-3 flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-[#FAFAFA] font-bold text-base truncate">{name}</p>
-          <p className="text-[#52525B] text-xs mt-0.5">
+          <p className="text-fg font-bold text-base truncate">{name}</p>
+          <p className="text-fg-disabled text-xs mt-0.5">
             {item.account?.name}
             {item.category ? ` · ${item.category.name}` : ''}
             {' · '}{formatScheduleSummary(item)}
@@ -137,20 +135,20 @@ function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDele
           <div className="flex items-center gap-0.5">
             <button
               onClick={() => onTogglePause(item)}
-              className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-lg text-fg-muted hover:text-fg flex items-center justify-center transition-colors"
               title={item.is_paused ? 'Resume' : 'Pause'}
             >
               {item.is_paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
             </button>
             <button
               onClick={() => onEdit(item)}
-              className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-lg text-fg-muted hover:text-fg flex items-center justify-center transition-colors"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => onDelete(item.id)}
-              className="w-8 h-8 rounded-lg text-[#71717A] hover:text-[#F43F5E] flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-lg text-fg-muted hover:text-destructive flex items-center justify-center transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -237,6 +235,8 @@ function RecurringContent() {
     tab === 'income' ? incomeItems :
     pausedItems;
 
+  const accentColor = tab === 'income' ? 'var(--accent)' : tab === 'expense' ? 'var(--destructive)' : 'var(--color-sika-wants)';
+
   async function handleSync() {
     if (!user) return;
     setSyncing(true);
@@ -247,14 +247,12 @@ function RecurringContent() {
   }
 
   async function handleTogglePause(item: RecurringTransaction) {
-    // Optimistic update — immediately removes from current tab list
     setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_paused: !i.is_paused } : i));
     const { error } = await supabase
       .from('recurring_transactions')
       .update({ is_paused: !item.is_paused })
       .eq('id', item.id);
     if (error) {
-      // Revert on failure
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_paused: item.is_paused } : i));
       toast.error('Failed to update');
       return;
@@ -271,7 +269,7 @@ function RecurringContent() {
       .eq('id', id);
     if (error) {
       toast.error('Failed to delete');
-      revalidateForEntity('transaction'); // re-fetch to restore
+      revalidateForEntity('transaction');
     } else {
       toast.success('Deleted');
     }
@@ -283,18 +281,16 @@ function RecurringContent() {
     setModalOpen(true);
   }
 
-  const accentColor = tab === 'income' ? '#00D9A3' : tab === 'expense' ? '#F43F5E' : '#FBBF24';
-
   return (
     <div className="max-w-2xl mx-auto pb-8 px-4 pt-6 md:px-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-[#FAFAFA]">Recurring</h1>
+        <h1 className="text-2xl font-bold text-fg">Recurring</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="w-9 h-9 rounded-xl text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#1C1C1F] flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-xl text-fg-muted hover:text-fg hover:bg-elevated flex items-center justify-center transition-colors"
             title="Sync now"
           >
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
@@ -305,14 +301,14 @@ function RecurringContent() {
               setDefaultModalValues(tab !== 'paused' ? { type: tab } : {});
               setModalOpen(true);
             }}
-            className="h-9 px-3 text-sm bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-medium rounded-xl gap-1.5"
+            className="h-9 px-3 text-sm bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-xl gap-1.5"
           >
             <Plus className="w-4 h-4" /> Add
           </Button>
         </div>
       </div>
 
-      {/* Intro hint — shown until dismissed */}
+      {/* Intro hint */}
       <HintCard
         hintId="recurring_intro"
         title="Automate your money rhythm"
@@ -323,15 +319,15 @@ function RecurringContent() {
       />
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-5 bg-[#141416] border border-[#27272A] rounded-xl p-1 overflow-x-auto scrollbar-none">
+      <div className="flex gap-1 mb-5 bg-surface border border-border rounded-xl p-1 overflow-x-auto scrollbar-none">
         {TABS.map(({ value, label, count }) => (
           <button
             key={value}
             onClick={() => setTab(value)}
             className="flex-1 h-9 rounded-lg text-xs font-medium transition-colors min-w-[80px] whitespace-nowrap"
             style={{
-              backgroundColor: tab === value ? '#1C1C1F' : 'transparent',
-              color: tab === value ? '#FAFAFA' : '#71717A',
+              backgroundColor: tab === value ? 'var(--bg-elevated)' : 'transparent',
+              color: tab === value ? 'var(--text-fg)' : 'var(--text-fg-muted)',
             }}
           >
             {label}
@@ -339,8 +335,8 @@ function RecurringContent() {
               <span
                 className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
                 style={{
-                  backgroundColor: tab === value ? accentColor + '22' : '#27272A',
-                  color: tab === value ? accentColor : '#52525B',
+                  backgroundColor: tab === value ? accentColor + '22' : 'var(--border)',
+                  color: tab === value ? accentColor : 'var(--text-fg-disabled)',
                 }}
               >
                 {count}
@@ -353,7 +349,7 @@ function RecurringContent() {
       {/* Content */}
       {loading ? (
         <div className="space-y-3">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-2xl bg-[#141416]" />)}
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-2xl bg-surface" />)}
         </div>
       ) : visibleItems.length === 0 ? (
         <EmptyState tab={tab} onAdd={() => {
@@ -367,7 +363,7 @@ function RecurringContent() {
             <RecurringCard
               key={item.id}
               item={item}
-              accentColor={item.type === 'income' ? '#00D9A3' : '#F43F5E'}
+              accentColor={item.type === 'income' ? 'var(--accent)' : 'var(--destructive)'}
               today={today}
               onTogglePause={handleTogglePause}
               onEdit={(i) => { setEditItem(i); setModalOpen(true); }}
@@ -380,16 +376,16 @@ function RecurringContent() {
       {/* Quick templates strip */}
       {!loading && (
         <div className="mt-8">
-          <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider mb-3">Quick templates</p>
+          <p className="text-fg-muted text-xs font-medium uppercase tracking-wider mb-3">Quick templates</p>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             {TEMPLATES.map(tmpl => (
               <button
                 key={tmpl.label}
                 onClick={() => openTemplate(tmpl)}
-                className="flex items-center gap-2 bg-[#141416] border border-[#27272A] rounded-2xl px-3 py-2 shrink-0 hover:border-[#3F3F46] transition-colors"
+                className="flex items-center gap-2 bg-surface border border-border rounded-2xl px-3 py-2 shrink-0 hover:border-border/60 transition-colors"
               >
                 <span className="text-base">{tmpl.emoji}</span>
-                <span className="text-[#A1A1AA] text-xs whitespace-nowrap">{tmpl.label}</span>
+                <span className="text-fg-secondary text-xs whitespace-nowrap">{tmpl.label}</span>
               </button>
             ))}
           </div>
@@ -410,7 +406,7 @@ function RecurringContent() {
 function EmptyState({ tab, onAdd }: { tab: TabValue; onAdd: () => void }) {
   if (tab === 'paused') {
     return (
-      <div className="text-center py-16 text-[#71717A] text-sm">
+      <div className="text-center py-16 text-fg-muted text-sm">
         Nothing paused right now.
       </div>
     );
@@ -419,14 +415,14 @@ function EmptyState({ tab, onAdd }: { tab: TabValue; onAdd: () => void }) {
   const isExpense = tab === 'expense';
   return (
     <div className="text-center py-16 px-4">
-      <p className="text-[#71717A] text-sm mb-4">
+      <p className="text-fg-muted text-sm mb-4">
         {isExpense
           ? 'No recurring expenses yet. Add things like rent, subscriptions, or bills.'
           : 'No recurring income yet. Add your salary or regular allowances.'}
       </p>
       <Button
         onClick={onAdd}
-        className="h-9 px-4 text-sm bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+        className="h-9 px-4 text-sm bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl"
       >
         <Plus className="w-4 h-4 mr-1.5" />
         Add {isExpense ? 'expense' : 'income'}
@@ -440,9 +436,9 @@ export default function RecurringPage() {
     <Suspense
       fallback={
         <div className="max-w-2xl mx-auto px-4 pt-6 md:px-8 space-y-3">
-          <div className="h-8 w-36 rounded-xl bg-[#141416] animate-pulse" />
-          <div className="h-11 rounded-xl bg-[#141416] animate-pulse" />
-          {[1, 2, 3].map(i => <div key={i} className="h-28 rounded-2xl bg-[#141416] animate-pulse" />)}
+          <div className="h-8 w-36 rounded-xl bg-surface animate-pulse" />
+          <div className="h-11 rounded-xl bg-surface animate-pulse" />
+          {[1, 2, 3].map(i => <div key={i} className="h-28 rounded-2xl bg-surface animate-pulse" />)}
         </div>
       }
     >

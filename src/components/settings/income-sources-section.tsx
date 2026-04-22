@@ -157,9 +157,9 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onClose(); } }}>
-      <DialogContent className="bg-[#141416] border-[#27272A] text-[#FAFAFA] max-w-sm">
+      <DialogContent className="bg-surface border-border text-fg max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-[#FAFAFA]">
+          <DialogTitle className="text-fg">
             {editSource ? 'Edit income source' : 'Add income source'}
           </DialogTitle>
         </DialogHeader>
@@ -167,35 +167,35 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
           {/* Name */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Name</Label>
+            <Label className="text-fg-secondary text-sm">Name</Label>
             <Input
               placeholder="e.g. Salary, Weekly Allowance"
-              className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#52525B] focus-visible:ring-[#00D9A3]"
+              className="h-11 bg-elevated border-border text-fg placeholder:text-fg-disabled focus-visible:ring-ring"
               {...register('name')}
             />
-            {errors.name && <p className="text-[#F43F5E] text-xs">{errors.name.message}</p>}
+            {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
           </div>
 
           {/* Amount */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Amount</Label>
+            <Label className="text-fg-secondary text-sm">Amount</Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">{CURRENCY_SYMBOL}</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-secondary font-mono text-sm">{CURRENCY_SYMBOL}</span>
               <Input
                 type="number"
                 min="0.01"
                 step="0.01"
                 placeholder="0.00"
-                className="h-11 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                className="h-11 pl-7 bg-elevated border-border text-fg focus-visible:ring-ring amount"
                 {...register('amount', { valueAsNumber: true })}
               />
             </div>
-            {errors.amount && <p className="text-[#F43F5E] text-xs">{errors.amount.message}</p>}
+            {errors.amount && <p className="text-destructive text-xs">{errors.amount.message}</p>}
           </div>
 
           {/* Frequency */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Frequency</Label>
+            <Label className="text-fg-secondary text-sm">Frequency</Label>
             <div className="grid grid-cols-4 gap-1.5">
               {FREQUENCIES.map(f => (
                 <button
@@ -206,7 +206,7 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
                   style={
                     frequency === f
                       ? { backgroundColor: FREQUENCY_COLORS[f] + '22', color: FREQUENCY_COLORS[f], borderWidth: 1, borderColor: FREQUENCY_COLORS[f] }
-                      : { backgroundColor: '#1C1C1F', color: '#71717A', borderWidth: 1, borderColor: '#27272A' }
+                      : { backgroundColor: 'var(--bg-elevated)', color: 'var(--text-fg-muted)', borderWidth: 1, borderColor: 'var(--border)' }
                   }
                 >
                   {f === 'biweekly' ? 'Bi-wk' : FREQUENCY_LABELS[f]}
@@ -218,7 +218,7 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
           {/* Expected day (conditional) */}
           {showExpectedDay && (
             <div className="space-y-1.5">
-              <Label className="text-[#A1A1AA] text-sm">
+              <Label className="text-fg-secondary text-sm">
                 {frequency === 'monthly' ? 'Day of month (optional)' : 'Day of week (optional)'}
               </Label>
               {frequency === 'monthly' ? (
@@ -227,7 +227,7 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
                   min="1"
                   max="31"
                   placeholder="1–31"
-                  className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3]"
+                  className="h-11 bg-elevated border-border text-fg focus-visible:ring-ring"
                   {...register('expected_day', { valueAsNumber: true })}
                 />
               ) : (
@@ -235,12 +235,12 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
                   onValueChange={(v) => setValue('expected_day', v != null ? parseInt(v) : undefined)}
                   defaultValue={editSource?.expected_day != null ? String(editSource.expected_day) : undefined}
                 >
-                  <SelectTrigger className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus:ring-[#00D9A3]">
+                  <SelectTrigger className="h-11 bg-elevated border-border text-fg focus:ring-ring">
                     <SelectValue placeholder="Select day" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1C1C1F] border-[#27272A]">
+                  <SelectContent className="bg-elevated border-border">
                     {DAY_OF_WEEK.map((day, i) => (
-                      <SelectItem key={i} value={String(i)} className="text-[#FAFAFA] focus:bg-[#27272A]">
+                      <SelectItem key={i} value={String(i)} className="text-fg focus:bg-border/50">
                         {day}
                       </SelectItem>
                     ))}
@@ -252,10 +252,10 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
 
           {/* Notes */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Notes (optional)</Label>
+            <Label className="text-fg-secondary text-sm">Notes (optional)</Label>
             <textarea
               rows={2}
-              className="w-full rounded-xl h-16 px-3 py-2 text-sm bg-[#1C1C1F] border border-[#27272A] text-[#FAFAFA] placeholder:text-[#52525B] focus:outline-none focus:ring-2 focus:ring-[#00D9A3] resize-none"
+              className="w-full rounded-xl h-16 px-3 py-2 text-sm bg-elevated border border-border text-fg placeholder:text-fg-disabled focus:outline-none focus:ring-2 focus:ring-ring resize-none"
               placeholder="Any details…"
               {...register('notes')}
             />
@@ -264,12 +264,12 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
           {/* Active toggle (edit only) */}
           {editSource && (
             <div className="flex items-center justify-between">
-              <Label className="text-[#A1A1AA] text-sm">Active</Label>
+              <Label className="text-fg-secondary text-sm">Active</Label>
               <button
                 type="button"
                 onClick={() => setValue('is_active', !isActive)}
                 className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
-                style={{ backgroundColor: isActive ? '#00D9A3' : '#27272A' }}
+                style={{ backgroundColor: isActive ? 'var(--accent)' : 'var(--border)' }}
               >
                 <span
                   className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
@@ -282,7 +282,7 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-11 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+            className="w-full h-11 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editSource ? 'Save changes' : 'Add source'}
           </Button>
@@ -302,8 +302,6 @@ export function IncomeSourcesSection() {
   function openAdd(template?: (typeof QUICK_ADD_TEMPLATES)[0]) {
     setEditSource(undefined);
     setModalOpen(true);
-    // template pre-filling handled inside modal via defaultValues reset — not supported here
-    // so templates use a separate path via openTemplate
     void template;
   }
 
@@ -328,15 +326,15 @@ export function IncomeSourcesSection() {
 
   return (
     <>
-      <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-5">
+      <div className="bg-surface border border-border rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Wallet className="w-4 h-4 text-[#00D9A3]" />
-            <h2 className="text-[#FAFAFA] font-semibold">Income Sources</h2>
+            <Wallet className="w-4 h-4 text-accent" />
+            <h2 className="text-fg font-semibold">Income Sources</h2>
           </div>
           <Button
             onClick={() => openAdd()}
-            className="h-8 px-3 text-xs bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-medium rounded-lg gap-1"
+            className="h-8 px-3 text-xs bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-lg gap-1"
           >
             <Plus className="w-3.5 h-3.5" /> Add source
           </Button>
@@ -344,7 +342,7 @@ export function IncomeSourcesSection() {
 
         {incomeSources.length === 0 ? (
           <div className="space-y-3">
-            <p className="text-[#71717A] text-sm">No income sources yet. Add one or start from a template:</p>
+            <p className="text-fg-muted text-sm">No income sources yet. Add one or start from a template:</p>
             <div className="grid grid-cols-2 gap-2">
               {QUICK_ADD_TEMPLATES.map((t) => (
                 <button
@@ -353,11 +351,11 @@ export function IncomeSourcesSection() {
                     setEditSource(undefined);
                     setModalOpen(true);
                   }}
-                  className="text-left p-3 rounded-xl border border-[#27272A] hover:border-[#00D9A3]/50 bg-[#1C1C1F] hover:bg-[#1C1C1F] transition-colors"
+                  className="text-left p-3 rounded-xl border border-border hover:border-accent/50 bg-elevated transition-colors"
                   title={`${formatGHS(t.amount)} · ${FREQUENCY_LABELS[t.frequency]}`}
                 >
-                  <p className="text-[#FAFAFA] text-xs font-medium leading-tight">{t.name}</p>
-                  <p className="text-[#71717A] text-xs mt-0.5">{formatGHS(t.amount)}</p>
+                  <p className="text-fg text-xs font-medium leading-tight">{t.name}</p>
+                  <p className="text-fg-muted text-xs mt-0.5">{formatGHS(t.amount)}</p>
                 </button>
               ))}
             </div>
@@ -370,12 +368,12 @@ export function IncomeSourcesSection() {
               return (
                 <div
                   key={source.id}
-                  className="flex items-center justify-between px-3 py-2.5 bg-[#1C1C1F] rounded-xl"
+                  className="flex items-center justify-between px-3 py-2.5 bg-elevated rounded-xl"
                   style={{ opacity: source.is_active ? 1 : 0.5 }}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[#FAFAFA] text-sm font-medium truncate">{source.name}</span>
+                      <span className="text-fg text-sm font-medium truncate">{source.name}</span>
                       <Badge
                         className="text-[10px] px-1.5 py-0 h-4 font-medium border-0"
                         style={{
@@ -386,13 +384,13 @@ export function IncomeSourcesSection() {
                         {FREQUENCY_LABELS[source.frequency]}
                       </Badge>
                       {!source.is_active && (
-                        <span className="text-[#52525B] text-[10px]">inactive</span>
+                        <span className="text-fg-disabled text-[10px]">inactive</span>
                       )}
                     </div>
                     <div className="flex items-baseline gap-2 mt-0.5">
-                      <span className="text-[#A1A1AA] text-xs">{formatGHS(source.amount)}</span>
+                      <span className="text-fg-secondary text-xs">{formatGHS(source.amount)}</span>
                       {showEq && (
-                        <span className="text-[#52525B] text-[11px]">≈ {formatGHS(monthlyEq)}/mo</span>
+                        <span className="text-fg-disabled text-[11px]">≈ {formatGHS(monthlyEq)}/mo</span>
                       )}
                     </div>
                   </div>
@@ -400,13 +398,13 @@ export function IncomeSourcesSection() {
                   <div className="flex items-center gap-1 ml-2 shrink-0">
                     <button
                       onClick={() => openEdit(source)}
-                      className="w-7 h-7 rounded-lg text-[#71717A] hover:text-[#FAFAFA] flex items-center justify-center transition-colors"
+                      className="w-7 h-7 rounded-lg text-fg-muted hover:text-fg flex items-center justify-center transition-colors"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(source.id)}
-                      className="w-7 h-7 rounded-lg text-[#71717A] hover:text-[#F43F5E] flex items-center justify-center transition-colors"
+                      className="w-7 h-7 rounded-lg text-fg-muted hover:text-destructive flex items-center justify-center transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -415,9 +413,9 @@ export function IncomeSourcesSection() {
               );
             })}
 
-            <div className="flex items-center justify-between pt-3 mt-1 border-t border-[#27272A]">
-              <span className="text-[#71717A] text-sm">Total monthly income</span>
-              <span className="text-[#FAFAFA] text-base font-bold">{formatGHS(total)}</span>
+            <div className="flex items-center justify-between pt-3 mt-1 border-t border-border">
+              <span className="text-fg-muted text-sm">Total monthly income</span>
+              <span className="text-fg text-base font-bold">{formatGHS(total)}</span>
             </div>
           </div>
         )}

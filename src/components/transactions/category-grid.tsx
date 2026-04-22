@@ -24,7 +24,6 @@ interface CategoryGridProps {
 
 export function CategoryGrid({ categories, selectedId, onSelect, transactionType }: CategoryGridProps) {
   const filtered = categories.filter((c) => {
-    // Fallback for categories loaded before the migration ran
     const ctype = c.category_type ?? (c.bucket_id ? 'expense' : 'income');
     if (transactionType === 'income') return ctype === 'income' || ctype === 'adjustment';
     return ctype === 'expense' || ctype === 'adjustment';
@@ -39,12 +38,12 @@ export function CategoryGrid({ categories, selectedId, onSelect, transactionType
           className={cn(
             'flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all',
             selectedId === cat.id
-              ? 'border-[#00D9A3] bg-[#00D9A3]/10'
-              : 'border-[#27272A] bg-[#1C1C1F] hover:border-[#3F3F46]'
+              ? 'border-accent bg-accent/10'
+              : 'border-border bg-elevated hover:border-border/60'
           )}
         >
           <span className="text-xl">{getIconEmoji(cat.icon)}</span>
-          <span className="text-xs text-[#A1A1AA] text-center leading-tight font-medium line-clamp-2">
+          <span className="text-xs text-fg-secondary text-center leading-tight font-medium line-clamp-2">
             {cat.name}
           </span>
         </button>

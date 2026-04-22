@@ -36,7 +36,7 @@ function PopoverContent({
       >
         <PopoverPrimitive.Popup
           className={cn(
-            "max-w-[280px] rounded-xl bg-[#1C1C1F] border border-[#27272A] px-3 py-2.5 text-xs text-[#A1A1AA] shadow-lg outline-none",
+            "max-w-[280px] rounded-xl bg-elevated border border-border px-3 py-2.5 text-xs text-fg-secondary shadow-lg outline-none",
             "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
             "data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
             className

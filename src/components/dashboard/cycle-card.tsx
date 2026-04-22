@@ -4,17 +4,16 @@ import { useRef, useEffect } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { formatGHS, formatGHSCompact } from '@/lib/utils';
 import type { CardTheme } from '@/types/card-theme';
-import { CARD_THEMES, resolveAmountColor } from '@/types/card-theme';
+import { getCardThemeConfig, resolveAmountColor } from '@/types/card-theme';
+import { useTheme } from '@/components/theme-provider';
 
 // ── Shared card surface ───────────────────────────────────────────
-// Used by both the full CycleCard and the mini preview in Settings.
 
 interface CardSurfaceProps {
   themeId: CardTheme;
   cycleNet: number;
   cycleLabel: string;
   userName: string;
-  /** animated key — when it changes, the amount ticks in */
   amountKey?: number;
   mounted?: React.RefObject<boolean>;
   mini?: boolean;
@@ -29,8 +28,9 @@ export function CardSurface({
   mounted,
   mini = false,
 }: CardSurfaceProps) {
-  const theme = CARD_THEMES[themeId];
-  const amountColor = resolveAmountColor(theme, cycleNet);
+  const { resolvedTheme } = useTheme();
+  const theme = getCardThemeConfig(themeId, resolvedTheme);
+  const amountColor = resolveAmountColor(theme, cycleNet, resolvedTheme);
   const isNegative = cycleNet < 0;
   const prefix = isNegative ? '−' : '';
 
@@ -79,7 +79,9 @@ export function CardSurface({
         className="absolute inset-x-0 top-0 pointer-events-none"
         style={{
           height: mini ? 24 : 40,
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, transparent 100%)',
+          background: resolvedTheme === 'light'
+            ? 'linear-gradient(to bottom, rgba(0,0,0,0.06) 0%, transparent 100%)'
+            : 'linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, transparent 100%)',
         }}
       />
 
@@ -267,12 +269,12 @@ export function CycleCard({
       </div>
 
       {/* Supporting stats */}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#71717A] tabular-nums px-1">
-        <span>Received <span className="text-[#A1A1AA]">{formatGHSCompact(received)}</span></span>
-        <span className="text-[#3F3F46]">·</span>
-        <span>Spent <span className="text-[#A1A1AA]">{formatGHSCompact(spent)}</span></span>
-        <span className="text-[#3F3F46]">·</span>
-        <span>Expected <span className="text-[#A1A1AA]">{formatGHSCompact(expected)}/mo</span></span>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-fg-muted tabular-nums px-1">
+        <span>Received <span className="text-fg-secondary">{formatGHSCompact(received)}</span></span>
+        <span className="text-fg-disabled">·</span>
+        <span>Spent <span className="text-fg-secondary">{formatGHSCompact(spent)}</span></span>
+        <span className="text-fg-disabled">·</span>
+        <span>Expected <span className="text-fg-secondary">{formatGHSCompact(expected)}/mo</span></span>
       </div>
     </div>
   );
@@ -280,8 +282,9 @@ export function CycleCard({
 
 // ── Helpers ───────────────────────────────────────────────────────
 
-/** Convert #RRGGBB hex to rgba(r,g,b,alpha) string. */
 function hexWithAlpha(hex: string, alpha: number): string {
+  // Handle shorthand or non-hex (like 'rgba(...)' already)
+  if (!hex.startsWith('#')) return hex;
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);

@@ -82,7 +82,6 @@ function DashboardContent() {
     }
   }, [profile, incomeSources]);
 
-  // Fetch today's digest and read status
   useEffect(() => {
     if (!user) return;
     const today = new Date().toISOString().slice(0, 10);
@@ -108,7 +107,6 @@ function DashboardContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Check cycle-ended badges on dashboard load
   useEffect(() => {
     if (!user) return;
     checkAndUnlockBadges(supabase, user.id, 'cycle_ended').then(({ newlyUnlocked }) => {
@@ -120,14 +118,12 @@ function DashboardContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Fetch income nudges once profile + income sources are available
   useEffect(() => {
     if (!user || incomeSources.length === 0) return;
     getDueIncomeNudges(supabase, user.id, incomeSources).then(setNudges);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, incomeSources]);
 
-  // Fetch top goals for widget
   useEffect(() => {
     if (!user || accounts.length === 0) return;
     fetchGoals(supabase, user.id).then(async goals => {
@@ -208,17 +204,17 @@ function DashboardContent() {
           <button
             onClick={() => navigateCycle(-1)}
             aria-label="Previous month"
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-fg-muted hover:text-fg hover:bg-elevated transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
           <div className="text-center">
-            <h2 className="text-[#FAFAFA] font-bold text-lg leading-tight tabular-nums">
+            <h2 className="text-fg font-bold text-lg leading-tight tabular-nums">
               {cycle.label}
             </h2>
             {!cycle.isCurrent && (
-              <span className="text-[#71717A] text-[10px] font-medium uppercase tracking-wider">
+              <span className="text-fg-muted text-[10px] font-medium uppercase tracking-wider">
                 Past month
               </span>
             )}
@@ -228,24 +224,24 @@ function DashboardContent() {
             onClick={() => navigateCycle(1)}
             disabled={cycle.isCurrent}
             aria-label="Next month"
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
-            style={{ color: cycle.isCurrent ? '#3F3F46' : '#71717A' }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            style={{ color: cycle.isCurrent ? 'var(--text-fg-disabled)' : 'var(--text-fg-muted)' }}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Sika Daily banner — skeleton while loading, banner/nothing once resolved */}
+        {/* Sika Daily banner */}
         {digestLoading ? (
-          <div className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-[#141416] to-[#1C1C1F] border border-[#00D9A3]/10">
+          <div className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-surface to-elevated border border-accent/10">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-[#1C1C1F] animate-pulse" />
+              <div className="w-6 h-6 rounded-full bg-elevated animate-pulse" />
               <div className="space-y-1.5">
-                <div className="h-3.5 w-32 rounded bg-[#1C1C1F] animate-pulse" />
-                <div className="h-3 w-24 rounded bg-[#1C1C1F] animate-pulse" />
+                <div className="h-3.5 w-32 rounded bg-elevated animate-pulse" />
+                <div className="h-3 w-24 rounded bg-elevated animate-pulse" />
               </div>
             </div>
-            <div className="w-4 h-4 rounded bg-[#1C1C1F] animate-pulse" />
+            <div className="w-4 h-4 rounded bg-elevated animate-pulse" />
           </div>
         ) : todayDigest && !digestRead ? (
           <SikaDailyBanner digest={todayDigest} />
@@ -255,7 +251,7 @@ function DashboardContent() {
         <div className="w-full md:max-w-[440px] md:mx-auto">
           {loading ? (
             <Skeleton
-              className="w-full bg-[#141416]"
+              className="w-full bg-surface"
               style={{ aspectRatio: '85.6 / 54', borderRadius: 20 }}
             />
           ) : (
@@ -278,7 +274,7 @@ function DashboardContent() {
           )}
         </div>
 
-        {/* Sunday recap — only on Sundays */}
+        {/* Sunday recap */}
         <SundayRecapCard />
 
         {/* Financial health row */}
@@ -291,24 +287,24 @@ function DashboardContent() {
               onClick={() => setShowIncomeBreakdown(v => !v)}
               className="flex items-center gap-1.5 text-sm transition-colors"
             >
-              <span className="text-[#FAFAFA] font-semibold tabular-nums">{formatGHS(monthlyIncome)}</span>
-              <span className="text-[#71717A]">/mo</span>
+              <span className="text-fg font-semibold tabular-nums">{formatGHS(monthlyIncome)}</span>
+              <span className="text-fg-muted">/mo</span>
               {activeSources.length > 1 && (
-                <span className="text-[#52525B] text-[10px] ml-0.5">
+                <span className="text-fg-disabled text-[10px] ml-0.5">
                   {showIncomeBreakdown ? '▴' : '▾'}
                 </span>
               )}
             </button>
 
             {showIncomeBreakdown && activeSources.length > 1 && (
-              <div className="absolute top-full left-0 mt-1 z-20 bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 shadow-xl">
+              <div className="absolute top-full left-0 mt-1 z-20 bg-elevated border border-border rounded-xl px-3 py-2.5 shadow-xl">
                 <div className="flex flex-wrap gap-x-3 gap-y-1">
                   {activeSources.map(s => (
-                    <span key={s.id} className="text-[#A1A1AA] text-xs whitespace-nowrap">
+                    <span key={s.id} className="text-fg-secondary text-xs whitespace-nowrap">
                       {s.name}{' '}
-                      <span className="text-[#FAFAFA]">{formatGHSCompact(s.amount)}</span>
+                      <span className="text-fg">{formatGHSCompact(s.amount)}</span>
                       {s.frequency !== 'monthly' && (
-                        <span className="text-[#52525B]"> {FREQUENCY_LABELS[s.frequency].toLowerCase()}</span>
+                        <span className="text-fg-disabled"> {FREQUENCY_LABELS[s.frequency].toLowerCase()}</span>
                       )}
                     </span>
                   ))}
@@ -345,7 +341,7 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Buckets intro — shown once until dismissed */}
+        {/* Buckets intro */}
         <HintCard
           hintId="dashboard_buckets_intro"
           title="How buckets work"
@@ -355,39 +351,39 @@ function DashboardContent() {
 
         {/* Bucket rings */}
         <div>
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">Buckets</p>
-          <BucketsTooltip />
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          {(() => {
-            const sinkingFundEarmarked = goalProgresses
-              .filter(gp => gp.goal.goal_type === 'target' && !gp.goal.completed_at && gp.required_monthly_pace != null)
-              .reduce((s, gp) => s + (gp.required_monthly_pace ?? 0), 0);
-            return loading
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-40 rounded-2xl bg-[#141416]" />
-                ))
-              : BUCKETS.map((bucket, i) => (
-                  <BucketRing
-                    key={bucket}
-                    bucket={bucket}
-                    spent={dashboardStats?.bucketSpend[bucket] ?? 0}
-                    limit={dashboardStats?.bucketLimits[bucket] ?? 0}
-                    index={i}
-                    earmarked={bucket === 'future' ? sinkingFundEarmarked : undefined}
-                  />
-                ));
-          })()}
-        </div>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-fg-muted text-xs font-medium uppercase tracking-wider">Buckets</p>
+            <BucketsTooltip />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {(() => {
+              const sinkingFundEarmarked = goalProgresses
+                .filter(gp => gp.goal.goal_type === 'target' && !gp.goal.completed_at && gp.required_monthly_pace != null)
+                .reduce((s, gp) => s + (gp.required_monthly_pace ?? 0), 0);
+              return loading
+                ? Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-40 rounded-2xl bg-surface" />
+                  ))
+                : BUCKETS.map((bucket, i) => (
+                    <BucketRing
+                      key={bucket}
+                      bucket={bucket}
+                      spent={dashboardStats?.bucketSpend[bucket] ?? 0}
+                      limit={dashboardStats?.bucketLimits[bucket] ?? 0}
+                      index={i}
+                      earmarked={bucket === 'future' ? sinkingFundEarmarked : undefined}
+                    />
+                  ));
+            })()}
+          </div>
         </div>
 
         {/* Spend summary cards */}
         <div className="grid grid-cols-2 gap-3">
           {loading ? (
             <>
-              <Skeleton className="h-24 rounded-2xl bg-[#141416]" />
-              <Skeleton className="h-24 rounded-2xl bg-[#141416]" />
+              <Skeleton className="h-24 rounded-2xl bg-surface" />
+              <Skeleton className="h-24 rounded-2xl bg-surface" />
             </>
           ) : (
             <>
@@ -411,8 +407,8 @@ function DashboardContent() {
         {accounts.length > 0 && (
           <div className="hidden md:block">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[#71717A] text-xs font-medium uppercase tracking-wider">Accounts</p>
-              <Link href="/accounts" className="text-[#00D9A3] text-xs hover:text-[#00F5B8] transition-colors">
+              <p className="text-fg-muted text-xs font-medium uppercase tracking-wider">Accounts</p>
+              <Link href="/accounts" className="text-accent text-xs hover:text-accent/80 transition-colors">
                 See all
               </Link>
             </div>
@@ -424,12 +420,12 @@ function DashboardContent() {
                   <Link
                     key={acc.id}
                     href="/accounts"
-                    className="flex-shrink-0 bg-[#141416] border border-[#27272A] rounded-2xl p-3 min-w-[120px] hover:border-[#3F3F46] transition-colors"
+                    className="flex-shrink-0 bg-surface border border-border rounded-2xl p-3 min-w-[120px] hover:border-border/60 transition-colors"
                     style={{ borderLeftColor: cfg.color, borderLeftWidth: 3 }}
                   >
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="text-base">{cfg.emoji}</span>
-                      <span className="text-[#A1A1AA] text-xs truncate">{acc.name}</span>
+                      <span className="text-fg-secondary text-xs truncate">{acc.name}</span>
                     </div>
                     <p className="text-sm font-bold tabular-nums" style={{ color: cfg.color }}>
                       {formatGHSCompact(balance)}
@@ -446,7 +442,7 @@ function DashboardContent() {
 
         {/* Weekly chart */}
         {loading ? (
-          <Skeleton className="h-52 rounded-2xl bg-[#141416]" />
+          <Skeleton className="h-52 rounded-2xl bg-surface" />
         ) : (
           <WeeklyChart data={dashboardStats?.weeklySpend ?? []} />
         )}
@@ -454,7 +450,7 @@ function DashboardContent() {
         {/* Recent transactions — desktop only */}
         <div className="hidden md:block">
           {loading ? (
-            <Skeleton className="h-64 rounded-2xl bg-[#141416]" />
+            <Skeleton className="h-64 rounded-2xl bg-surface" />
           ) : (
             <RecentTransactions transactions={dashboardStats?.recentTransactions ?? []} />
           )}
@@ -471,10 +467,10 @@ export default function DashboardPage() {
     <Suspense
       fallback={
         <div className="max-w-2xl mx-auto px-4 pt-6 md:px-8 space-y-4">
-          <Skeleton className="h-8 w-48 rounded-xl bg-[#141416]" />
+          <Skeleton className="h-8 w-48 rounded-xl bg-surface" />
           <div className="grid grid-cols-3 gap-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-40 rounded-2xl bg-[#141416]" />
+              <Skeleton key={i} className="h-40 rounded-2xl bg-surface" />
             ))}
           </div>
         </div>

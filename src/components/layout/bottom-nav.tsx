@@ -19,7 +19,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed bottom-0 left-0 right-0 z-30 bg-[#141416] border-t border-[#27272A] md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-30 bg-surface border-t border-border md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex h-16">
@@ -29,24 +29,24 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
-              className="relative flex flex-col items-center justify-center flex-1 gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#00D9A3]"
+              className="relative flex flex-col items-center justify-center flex-1 gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
               aria-current={active ? 'page' : undefined}
             >
               {active && (
                 <motion.div
                   layoutId="bottom-nav-indicator"
-                  className="absolute top-0 left-4 right-4 h-[2px] rounded-full bg-[#00D9A3]"
+                  className="absolute top-0 left-4 right-4 h-[2px] rounded-full bg-accent"
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
               <Icon
                 className="w-5 h-5 transition-colors"
-                style={{ color: active ? '#00D9A3' : '#71717A' }}
+                style={{ color: active ? 'var(--accent)' : 'var(--text-fg-muted)' }}
                 aria-hidden
               />
               <span
                 className="text-[10px] font-medium leading-none transition-colors"
-                style={{ color: active ? '#00D9A3' : '#71717A' }}
+                style={{ color: active ? 'var(--accent)' : 'var(--text-fg-muted)' }}
               >
                 {label}
               </span>

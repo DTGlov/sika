@@ -51,16 +51,16 @@ export default function MomentumPage() {
   return (
     <div className="max-w-2xl mx-auto pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#0A0A0B] border-b border-[#141416]">
+      <div className="sticky top-0 z-10 bg-page border-b border-surface">
         <div className="flex items-center gap-3 px-4 h-14">
           <button
             onClick={() => router.back()}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#1C1C1F] transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-fg-muted hover:text-fg hover:bg-elevated transition-colors"
             aria-label="Go back"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-[#FAFAFA] font-semibold text-base">Momentum</h1>
+          <h1 className="text-fg font-semibold text-base">Momentum</h1>
         </div>
       </div>
 
@@ -69,7 +69,7 @@ export default function MomentumPage() {
         <div
           className="rounded-3xl p-6 text-center border"
           style={{
-            background: `linear-gradient(135deg, #0A0A0B 0%, ${tier.color}15 100%)`,
+            background: `linear-gradient(135deg, var(--bg-page) 0%, ${tier.color}15 100%)`,
             borderColor: `${tier.color}40`,
             boxShadow: `0 0 40px ${tier.color}20`,
           }}
@@ -85,19 +85,19 @@ export default function MomentumPage() {
           <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color: tier.color }}>
             Current Tier
           </p>
-          <h2 className="text-3xl font-bold text-[#FAFAFA] mb-1">{tier.name}</h2>
-          <p className="text-[#A1A1AA] text-sm tabular-nums">{totalPoints.toLocaleString()} total points</p>
+          <h2 className="text-3xl font-bold text-fg mb-1">{tier.name}</h2>
+          <p className="text-fg-secondary text-sm tabular-nums">{totalPoints.toLocaleString()} total points</p>
 
           {nextTier && (
             <div className="mt-5">
-              <div className="flex justify-between items-center text-xs text-[#52525B] mb-1.5">
+              <div className="flex justify-between items-center text-xs text-fg-disabled mb-1.5">
                 <span>{tier.name}</span>
                 <div className="flex items-center gap-1">
                   <TierIcon tier={nextTier.id} size={12} />
                   <span>{nextTier.name}</span>
                 </div>
               </div>
-              <div className="h-2 bg-[#1C1C1F] rounded-full overflow-hidden">
+              <div className="h-2 bg-elevated rounded-full overflow-hidden">
                 <motion.div
                   className="h-full rounded-full"
                   style={{ background: tier.color }}
@@ -106,15 +106,15 @@ export default function MomentumPage() {
                   transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
                 />
               </div>
-              <p className="text-xs text-[#52525B] mt-1.5">{pointsNeeded} pts to next tier</p>
+              <p className="text-xs text-fg-disabled mt-1.5">{pointsNeeded} pts to next tier</p>
             </div>
           )}
         </div>
 
         {/* Tier ladder */}
         <div>
-          <h3 className="text-[#FAFAFA] font-semibold text-sm mb-3">All Tiers</h3>
-          <div className="bg-[#141416] border border-[#27272A] rounded-2xl divide-y divide-[#1C1C1F]">
+          <h3 className="text-fg font-semibold text-sm mb-3">All Tiers</h3>
+          <div className="bg-surface border border-border rounded-2xl divide-y divide-elevated">
             {TIER_ORDER.map(tierId => {
               const t = TIERS[tierId];
               const isCurrent = t.id === tier.id;
@@ -125,10 +125,10 @@ export default function MomentumPage() {
                     <TierIcon tier={t.id} size={20} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium" style={{ color: isUnlocked ? t.color : '#52525B' }}>
+                    <p className="text-sm font-medium" style={{ color: isUnlocked ? t.color : 'var(--text-fg-disabled)' }}>
                       {t.name}
                     </p>
-                    <p className="text-xs text-[#52525B]">{t.threshold.toLocaleString()} pts</p>
+                    <p className="text-xs text-fg-disabled">{t.threshold.toLocaleString()} pts</p>
                   </div>
                   {isCurrent && (
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: `${t.color}20`, color: t.color }}>
@@ -143,12 +143,12 @@ export default function MomentumPage() {
 
         {/* How to earn */}
         <div>
-          <h3 className="text-[#FAFAFA] font-semibold text-sm mb-3">How to Earn Points</h3>
-          <div className="bg-[#141416] border border-[#27272A] rounded-2xl divide-y divide-[#1C1C1F]">
+          <h3 className="text-fg font-semibold text-sm mb-3">How to Earn Points</h3>
+          <div className="bg-surface border border-border rounded-2xl divide-y divide-elevated">
             {(Object.entries(MOMENTUM_AMOUNTS) as [string, number][]).map(([key, pts]) => (
               <div key={key} className="flex items-center justify-between px-4 py-3">
-                <p className="text-sm text-[#A1A1AA]">{EVENT_LABELS[key] ?? key}</p>
-                <span className="text-sm font-semibold text-[#00D9A3] tabular-nums">+{pts}</span>
+                <p className="text-sm text-fg-secondary">{EVENT_LABELS[key] ?? key}</p>
+                <span className="text-sm font-semibold text-accent tabular-nums">+{pts}</span>
               </div>
             ))}
           </div>
@@ -157,17 +157,17 @@ export default function MomentumPage() {
         {/* Recent events */}
         {events.length > 0 && (
           <div>
-            <h3 className="text-[#FAFAFA] font-semibold text-sm mb-3">Recent Activity</h3>
-            <div className="bg-[#141416] border border-[#27272A] rounded-2xl divide-y divide-[#1C1C1F]">
+            <h3 className="text-fg font-semibold text-sm mb-3">Recent Activity</h3>
+            <div className="bg-surface border border-border rounded-2xl divide-y divide-elevated">
               {events.map(e => (
                 <div key={e.id} className="flex items-center justify-between px-4 py-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#A1A1AA]">{EVENT_LABELS[e.event_type] ?? e.event_type}</p>
-                    <p className="text-xs text-[#52525B]">
+                    <p className="text-sm text-fg-secondary">{EVENT_LABELS[e.event_type] ?? e.event_type}</p>
+                    <p className="text-xs text-fg-disabled">
                       {formatDistanceToNow(new Date(e.created_at), { addSuffix: true })}
                     </p>
                   </div>
-                  <span className="text-sm font-semibold text-[#00D9A3] tabular-nums ml-3">+{e.points}</span>
+                  <span className="text-sm font-semibold text-accent tabular-nums ml-3">+{e.points}</span>
                 </div>
               ))}
             </div>

@@ -16,20 +16,20 @@ export function TopBar() {
       style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1.5rem)' }}
     >
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-[#00D9A3] flex items-center justify-center">
-          <TrendingUp className="w-4 h-4 text-[#0A0A0B]" />
+        <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+          <TrendingUp className="w-4 h-4 text-accent-foreground" />
         </div>
         <div>
-          <p className="text-sm text-[#A1A1AA]">
+          <p className="text-sm text-fg-secondary">
             {getGreeting()}, {firstName}
           </p>
-          <p className="text-xs text-[#71717A]">{format(new Date(), 'MMMM yyyy')}</p>
+          <p className="text-xs text-fg-muted">{format(new Date(), 'MMMM yyyy')}</p>
         </div>
       </div>
 
       <Link
         href="/settings"
-        className="w-9 h-9 rounded-xl bg-[#141416] border border-[#27272A] flex items-center justify-center text-[#A1A1AA] hover:text-[#FAFAFA] hover:border-[#3F3F46] transition-colors"
+        className="w-9 h-9 rounded-xl bg-surface border border-border flex items-center justify-center text-fg-secondary hover:text-fg hover:border-border/60 transition-colors"
       >
         <Settings className="w-4 h-4" />
       </Link>

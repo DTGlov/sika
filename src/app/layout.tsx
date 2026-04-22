@@ -43,9 +43,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full`}
+      data-theme="dark"
+      className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
-      <body className="min-h-full bg-[#0A0A0B] text-[#FAFAFA] antialiased">
+      <body className="min-h-full antialiased" style={{ background: 'var(--bg-page)', color: 'var(--text-fg)' }}>
         {children}
         <Toaster richColors position="top-center" />
         <PwaRegister />

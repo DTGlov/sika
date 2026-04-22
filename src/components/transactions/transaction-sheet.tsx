@@ -361,12 +361,12 @@ export function TransactionSheet() {
     <Sheet open={isLogSheetOpen} onOpenChange={(open) => !open && handleClose()}>
       <SheetContent
         side="bottom"
-        className="bg-[#141416] border-t border-[#27272A] rounded-t-3xl px-4 pb-8 pt-4 max-h-[92svh] overflow-y-auto"
+        className="bg-surface border-t border-border rounded-t-3xl px-4 pb-8 pt-4 max-h-[92svh] overflow-y-auto"
       >
-        <div className="w-10 h-1 bg-[#27272A] rounded-full mx-auto mb-4" />
+        <div className="w-10 h-1 bg-border rounded-full mx-auto mb-4" />
 
         <SheetHeader className="mb-4">
-          <SheetTitle className="text-[#FAFAFA] text-lg font-bold text-left">
+          <SheetTitle className="text-fg text-lg font-bold text-left">
             {stepTitles[step]}
           </SheetTitle>
         </SheetHeader>
@@ -377,7 +377,7 @@ export function TransactionSheet() {
             <div
               key={s}
               className="h-1 flex-1 rounded-full transition-colors"
-              style={{ background: stepList.indexOf(step) >= i ? '#00D9A3' : '#27272A' }}
+              style={{ background: stepList.indexOf(step) >= i ? 'var(--accent)' : 'var(--border)' }}
             />
           ))}
         </div>
@@ -397,7 +397,7 @@ export function TransactionSheet() {
               <button
                 type="button"
                 onClick={() => handleTypeChange('adjustment')}
-                className="w-full flex items-center justify-center gap-1.5 text-xs text-[#52525B] hover:text-[#A1A1AA] transition-colors py-1"
+                className="w-full flex items-center justify-center gap-1.5 text-xs text-fg-disabled hover:text-fg-secondary transition-colors py-1"
               >
                 <Scale className="w-3.5 h-3.5" />
                 Reconcile an account balance instead
@@ -407,7 +407,7 @@ export function TransactionSheet() {
             {/* Account chips — not for transfer */}
             {txType !== 'transfer' && accounts.length > 0 && (
               <div>
-                <p className="text-[#71717A] text-xs mb-2">Account</p>
+                <p className="text-fg-muted text-xs mb-2">Account</p>
                 <div className="flex flex-wrap gap-2">
                   {accounts.map(acc => {
                     const cfg = ACCOUNT_TYPE_CONFIG[acc.type];
@@ -419,9 +419,9 @@ export function TransactionSheet() {
                         onClick={() => setAccountId(acc.id)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all"
                         style={{
-                          borderColor: active ? cfg.color : '#27272A',
-                          backgroundColor: active ? cfg.color + '18' : '#1C1C1F',
-                          color: active ? cfg.color : '#71717A',
+                          borderColor: active ? cfg.color : 'var(--border)',
+                          backgroundColor: active ? cfg.color + '18' : 'var(--bg-elevated)',
+                          color: active ? cfg.color : 'var(--text-fg-muted)',
                         }}
                       >
                         <span>{cfg.emoji}</span>
@@ -436,7 +436,7 @@ export function TransactionSheet() {
             <Button
               onClick={handleNext}
               disabled={!canProceedAmount}
-              className="w-full h-13 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold text-base rounded-xl flex items-center justify-center gap-2"
+              className="w-full h-13 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-base rounded-xl flex items-center justify-center gap-2"
             >
               Next <ChevronRight className="w-4 h-4" />
             </Button>
@@ -454,11 +454,11 @@ export function TransactionSheet() {
             />
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleBack}
-                className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
+                className="flex-1 h-12 border-border text-fg-secondary hover:bg-elevated rounded-xl">
                 Back
               </Button>
               <Button onClick={() => setStep('details')}
-                className="flex-1 h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl">
+                className="flex-1 h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl">
                 Next
               </Button>
             </div>
@@ -469,7 +469,7 @@ export function TransactionSheet() {
         {step === 'accounts' && (
           <div className="space-y-5">
             <div className="space-y-2">
-              <p className="text-[#A1A1AA] text-sm">From</p>
+              <p className="text-fg-secondary text-sm">From</p>
               <div className="flex flex-wrap gap-2">
                 {accounts.map(acc => {
                   const cfg = ACCOUNT_TYPE_CONFIG[acc.type];
@@ -478,9 +478,9 @@ export function TransactionSheet() {
                     <button key={acc.id} type="button" onClick={() => setAccountId(acc.id)}
                       className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all"
                       style={{
-                        borderColor: active ? cfg.color : '#27272A',
-                        backgroundColor: active ? cfg.color + '18' : '#1C1C1F',
-                        color: active ? cfg.color : '#71717A',
+                        borderColor: active ? cfg.color : 'var(--border)',
+                        backgroundColor: active ? cfg.color + '18' : 'var(--bg-elevated)',
+                        color: active ? cfg.color : 'var(--text-fg-muted)',
                       }}>
                       <span>{cfg.emoji}</span><span>{acc.name}</span>
                     </button>
@@ -488,13 +488,13 @@ export function TransactionSheet() {
                 })}
               </div>
             </div>
-            <div className="flex items-center gap-2 text-[#52525B]">
-              <div className="flex-1 h-px bg-[#27272A]" />
+            <div className="flex items-center gap-2 text-fg-disabled">
+              <div className="flex-1 h-px bg-border" />
               <ArrowRight className="w-4 h-4" />
-              <div className="flex-1 h-px bg-[#27272A]" />
+              <div className="flex-1 h-px bg-border" />
             </div>
             <div className="space-y-2">
-              <p className="text-[#A1A1AA] text-sm">To</p>
+              <p className="text-fg-secondary text-sm">To</p>
               <div className="flex flex-wrap gap-2">
                 {accounts.filter(a => a.id !== accountId).map(acc => {
                   const cfg = ACCOUNT_TYPE_CONFIG[acc.type];
@@ -503,9 +503,9 @@ export function TransactionSheet() {
                     <button key={acc.id} type="button" onClick={() => setToAccountId(acc.id)}
                       className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all"
                       style={{
-                        borderColor: active ? cfg.color : '#27272A',
-                        backgroundColor: active ? cfg.color + '18' : '#1C1C1F',
-                        color: active ? cfg.color : '#71717A',
+                        borderColor: active ? cfg.color : 'var(--border)',
+                        backgroundColor: active ? cfg.color + '18' : 'var(--bg-elevated)',
+                        color: active ? cfg.color : 'var(--text-fg-muted)',
                       }}>
                       <span>{cfg.emoji}</span><span>{acc.name}</span>
                     </button>
@@ -515,11 +515,11 @@ export function TransactionSheet() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleBack}
-                className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
+                className="flex-1 h-12 border-border text-fg-secondary hover:bg-elevated rounded-xl">
                 Back
               </Button>
               <Button onClick={() => setStep('details')} disabled={!accountId || !toAccountId}
-                className="flex-1 h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl">
+                className="flex-1 h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl">
                 Next
               </Button>
             </div>
@@ -538,7 +538,7 @@ export function TransactionSheet() {
             {/* Account selector */}
             {!reconcileContext && (
               <div>
-                <p className="text-[#A1A1AA] text-sm mb-2">Account</p>
+                <p className="text-fg-secondary text-sm mb-2">Account</p>
                 <div className="flex flex-wrap gap-2">
                   {accounts.map(acc => {
                     const cfg = ACCOUNT_TYPE_CONFIG[acc.type];
@@ -547,9 +547,9 @@ export function TransactionSheet() {
                       <button key={acc.id} type="button" onClick={() => setAccountId(acc.id)}
                         className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all"
                         style={{
-                          borderColor: active ? cfg.color : '#27272A',
-                          backgroundColor: active ? cfg.color + '18' : '#1C1C1F',
-                          color: active ? cfg.color : '#71717A',
+                          borderColor: active ? cfg.color : 'var(--border)',
+                          backgroundColor: active ? cfg.color + '18' : 'var(--bg-elevated)',
+                          color: active ? cfg.color : 'var(--text-fg-muted)',
                         }}>
                         <span>{cfg.emoji}</span><span>{acc.name}</span>
                       </button>
@@ -561,17 +561,17 @@ export function TransactionSheet() {
 
             {/* Sika's current balance */}
             {accountId && (
-              <div className="bg-[#1C1C1F] border border-[#27272A] rounded-xl px-4 py-3 flex items-center justify-between">
-                <span className="text-[#71717A] text-sm">Sika shows</span>
-                <span className="text-[#FAFAFA] font-semibold tabular-nums">{formatGHS(sikaBalance)}</span>
+              <div className="bg-elevated border border-border rounded-xl px-4 py-3 flex items-center justify-between">
+                <span className="text-fg-muted text-sm">Sika shows</span>
+                <span className="text-fg font-semibold tabular-nums">{formatGHS(sikaBalance)}</span>
               </div>
             )}
 
             {/* Actual balance input */}
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">Actual current balance</label>
+              <label className="text-fg-secondary text-sm">Actual current balance</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">₵</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-secondary font-mono text-sm">₵</span>
                 <Input
                   type="number"
                   min="0"
@@ -579,7 +579,7 @@ export function TransactionSheet() {
                   placeholder="0.00"
                   value={reconcileActual}
                   onChange={(e) => setReconcileActual(e.target.value)}
-                  className="h-12 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                  className="h-12 pl-7 bg-elevated border-border text-fg focus-visible:ring-ring amount"
                 />
               </div>
             </div>
@@ -588,12 +588,12 @@ export function TransactionSheet() {
             {reconcileActual !== '' && (
               <div
                 className="rounded-xl px-4 py-3 flex items-center justify-between"
-                style={{ backgroundColor: reconcileIsPositive ? '#00D9A318' : '#F43F5E18' }}
+                style={{ backgroundColor: reconcileIsPositive ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'color-mix(in srgb, var(--destructive) 10%, transparent)' }}
               >
-                <span className="text-[#A1A1AA] text-sm">Adjustment</span>
+                <span className="text-fg-secondary text-sm">Adjustment</span>
                 <span
                   className="font-semibold tabular-nums text-sm"
-                  style={{ color: reconcileIsPositive ? '#00D9A3' : '#F43F5E' }}
+                  style={{ color: reconcileIsPositive ? 'var(--accent)' : 'var(--destructive)' }}
                 >
                   {reconcileIsPositive ? '+' : ''}{formatGHS(reconcileDiff)}
                 </span>
@@ -602,26 +602,26 @@ export function TransactionSheet() {
 
             {/* Note */}
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">Note (optional)</label>
+              <label className="text-fg-secondary text-sm">Note (optional)</label>
               <Input
                 placeholder="e.g. Bank statement reconciliation"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#52525B] focus-visible:ring-[#00D9A3]"
+                className="h-11 bg-elevated border-border text-fg placeholder:text-fg-disabled focus-visible:ring-ring"
               />
             </div>
 
             <div className="flex gap-2">
               {!reconcileContext && (
                 <Button variant="outline" onClick={() => handleTypeChange('expense')}
-                  className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
+                  className="flex-1 h-12 border-border text-fg-secondary hover:bg-elevated rounded-xl">
                   Cancel
                 </Button>
               )}
               <Button
                 onClick={handleReconcileSave}
                 disabled={saving || reconcileActual === '' || !accountId || reconcileDiff === 0}
-                className="flex-1 h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+                className="flex-1 h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl"
               >
                 {saving
                   ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -637,21 +637,21 @@ export function TransactionSheet() {
         {step === 'details' && (
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">Note (optional)</label>
+              <label className="text-fg-secondary text-sm">Note (optional)</label>
               <Input
                 placeholder="What was this for?"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="h-12 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#71717A] focus-visible:ring-[#00D9A3]"
+                className="h-12 bg-elevated border-border text-fg placeholder:text-fg-muted focus-visible:ring-ring"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">Date</label>
+              <label className="text-fg-secondary text-sm">Date</label>
               <Input
                 type="date"
                 value={txDate}
                 onChange={(e) => setTxDate(e.target.value)}
-                className="h-12 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3]"
+                className="h-12 bg-elevated border-border text-fg focus-visible:ring-ring"
               />
             </div>
 
@@ -665,9 +665,9 @@ export function TransactionSheet() {
                       setSfExpanded(v => !v);
                       setSfHintDismissed(false);
                     }}
-                    className="flex items-center gap-1.5 text-xs text-[#71717A] hover:text-[#A1A1AA] transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-fg-muted hover:text-fg-secondary transition-colors"
                   >
-                    <span className="text-[#52525B]">{sfExpanded ? '▾' : '▸'}</span>
+                    <span className="text-fg-disabled">{sfExpanded ? '▾' : '▸'}</span>
                     Paid from a target?
                   </button>
                   <Popover>
@@ -676,7 +676,7 @@ export function TransactionSheet() {
                         <button
                           type="button"
                           aria-label="Why isn't my perpetual goal here?"
-                          className="text-[#71717A] hover:text-[#A1A1AA] transition-colors cursor-pointer"
+                          className="text-fg-muted hover:text-fg-secondary transition-colors cursor-pointer"
                         >
                           <Info className="w-3.5 h-3.5" />
                         </button>
@@ -708,7 +708,7 @@ export function TransactionSheet() {
                       <select
                         value={paidFromGoalId ?? ''}
                         onChange={e => { setPaidFromGoalId(e.target.value || null); setSfBalance(null); }}
-                        className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#00D9A3] transition-colors"
+                        className="w-full bg-elevated border border-border rounded-xl px-3 py-2.5 text-sm text-fg focus:outline-none focus:border-accent transition-colors"
                       >
                         <option value="">— Not from a target</option>
                         {sinkingFundGoals.map(g => (
@@ -719,8 +719,8 @@ export function TransactionSheet() {
                       </select>
 
                       {/* Perpetual goals note */}
-                      <div className="border-t border-[#27272A] mt-2 pt-2">
-                        <p className="text-xs text-[#71717A] leading-relaxed px-1">
+                      <div className="border-t border-border mt-2 pt-2">
+                        <p className="text-xs text-fg-muted leading-relaxed px-1">
                           Perpetual goals (like Life Savings) don&apos;t appear here — they&apos;re protected.
                         </p>
                       </div>
@@ -728,45 +728,45 @@ export function TransactionSheet() {
                       {/* Live balance preview */}
                       {paidFromGoalId && !sfBalanceLoading && sfBalance !== null && (
                         sfOverpayment ? (
-                          <div className="rounded-xl bg-[#F43F5E]/10 border border-[#F43F5E]/30 px-3 py-2.5 space-y-1.5">
+                          <div className="rounded-xl bg-destructive/10 border border-destructive/30 px-3 py-2.5 space-y-1.5">
                             <div className="flex items-center gap-1.5">
-                              <AlertTriangle className="w-3.5 h-3.5 text-[#F43F5E] shrink-0" />
-                              <p className="text-[#F43F5E] text-xs font-medium">
+                              <AlertTriangle className="w-3.5 h-3.5 text-destructive shrink-0" />
+                              <p className="text-destructive text-xs font-medium">
                                 Not enough in this target yet
                               </p>
                             </div>
-                            <p className="text-[#A1A1AA] text-xs leading-relaxed">
+                            <p className="text-fg-secondary text-xs leading-relaxed">
                               Goal has{' '}
-                              <span className="text-[#FAFAFA] font-medium">{formatGHS(sfBalance)}</span>{' '}
+                              <span className="text-fg font-medium">{formatGHS(sfBalance)}</span>{' '}
                               saved. You can either:
                             </p>
-                            <ul className="text-[#71717A] text-xs space-y-0.5 ml-2">
+                            <ul className="text-fg-muted text-xs space-y-0.5 ml-2">
                               <li>• Reduce this payment to {formatGHS(sfBalance)} or less</li>
                               <li>• Contribute {formatGHS(numAmount - sfBalance)} more to the goal first</li>
                               <li>• Uncheck &ldquo;Paid from target&rdquo; and log as a regular expense</li>
                             </ul>
                           </div>
                         ) : sfBalance === 0 ? (
-                          <div className="rounded-xl bg-[#F43F5E]/10 border border-[#F43F5E]/30 px-3 py-2.5">
+                          <div className="rounded-xl bg-destructive/10 border border-destructive/30 px-3 py-2.5">
                             <div className="flex items-center gap-1.5">
-                              <AlertTriangle className="w-3.5 h-3.5 text-[#F43F5E] shrink-0" />
-                              <p className="text-[#F43F5E] text-xs font-medium">
+                              <AlertTriangle className="w-3.5 h-3.5 text-destructive shrink-0" />
+                              <p className="text-destructive text-xs font-medium">
                                 This goal has no saved amount yet — contribute first.
                               </p>
                             </div>
                           </div>
                         ) : (
-                          <div className="rounded-xl bg-[#1C1C1F] border border-[#27272A] px-3 py-2.5 space-y-1">
+                          <div className="rounded-xl bg-elevated border border-border px-3 py-2.5 space-y-1">
                             <div className="flex justify-between text-xs">
-                              <span className="text-[#71717A]">Goal balance</span>
-                              <span className="text-[#FAFAFA] tabular-nums">{formatGHS(sfBalance)}</span>
+                              <span className="text-fg-muted">Goal balance</span>
+                              <span className="text-fg tabular-nums">{formatGHS(sfBalance)}</span>
                             </div>
                             {numAmount > 0 && (
                               <div className="flex justify-between text-xs">
-                                <span className="text-[#71717A]">After this payment</span>
+                                <span className="text-fg-muted">After this payment</span>
                                 <span
                                   className="tabular-nums font-medium"
-                                  style={{ color: sfWillFulfill ? '#00D9A3' : '#FAFAFA' }}
+                                  style={{ color: sfWillFulfill ? 'var(--accent)' : 'var(--text-fg)' }}
                                 >
                                   {sfWillFulfill
                                     ? '₵0 — goal will be fulfilled'
@@ -775,7 +775,7 @@ export function TransactionSheet() {
                               </div>
                             )}
                             {!sfWillFulfill && (
-                              <p className="text-[#71717A] text-xs pt-0.5">
+                              <p className="text-fg-muted text-xs pt-0.5">
                                 This expense won't count against your buckets.
                               </p>
                             )}
@@ -784,7 +784,7 @@ export function TransactionSheet() {
                       )}
 
                       {paidFromGoalId && sfBalanceLoading && (
-                        <p className="text-[#52525B] text-xs">Checking goal balance…</p>
+                        <p className="text-fg-disabled text-xs">Checking goal balance…</p>
                       )}
                     </motion.div>
                   )}
@@ -794,11 +794,11 @@ export function TransactionSheet() {
 
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleBack}
-                className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
+                className="flex-1 h-12 border-border text-fg-secondary hover:bg-elevated rounded-xl">
                 Back
               </Button>
               <Button onClick={handleSave} disabled={saving || !canProceedAmount || !!sfOverpayment}
-                className="flex-1 h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl">
+                className="flex-1 h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editingTransaction ? 'Update' : 'Save'}
               </Button>
             </div>

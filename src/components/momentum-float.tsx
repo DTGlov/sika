@@ -34,7 +34,7 @@ export function MomentumFloat({ points, id, onDone }: MomentumFloatProps) {
       initial={{ opacity: 0, y: 0, scale: 0.8 }}
       animate={{ opacity: [0, 1, 1, 0], y: -60, scale: 1 }}
       transition={{ duration: 1.6, ease: 'easeOut' }}
-      className="pointer-events-none fixed bottom-28 right-4 z-[200] flex items-center gap-1 rounded-full bg-[#00D9A3]/20 border border-[#00D9A3]/40 px-3 py-1 text-sm font-semibold text-[#00D9A3] shadow-lg"
+      className="pointer-events-none fixed bottom-28 right-4 z-[200] flex items-center gap-1 rounded-full bg-accent/20 border border-accent/40 px-3 py-1 text-sm font-semibold text-accent shadow-lg"
     >
       +{points} pts
     </motion.div>
@@ -57,7 +57,7 @@ export function TierUpModal({ open, onClose, tier }: TierUpModalProps) {
         particleCount: 120,
         spread: 80,
         origin: { y: 0.6 },
-        colors: [tier.color, '#00D9A3', '#FBBF24', '#FAFAFA'],
+        colors: [tier.color, 'var(--accent)', '#FBBF24', 'var(--text-fg)'],
       });
     }
     if (!open) firedRef.current = false;
@@ -67,7 +67,7 @@ export function TierUpModal({ open, onClose, tier }: TierUpModalProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
         showCloseButton
-        className="max-w-[calc(100vw-32px)] sm:max-w-sm bg-[#0A0A0B] border-[#27272A] p-6 text-center"
+        className="max-w-[calc(100vw-32px)] sm:max-w-sm bg-page border-border p-6 text-center"
         style={{ boxShadow: `0 0 60px ${tier.color}40, 0 0 20px ${tier.color}20` }}
       >
         <DialogTitle className="sr-only">Tier up!</DialogTitle>
@@ -82,14 +82,14 @@ export function TierUpModal({ open, onClose, tier }: TierUpModalProps) {
         <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color: tier.color }}>
           Tier Up!
         </p>
-        <h2 className="text-2xl font-bold text-[#FAFAFA] mb-2">{tier.name}</h2>
-        <p className="text-sm text-[#A1A1AA] leading-relaxed">
+        <h2 className="text-2xl font-bold text-fg mb-2">{tier.name}</h2>
+        <p className="text-sm text-fg-secondary leading-relaxed">
           You&apos;ve reached <span style={{ color: tier.color }}>{tier.name}</span>. Keep going — the next tier is waiting.
         </p>
         <button
           onClick={onClose}
-          className="mt-6 w-full h-11 rounded-xl font-semibold text-sm text-[#0A0A0B] transition-colors hover:opacity-90"
-          style={{ background: tier.color }}
+          className="mt-6 w-full h-11 rounded-xl font-semibold text-sm transition-colors hover:opacity-90"
+          style={{ background: tier.color, color: '#0A0A0B' }}
         >
           Let&apos;s go!
         </button>

@@ -46,9 +46,9 @@ export const ICON_OPTIONS: { key: string; emoji: string }[] = [
 ];
 
 const BUCKET_COLORS: Record<string, string> = {
-  needs: '#00D9A3',
-  wants: '#FBBF24',
-  future: '#60A5FA',
+  needs: 'var(--color-sika-needs)',
+  wants: 'var(--color-sika-wants)',
+  future: 'var(--color-sika-future)',
 };
 
 const TYPE_META: Record<string, { label: string; hint: string }> = {
@@ -173,9 +173,9 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onClose(); } }}>
-      <DialogContent className="bg-[#141416] border-[#27272A] text-[#FAFAFA] max-w-sm">
+      <DialogContent className="bg-surface border-border text-fg max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-[#FAFAFA]">
+          <DialogTitle className="text-fg">
             {editCategory ? 'Edit category' : 'Add category'}
           </DialogTitle>
         </DialogHeader>
@@ -183,18 +183,18 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
           {/* Name */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Name</Label>
+            <Label className="text-fg-secondary text-sm">Name</Label>
             <Input
               placeholder="e.g. Groceries, Salary"
-              className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#52525B] focus-visible:ring-[#00D9A3]"
+              className="h-11 bg-elevated border-border text-fg placeholder:text-fg-disabled focus-visible:ring-ring"
               {...register('name')}
             />
-            {errors.name && <p className="text-[#F43F5E] text-xs">{errors.name.message}</p>}
+            {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
           </div>
 
           {/* Type */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Type</Label>
+            <Label className="text-fg-secondary text-sm">Type</Label>
             <div className="flex gap-1.5">
               {(['expense', 'income', 'adjustment'] as const).map((t) => {
                 const active = categoryType === t;
@@ -205,9 +205,9 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
                     onClick={() => setValue('category_type', t)}
                     className="flex-1 h-9 rounded-xl text-xs font-medium border transition-all"
                     style={{
-                      borderColor: active ? '#00D9A3' : '#27272A',
-                      backgroundColor: active ? '#00D9A3' + '18' : '#1C1C1F',
-                      color: active ? '#00D9A3' : '#71717A',
+                      borderColor: active ? 'var(--accent)' : 'var(--border)',
+                      backgroundColor: active ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'var(--bg-elevated)',
+                      color: active ? 'var(--accent)' : 'var(--text-fg-muted)',
                     }}
                   >
                     {TYPE_META[t].label}
@@ -215,16 +215,16 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
                 );
               })}
             </div>
-            <p className="text-[#52525B] text-[11px]">{TYPE_META[categoryType].hint}</p>
+            <p className="text-fg-disabled text-[11px]">{TYPE_META[categoryType].hint}</p>
           </div>
 
           {/* Bucket — only for expense */}
           {categoryType === 'expense' && (
             <div className="space-y-1.5">
-              <Label className="text-[#A1A1AA] text-sm">Bucket</Label>
+              <Label className="text-fg-secondary text-sm">Bucket</Label>
               <div className="flex gap-2">
                 {buckets.map((b) => {
-                  const color = BUCKET_COLORS[b.name] ?? '#71717A';
+                  const color = BUCKET_COLORS[b.name] ?? 'var(--text-fg-muted)';
                   const active = bucketId === b.id;
                   return (
                     <button
@@ -233,9 +233,9 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
                       onClick={() => setValue('bucket_id', b.id)}
                       className="flex-1 h-10 rounded-xl text-sm font-medium border transition-all"
                       style={{
-                        borderColor: active ? color : '#27272A',
-                        backgroundColor: active ? color + '18' : '#1C1C1F',
-                        color: active ? color : '#71717A',
+                        borderColor: active ? color : 'var(--border)',
+                        backgroundColor: active ? `color-mix(in srgb, ${color} 12%, transparent)` : 'var(--bg-elevated)',
+                        color: active ? color : 'var(--text-fg-muted)',
                       }}
                     >
                       {b.display_name}
@@ -243,13 +243,13 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
                   );
                 })}
               </div>
-              {errors.bucket_id && <p className="text-[#F43F5E] text-xs">{errors.bucket_id.message}</p>}
+              {errors.bucket_id && <p className="text-destructive text-xs">{errors.bucket_id.message}</p>}
             </div>
           )}
 
           {/* Icon picker */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Icon (optional)</Label>
+            <Label className="text-fg-secondary text-sm">Icon (optional)</Label>
             <div className="grid grid-cols-8 gap-1.5">
               {ICON_OPTIONS.map((opt) => {
                 const active = icon === opt.key;
@@ -260,8 +260,8 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
                     onClick={() => setValue('icon', active ? null : opt.key)}
                     className="h-9 w-9 rounded-xl text-lg flex items-center justify-center border transition-all"
                     style={{
-                      borderColor: active ? '#00D9A3' : '#27272A',
-                      backgroundColor: active ? '#00D9A3' + '18' : '#1C1C1F',
+                      borderColor: active ? 'var(--accent)' : 'var(--border)',
+                      backgroundColor: active ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'var(--bg-elevated)',
                     }}
                   >
                     {opt.emoji}
@@ -274,7 +274,7 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-11 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+            className="w-full h-11 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editCategory ? 'Save changes' : 'Add category'}
           </Button>

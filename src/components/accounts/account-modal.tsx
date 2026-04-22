@@ -40,13 +40,13 @@ interface AccountModalProps {
   open: boolean;
   onClose: () => void;
   editAccount?: Account;
-  currentBalance?: number; // computed balance (opening + transactions) — passed when editing
+  currentBalance?: number;
   onSaved: (accounts: Account[]) => void;
 }
 
 export function AccountModal({ open, onClose, editAccount, currentBalance, onSaved }: AccountModalProps) {
   const { user, accounts, setAccounts } = useAuthStore();
-  const { addTransaction, openReconcileSheet } = useTransactionStore();
+  const { addTransaction } = useTransactionStore();
   const supabase = createClient();
   const [reconcileMode, setReconcileMode] = useState(false);
   const [reconcileActual, setReconcileActual] = useState('');
@@ -72,7 +72,6 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
       : { name: '', type: 'bank', opening_balance: 0, is_default: false, is_active: true },
   });
 
-  // Reset form when editAccount changes
   useEffect(() => {
     if (open) {
       reset(
@@ -102,7 +101,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
       user_id: user.id,
       name: values.name,
       type: values.type,
-      icon: ACCOUNT_TYPE_CONFIG[values.type].emoji, // store emoji as icon
+      icon: ACCOUNT_TYPE_CONFIG[values.type].emoji,
       color: ACCOUNT_TYPE_CONFIG[values.type].color,
       opening_balance: values.opening_balance,
       is_default: values.is_default,
@@ -112,7 +111,6 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
     let updatedAccounts: Account[];
 
     if (editAccount) {
-      // If setting as default, clear existing default first
       if (values.is_default && !editAccount.is_default) {
         await supabase
           .from('accounts')
@@ -131,7 +129,6 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
         a.id === editAccount.id ? (data as Account) : values.is_default ? { ...a, is_default: false } : a
       );
     } else {
-      // If new account should be default, clear existing
       if (values.is_default) {
         await supabase
           .from('accounts')
@@ -191,9 +188,9 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onClose(); } }}>
-      <DialogContent className="bg-[#141416] border-[#27272A] text-[#FAFAFA] max-w-sm">
+      <DialogContent className="bg-surface border-border text-fg max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-[#FAFAFA]">
+          <DialogTitle className="text-fg">
             {editAccount ? 'Edit account' : 'Add account'}
           </DialogTitle>
         </DialogHeader>
@@ -201,18 +198,18 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
           {/* Name */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Name</Label>
+            <Label className="text-fg-secondary text-sm">Name</Label>
             <Input
               placeholder="e.g. Bank, MoMo"
-              className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#52525B] focus-visible:ring-[#00D9A3]"
+              className="h-11 bg-elevated border-border text-fg placeholder:text-fg-disabled focus-visible:ring-ring"
               {...register('name')}
             />
-            {errors.name && <p className="text-[#F43F5E] text-xs">{errors.name.message}</p>}
+            {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
           </div>
 
           {/* Type */}
           <div className="space-y-1.5">
-            <Label className="text-[#A1A1AA] text-sm">Type</Label>
+            <Label className="text-fg-secondary text-sm">Type</Label>
             <div className="grid grid-cols-3 gap-2">
               {ACCOUNT_TYPES.map(t => {
                 const cfg = ACCOUNT_TYPE_CONFIG[t];
@@ -224,9 +221,9 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
                     onClick={() => setValue('type', t)}
                     className="h-14 rounded-xl flex flex-col items-center justify-center gap-1 text-xs font-medium border transition-all"
                     style={{
-                      borderColor: active ? cfg.color : '#27272A',
-                      backgroundColor: active ? cfg.color + '18' : '#1C1C1F',
-                      color: active ? cfg.color : '#71717A',
+                      borderColor: active ? cfg.color : 'var(--border)',
+                      backgroundColor: active ? cfg.color + '18' : 'var(--bg-elevated)',
+                      color: active ? cfg.color : 'var(--text-fg-muted)',
                     }}
                   >
                     <span className="text-lg">{cfg.emoji}</span>
@@ -240,41 +237,41 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
           {/* Opening balance */}
           {!reconcileMode && (
             <div className="space-y-1.5">
-              <Label className="text-[#A1A1AA] text-sm">
+              <Label className="text-fg-secondary text-sm">
                 {editAccount ? 'Opening balance' : 'Current balance — RIGHT NOW'}
               </Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">{CURRENCY_SYMBOL}</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-secondary font-mono text-sm">{CURRENCY_SYMBOL}</span>
                 <Input
                   type="number"
                   min="0"
                   step="0.01"
                   placeholder="0.00"
-                  className="h-11 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                  className="h-11 pl-7 bg-elevated border-border text-fg focus-visible:ring-ring amount"
                   {...register('opening_balance', { valueAsNumber: true })}
                 />
               </div>
               {!editAccount && (
-                <p className="text-[#52525B] text-[11px]">
+                <p className="text-fg-disabled text-[11px]">
                   Enter the actual balance in this account today — not zero, unless it's empty.
                   Sika adds/subtracts from this as you log transactions.
                 </p>
               )}
-              {errors.opening_balance && <p className="text-[#F43F5E] text-xs">{errors.opening_balance.message}</p>}
+              {errors.opening_balance && <p className="text-destructive text-xs">{errors.opening_balance.message}</p>}
             </div>
           )}
 
           {/* Set as default */}
           <div className="flex items-center justify-between">
             <div>
-              <Label className="text-[#A1A1AA] text-sm">Set as default</Label>
-              <p className="text-[#52525B] text-[11px]">Used for new transactions</p>
+              <Label className="text-fg-secondary text-sm">Set as default</Label>
+              <p className="text-fg-disabled text-[11px]">Used for new transactions</p>
             </div>
             <button
               type="button"
               onClick={() => setValue('is_default', !isDefault)}
               className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0"
-              style={{ backgroundColor: isDefault ? '#00D9A3' : '#27272A' }}
+              style={{ backgroundColor: isDefault ? 'var(--accent)' : 'var(--border)' }}
             >
               <span
                 className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
@@ -286,12 +283,12 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
           {/* Active toggle — edit only */}
           {editAccount && (
             <div className="flex items-center justify-between">
-              <Label className="text-[#A1A1AA] text-sm">Active</Label>
+              <Label className="text-fg-secondary text-sm">Active</Label>
               <button
                 type="button"
                 onClick={() => setValue('is_active', !isActive)}
                 className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0"
-                style={{ backgroundColor: isActive ? '#00D9A3' : '#27272A' }}
+                style={{ backgroundColor: isActive ? 'var(--accent)' : 'var(--border)' }}
               >
                 <span
                   className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
@@ -303,25 +300,25 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
 
           {/* Reconcile section — editing only */}
           {editAccount && currentBalance !== undefined && (
-            <div className="border border-[#27272A] rounded-xl p-3 space-y-3">
+            <div className="border border-border rounded-xl p-3 space-y-3">
               <button
                 type="button"
                 onClick={() => { setReconcileMode(v => !v); setReconcileActual(''); }}
-                className="flex items-center gap-2 text-sm text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors w-full"
+                className="flex items-center gap-2 text-sm text-fg-secondary hover:text-fg transition-colors w-full"
               >
                 <Scale className="w-4 h-4" />
                 <span className="font-medium">Reconcile to real balance</span>
-                <span className="ml-auto text-[#52525B] text-xs">{reconcileMode ? '▴' : '▾'}</span>
+                <span className="ml-auto text-fg-disabled text-xs">{reconcileMode ? '▴' : '▾'}</span>
               </button>
 
               {reconcileMode && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#71717A]">Sika shows</span>
-                    <span className="text-[#FAFAFA] font-semibold tabular-nums">{formatGHS(currentBalance)}</span>
+                    <span className="text-fg-muted">Sika shows</span>
+                    <span className="text-fg font-semibold tabular-nums">{formatGHS(currentBalance)}</span>
                   </div>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">{CURRENCY_SYMBOL}</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-secondary font-mono text-sm">{CURRENCY_SYMBOL}</span>
                     <Input
                       type="number"
                       min="0"
@@ -329,7 +326,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
                       placeholder="Actual current balance"
                       value={reconcileActual}
                       onChange={(e) => setReconcileActual(e.target.value)}
-                      className="h-10 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                      className="h-10 pl-7 bg-elevated border-border text-fg focus-visible:ring-ring amount"
                     />
                   </div>
                   {reconcileActual !== '' && (() => {
@@ -337,9 +334,9 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
                     const isPos = diff >= 0;
                     return (
                       <div className="flex items-center justify-between text-sm rounded-lg px-3 py-2"
-                        style={{ backgroundColor: isPos ? '#00D9A318' : '#F43F5E18' }}>
-                        <span className="text-[#A1A1AA]">Adjustment</span>
-                        <span style={{ color: isPos ? '#00D9A3' : '#F43F5E' }} className="font-semibold tabular-nums">
+                        style={{ backgroundColor: isPos ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'color-mix(in srgb, var(--destructive) 10%, transparent)' }}>
+                        <span className="text-fg-secondary">Adjustment</span>
+                        <span style={{ color: isPos ? 'var(--accent)' : 'var(--destructive)' }} className="font-semibold tabular-nums">
                           {isPos ? '+' : ''}{formatGHS(diff)}
                         </span>
                       </div>
@@ -349,7 +346,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
                     type="button"
                     onClick={handleReconcileFromModal}
                     disabled={reconcileSaving || reconcileActual === '' || (parseFloat(reconcileActual) || 0) === currentBalance}
-                    className="w-full h-10 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl text-sm"
+                    className="w-full h-10 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl text-sm"
                   >
                     {reconcileSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create adjustment & close'}
                   </Button>
@@ -362,7 +359,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full h-11 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+              className="w-full h-11 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-xl"
             >
               {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editAccount ? 'Save changes' : 'Add account'}
             </Button>
