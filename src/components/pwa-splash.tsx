@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TrendingUp } from 'lucide-react';
 
 export function PwaSplash() {
   const [show, setShow] = useState(false);
@@ -39,50 +40,51 @@ export function PwaSplash() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="fixed inset-0 z-[100] bg-[#0A0A0B] flex items-center justify-center"
-          style={{ pointerEvents: 'none' }}
+          className="fixed inset-0 z-[100] flex items-center justify-center"
+          style={{
+            backgroundColor: '#00a87e',
+            pointerEvents: 'none',
+          }}
         >
           <div className="relative flex items-center justify-center">
+            {/* Pulsing glow behind logo */}
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: [0.8, 1.05, 1], opacity: 1 }}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
+              animate={{
+                scale: [1, 1.4, 1],
+                opacity: [0.4, 0.7, 0.4],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
               className="absolute rounded-full blur-3xl"
               style={{
-                background: 'radial-gradient(circle, rgba(0, 217, 163, 0.4) 0%, transparent 70%)',
-                width: '200px',
-                height: '200px',
-                left: '-100px',
-                top: '-100px',
+                backgroundColor: '#00D9A3',
+                width: '180px',
+                height: '180px',
+                pointerEvents: 'none',
               }}
             />
-            <motion.h1
-              initial={{ scale: 0.95, opacity: 0 }}
+
+            {/* Logo — 64px rounded square with trending-up icon */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
-              className="relative text-[#00D9A3] text-6xl font-bold tracking-tight"
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              className="relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
               style={{
-                fontFamily: 'var(--font-geist-sans)',
-                textShadow: '0 0 40px rgba(0, 217, 163, 0.5)',
+                backgroundColor: '#00D9A3',
+                boxShadow: '0 8px 32px rgba(0, 217, 163, 0.4)',
               }}
             >
-              Sika
-            </motion.h1>
+              <TrendingUp
+                className="w-8 h-8"
+                strokeWidth={2.5}
+                style={{ color: '#0A0A0B' }}
+              />
+            </motion.div>
           </div>
-
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.1, 0.3],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-            className="absolute w-40 h-40 rounded-full border-2 border-[#00D9A3]"
-            style={{ pointerEvents: 'none' }}
-          />
         </motion.div>
       )}
     </AnimatePresence>
