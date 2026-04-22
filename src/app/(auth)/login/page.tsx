@@ -65,20 +65,20 @@ export default function LoginPage() {
           </div>
           <span className="text-2xl font-bold tracking-tight">Sika</span>
         </div>
-        <h1 className="text-2xl font-bold text-[#FAFAFA] mb-1">Welcome back</h1>
-        <p className="text-[#A1A1AA] text-sm">Sign in to your account</p>
+        <h1 className="text-2xl font-bold text-foreground mb-1">Welcome back</h1>
+        <p className="text-muted-foreground text-sm">Sign in to your account</p>
       </div>
 
-      <div className="bg-[#141416] border border-[#27272A] rounded-2xl p-6">
+      <div className="bg-card border border-border rounded-2xl p-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-[#A1A1AA] text-sm">Email</Label>
+            <Label htmlFor="email" className="text-muted-foreground text-sm">Email</Label>
             <Input
               id="email"
               type="email"
               placeholder="you@example.com"
               autoComplete="email"
-              className="h-12 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#71717A] focus-visible:ring-[#00D9A3] focus-visible:border-[#00D9A3] text-base"
+              className="h-12 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-accent focus-visible:border-accent text-base"
               {...register('email')}
             />
             {errors.email && (
@@ -87,13 +87,13 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="password" className="text-[#A1A1AA] text-sm">Password</Label>
+            <Label htmlFor="password" className="text-muted-foreground text-sm">Password</Label>
             <Input
               id="password"
               type="password"
               placeholder="••••••••"
               autoComplete="current-password"
-              className="h-12 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#71717A] focus-visible:ring-[#00D9A3] focus-visible:border-[#00D9A3] text-base"
+              className="h-12 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-accent focus-visible:border-accent text-base"
               {...register('password')}
             />
             {errors.password && (
@@ -114,7 +114,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-[#71717A]">
+        <p className="mt-4 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
           <Link href="/signup" className="text-[#00D9A3] hover:text-[#00F5B8] font-medium transition-colors">
             Sign up
