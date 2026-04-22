@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Flame, Coins, Snowflake } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -50,11 +49,11 @@ export default function StreaksPage() {
       <div className="flex items-center gap-3 pt-6 mb-6">
         <button
           onClick={() => router.back()}
-          className="w-9 h-9 rounded-xl bg-[#141416] border border-[#27272A] flex items-center justify-center text-[#A1A1AA] hover:text-[#FAFAFA] hover:border-[#3F3F46] transition-colors"
+          className="w-9 h-9 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-muted transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
-        <h1 className="text-xl font-bold text-[#FAFAFA]">Your Streaks</h1>
+        <h1 className="text-xl font-bold text-foreground">Your Streaks</h1>
       </div>
 
       {/* Two stat cards */}
@@ -64,37 +63,37 @@ export default function StreaksPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="bg-[#141416] border border-[#27272A] rounded-2xl p-5"
+          className="bg-card border border-border rounded-2xl p-5"
         >
           <div className="flex items-center gap-2 mb-4">
             <div className="w-8 h-8 rounded-lg bg-[#FBBF24]/10 flex items-center justify-center">
               <Flame className="w-4 h-4 text-[#FBBF24]" />
             </div>
-            <p className="text-[#A1A1AA] text-xs font-semibold uppercase tracking-wider">Logging</p>
+            <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Logging</p>
           </div>
 
-          <p className="text-4xl font-bold text-[#FAFAFA] tabular-nums mb-0.5">
+          <p className="text-4xl font-bold text-foreground tabular-nums mb-0.5">
             {streaks?.logging_current ?? 0}
           </p>
-          <p className="text-[#71717A] text-sm mb-4">
+          <p className="text-muted-foreground text-sm mb-4">
             {streaks?.logging_current === 1 ? 'day' : 'days'}
           </p>
 
-          <div className="border-t border-[#27272A] pt-3 space-y-1.5">
+          <div className="border-t border-border pt-3 space-y-1.5">
             <div className="flex justify-between text-xs">
-              <span className="text-[#71717A]">Longest</span>
-              <span className="text-[#FAFAFA]">{streaks?.logging_longest ?? 0} days</span>
+              <span className="text-muted-foreground">Longest</span>
+              <span className="text-foreground">{streaks?.logging_longest ?? 0} days</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span className="text-[#71717A]">Last logged</span>
-              <span className={loggedToday ? 'text-[#00D9A3]' : 'text-[#FAFAFA]'}>{lastLoggedLabel}</span>
+              <span className="text-muted-foreground">Last logged</span>
+              <span className={loggedToday ? 'text-[#00D9A3]' : 'text-foreground'}>{lastLoggedLabel}</span>
             </div>
             {loggingMilestone && streaks && (
               <div className="flex justify-between text-xs">
-                <span className="text-[#71717A]">Next milestone</span>
-                <span className="text-[#FAFAFA]">
+                <span className="text-muted-foreground">Next milestone</span>
+                <span className="text-foreground">
                   {loggingMilestone} days{' '}
-                  <span className="text-[#52525B]">({loggingMilestone - streaks.logging_current} to go)</span>
+                  <span className="text-muted-foreground/70">({loggingMilestone - streaks.logging_current} to go)</span>
                 </span>
               </div>
             )}
@@ -106,37 +105,37 @@ export default function StreaksPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut', delay: 0.08 }}
-          className="bg-[#141416] border border-[#27272A] rounded-2xl p-5"
+          className="bg-card border border-border rounded-2xl p-5"
         >
           <div className="flex items-center gap-2 mb-4">
             <div className="w-8 h-8 rounded-lg bg-[#00D9A3]/10 flex items-center justify-center">
               <Coins className="w-4 h-4 text-[#00D9A3]" />
             </div>
-            <p className="text-[#A1A1AA] text-xs font-semibold uppercase tracking-wider">Saving</p>
+            <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Saving</p>
           </div>
 
-          <p className="text-4xl font-bold text-[#FAFAFA] tabular-nums mb-0.5">
+          <p className="text-4xl font-bold text-foreground tabular-nums mb-0.5">
             {streaks?.savings_current ?? 0}
           </p>
-          <p className="text-[#71717A] text-sm mb-4">
+          <p className="text-muted-foreground text-sm mb-4">
             {streaks?.savings_current === 1 ? 'week' : 'weeks'}
           </p>
 
-          <div className="border-t border-[#27272A] pt-3 space-y-1.5">
+          <div className="border-t border-border pt-3 space-y-1.5">
             <div className="flex justify-between text-xs">
-              <span className="text-[#71717A]">Longest</span>
-              <span className="text-[#FAFAFA]">{streaks?.savings_longest ?? 0} weeks</span>
+              <span className="text-muted-foreground">Longest</span>
+              <span className="text-foreground">{streaks?.savings_longest ?? 0} weeks</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span className="text-[#71717A]">Last contributed</span>
-              <span className={savedThisWeek ? 'text-[#00D9A3]' : 'text-[#FAFAFA]'}>{lastSavedLabel}</span>
+              <span className="text-muted-foreground">Last contributed</span>
+              <span className={savedThisWeek ? 'text-[#00D9A3]' : 'text-foreground'}>{lastSavedLabel}</span>
             </div>
             {savingsMilestone && streaks && (
               <div className="flex justify-between text-xs">
-                <span className="text-[#71717A]">Next milestone</span>
-                <span className="text-[#FAFAFA]">
+                <span className="text-muted-foreground">Next milestone</span>
+                <span className="text-foreground">
                   {savingsMilestone} weeks{' '}
-                  <span className="text-[#52525B]">({savingsMilestone - streaks.savings_current} to go)</span>
+                  <span className="text-muted-foreground/70">({savingsMilestone - streaks.savings_current} to go)</span>
                 </span>
               </div>
             )}
@@ -149,18 +148,18 @@ export default function StreaksPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut', delay: 0.16 }}
-        className="bg-[#141416] border border-[#27272A] rounded-2xl p-5"
+        className="bg-card border border-border rounded-2xl p-5"
       >
         <div className="flex items-center gap-2 mb-3">
           <Snowflake className="w-4 h-4 text-[#60A5FA]" />
-          <p className="text-[#FAFAFA] text-sm font-semibold">Streak Freezes</p>
+          <p className="text-foreground text-sm font-semibold">Streak Freezes</p>
         </div>
 
-        <p className="text-[#FAFAFA] text-sm mb-1">
+        <p className="text-foreground text-sm mb-1">
           <span className="font-bold tabular-nums">{streaks?.freezes_banked ?? 0}</span>
-          <span className="text-[#71717A]"> banked · </span>
+          <span className="text-muted-foreground"> banked · </span>
           <span className="font-bold tabular-nums">{streaks?.freezes_earned_total ?? 0}</span>
-          <span className="text-[#71717A]"> earned total</span>
+          <span className="text-muted-foreground"> earned total</span>
         </p>
 
         {/* Visual freeze slots */}
@@ -170,8 +169,8 @@ export default function StreaksPage() {
               key={i}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
               style={{
-                background: i < (streaks?.freezes_banked ?? 0) ? 'rgba(96,165,250,0.15)' : 'rgba(39,39,42,0.5)',
-                border: `1px solid ${i < (streaks?.freezes_banked ?? 0) ? 'rgba(96,165,250,0.3)' : '#27272A'}`,
+                background: i < (streaks?.freezes_banked ?? 0) ? 'rgba(96,165,250,0.15)' : 'var(--muted)',
+                border: `1px solid ${i < (streaks?.freezes_banked ?? 0) ? 'rgba(96,165,250,0.3)' : 'var(--border)'}`,
               }}
             >
               {i < (streaks?.freezes_banked ?? 0) ? '❄️' : ''}
@@ -179,7 +178,7 @@ export default function StreaksPage() {
           ))}
         </div>
 
-        <p className="text-[#71717A] text-xs leading-relaxed">
+        <p className="text-muted-foreground text-xs leading-relaxed">
           Freezes protect your streak when life gets in the way. Earn 1 every 10 days of logging. Max 2 banked.
         </p>
       </motion.div>
