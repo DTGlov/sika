@@ -39,8 +39,8 @@ export function BadgeCard({ badge, size = 'md' }: BadgeCardProps) {
           badge.unlocked ? 'hover:scale-105' : 'opacity-60 grayscale'
         )}
         style={{
-          background: badge.unlocked ? config.frameGradient : 'rgba(82,82,91,0.1)',
-          border: `2px solid ${badge.unlocked ? config.frameColor : '#52525B'}`,
+          background: badge.unlocked ? config.frameGradient : 'var(--muted)',
+          border: `2px solid ${badge.unlocked ? config.frameColor : 'var(--muted-foreground)'}`,
           boxShadow: badge.unlocked
             ? `0 0 20px ${config.frameColor}${glowHex}`
             : 'none',
@@ -49,18 +49,18 @@ export function BadgeCard({ badge, size = 'md' }: BadgeCardProps) {
         {Icon && (
           <Icon
             className={iconSizeClass}
-            style={{ color: badge.unlocked ? config.frameColor : '#52525B' }}
+            style={{ color: badge.unlocked ? config.frameColor : 'var(--muted-foreground)' }}
           />
         )}
         {!badge.unlocked && (
-          <Lock className="absolute -bottom-1 -right-1 w-3 h-3 text-[#52525B] bg-[#0A0A0B] rounded-full p-0.5" />
+          <Lock className="absolute -bottom-1 -right-1 w-3 h-3 text-muted-foreground/70 bg-background rounded-full p-0.5" />
         )}
       </div>
       <div className="space-y-0.5">
-        <p className={cn('text-xs font-semibold', badge.unlocked ? 'text-[#FAFAFA]' : 'text-[#71717A]')}>
+        <p className={cn('text-xs font-semibold', badge.unlocked ? 'text-foreground' : 'text-muted-foreground')}>
           {badge.name}
         </p>
-        <p className="text-[10px] text-[#52525B] leading-tight max-w-[120px]">
+        <p className="text-[10px] text-muted-foreground/70 leading-tight max-w-[120px]">
           {badge.description}
         </p>
       </div>

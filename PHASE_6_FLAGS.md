@@ -1,22 +1,14 @@
 # Phase 6 — Flagged Shared Components
 
-Components used across multiple pages. Skipped during per-page theming 
-(would create churn). Will be themed in a dedicated PR near the end of 
-Phase 6, before Phase 6.10.
+All flagged components were themed in Phase 6.9b. File ready for deletion in Phase 6.10.
 
-## Flagged
+## Themed in Phase 6.9b
 
-| Component | Path | Used on pages | Flagged in phase |
-|-----------|------|---------------|------------------|
-| HintCard | src/components/hint-card.tsx | accounts, dashboard, settings, goals, recurring, transaction-sheet | 6.1 |
-| NextCycleModal | src/components/goals/next-cycle-modal.tsx | goals, transaction-sheet | 6.3 |
-| BadgeCard | src/components/badges/badge-card.tsx | badges, dashboard/recent-badges | 6.5b |
-| BadgeUnlockModal | src/components/badges/badge-unlock-modal.tsx | badges (via celebration host), app-shell | 6.5b |
-| BadgeCelebrationHost | src/components/badges/badge-celebration-host.tsx | app-shell | 6.5b |
-| MomentumFloat / TierUpModal | src/components/momentum-float.tsx | momentum, dashboard, transaction-sheet, contribute-modal | 6.5b |
-
-## How to use this file
-
-- When Phase 6.X audits a shared component, add a row here and SKIP in that phase
-- Before Phase 6.10, create `feat/theming-shared-components` branch to theme all flagged items in one PR
-- Delete this file after Phase 6.10 (temporary Phase-6 artifact)
+| Component | Path | Themed |
+|-----------|------|--------|
+| HintCard | src/components/hint-card.tsx | ✅ |
+| NextCycleModal | src/components/goals/next-cycle-modal.tsx | ✅ |
+| BadgeCard | src/components/badges/badge-card.tsx | ✅ |
+| BadgeUnlockModal | src/components/badges/badge-unlock-modal.tsx | ✅ |
+| BadgeCelebrationHost | src/components/badges/badge-celebration-host.tsx | ✅ (no hardcodes) |
+| MomentumFloat / TierUpModal | src/components/momentum-float.tsx | ✅ |

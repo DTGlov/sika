@@ -27,7 +27,7 @@ export function HintCard({ hintId, title, body, icon: Icon, variant = 'inline', 
   const supabase = createClient();
 
   if (!hintsLoaded) {
-    return <Skeleton className={`h-[72px] rounded-2xl bg-[#141416] ${className ?? ''}`} />;
+    return <Skeleton className={`h-[72px] rounded-2xl bg-card ${className ?? ''}`} />;
   }
 
   const isDismissed = dismissedHints.includes(hintId);
@@ -48,7 +48,7 @@ export function HintCard({ hintId, title, body, icon: Icon, variant = 'inline', 
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8, height: 0 }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
-        className={`bg-[#141416] border border-[#00D9A3]/30 rounded-2xl p-4 ${className ?? ''}`}
+        className={`bg-card border border-[#00D9A3]/30 rounded-2xl p-4 ${className ?? ''}`}
       >
         <div className="flex items-start gap-3">
           {Icon && (
@@ -57,8 +57,8 @@ export function HintCard({ hintId, title, body, icon: Icon, variant = 'inline', 
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-[#FAFAFA] text-sm font-medium mb-1">{title}</p>
-            <p className="text-[#A1A1AA] text-xs leading-relaxed">{body}</p>
+            <p className="text-foreground text-sm font-medium mb-1">{title}</p>
+            <p className="text-muted-foreground text-xs leading-relaxed">{body}</p>
             {cta && (
               <button
                 onClick={handleDismiss}
@@ -70,7 +70,7 @@ export function HintCard({ hintId, title, body, icon: Icon, variant = 'inline', 
           </div>
           <button
             onClick={handleDismiss}
-            className="shrink-0 text-[#52525B] hover:text-[#A1A1AA] transition-colors mt-0.5"
+            className="shrink-0 text-muted-foreground/70 hover:text-muted-foreground transition-colors mt-0.5"
             aria-label="Dismiss hint"
           >
             <X className="w-3.5 h-3.5" />
@@ -109,7 +109,7 @@ export function BucketsTooltip({ className }: BucketsTooltipProps) {
     <div className={className}>
       <button
         onClick={() => setOpen(true)}
-        className="w-5 h-5 rounded-full flex items-center justify-center text-[#52525B] hover:text-[#A1A1AA] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
+        className="w-5 h-5 rounded-full flex items-center justify-center text-muted-foreground/70 hover:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         aria-label="How do buckets work?"
       >
         <HelpCircle className="w-4 h-4" />
@@ -118,9 +118,9 @@ export function BucketsTooltip({ className }: BucketsTooltipProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           showCloseButton
-          className="max-w-[calc(100vw-32px)] sm:max-w-md bg-[#0A0A0B] border-[#00D9A3]/30 shadow-[0_0_60px_rgba(0,217,163,0.25),0_0_20px_rgba(0,217,163,0.15)] p-6"
+          className="max-w-[calc(100vw-32px)] sm:max-w-md bg-background border-[#00D9A3]/30 shadow-[0_0_60px_rgba(0,217,163,0.25),0_0_20px_rgba(0,217,163,0.15)] p-6"
         >
-          <DialogTitle className="text-xl font-semibold text-[#FAFAFA] mb-4">
+          <DialogTitle className="text-xl font-semibold text-foreground mb-4">
             Your buckets
           </DialogTitle>
           <div className="space-y-5">
@@ -131,7 +131,7 @@ export function BucketsTooltip({ className }: BucketsTooltipProps) {
                   <h4 className="text-base font-semibold mb-1.5" style={{ color }}>
                     {cfg.label} ({percents[key]}%)
                   </h4>
-                  <p className="text-sm text-[#A1A1AA] leading-relaxed">{cfg.explanation}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{cfg.explanation}</p>
                 </div>
               );
             })}

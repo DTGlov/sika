@@ -67,7 +67,7 @@ export function TierUpModal({ open, onClose, tier }: TierUpModalProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
         showCloseButton
-        className="max-w-[calc(100vw-32px)] sm:max-w-sm bg-[#0A0A0B] border-[#27272A] p-6 text-center"
+        className="max-w-[calc(100vw-32px)] sm:max-w-sm bg-card border-border p-6 text-center"
         style={{ boxShadow: `0 0 60px ${tier.color}40, 0 0 20px ${tier.color}20` }}
       >
         <DialogTitle className="sr-only">Tier up!</DialogTitle>
@@ -82,8 +82,8 @@ export function TierUpModal({ open, onClose, tier }: TierUpModalProps) {
         <p className="text-xs font-medium uppercase tracking-widest mb-1" style={{ color: tier.color }}>
           Tier Up!
         </p>
-        <h2 className="text-2xl font-bold text-[#FAFAFA] mb-2">{tier.name}</h2>
-        <p className="text-sm text-[#A1A1AA] leading-relaxed">
+        <h2 className="text-2xl font-bold text-foreground mb-2">{tier.name}</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed">
           You&apos;ve reached <span style={{ color: tier.color }}>{tier.name}</span>. Keep going — the next tier is waiting.
         </p>
         <button
