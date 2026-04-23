@@ -3,9 +3,11 @@
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { useTransactionStore } from '@/stores/transaction-store';
+import { useHaptics } from '@/hooks/use-haptics';
 
 export function AddTransactionFab() {
   const { openLogSheet } = useTransactionStore();
+  const { light } = useHaptics();
 
   return (
     <motion.button
@@ -13,7 +15,7 @@ export function AddTransactionFab() {
       animate={{ scale: 1, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.6 }}
       whileTap={{ scale: 0.92 }}
-      onClick={() => openLogSheet()}
+      onClick={() => { light(); openLogSheet(); }}
       aria-label="Log a transaction"
       // Mobile: centered, lifted ~112px + safe-area above the bottom nav
       // Desktop: fixed bottom-right corner, no bottom nav

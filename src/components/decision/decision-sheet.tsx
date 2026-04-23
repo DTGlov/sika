@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useHaptics } from '@/hooks/use-haptics';
 import { useRouter } from 'next/navigation';
 import { Loader2, X, TrendingUp, AlertTriangle, CheckCircle, HelpCircle } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
@@ -35,6 +36,7 @@ interface DecisionSheetProps {
 
 export function DecisionSheet({ onClose }: DecisionSheetProps) {
   const router = useRouter();
+  const { medium: hapticMedium } = useHaptics();
   const [phase, setPhase] = useState<Phase>('input');
   const [itemName, setItemName] = useState('');
   const [amount, setAmount] = useState('');
@@ -72,6 +74,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
       setDecisionId(data.id);
       setDecision(data.decision);
       setPhase('result');
+      hapticMedium();
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Something went wrong');
       setPhase('error');

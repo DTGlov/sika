@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, ChevronRight, ArrowRight, Scale, AlertTriangle, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import { useHaptics } from '@/hooks/use-haptics';
+import { hapticToast } from '@/lib/toast-with-haptic';
 import { createClient } from '@/lib/supabase/client';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { useAuthStore } from '@/stores/auth-store';
@@ -42,6 +44,7 @@ export function TransactionSheet() {
     dashboardStats,
   } = useTransactionStore();
   const { user, accounts, setStreaks, setMomentum, enqueueBadgeCelebrations } = useAuthStore();
+  const { medium: hapticMedium } = useHaptics();
   const [momentumFloats, setMomentumFloats] = useState<Array<{ id: string; points: number }>>([]);
   const [tierUpTier, setTierUpTier] = useState<TierConfig | null>(null);
   const supabase = createClient();
@@ -188,7 +191,7 @@ export function TransactionSheet() {
   async function handleSave() {
     if (!user || parseFloat(amount) <= 0) return;
     if (txType === 'transfer' && (!accountId || !toAccountId || accountId === toAccountId)) {
-      toast.error('Select two different accounts for the transfer');
+      hapticToast.error('Select two different accounts for the transfer');
       return;
     }
     setSaving(true);
@@ -214,9 +217,10 @@ export function TransactionSheet() {
         .select(selectClause)
         .single();
       setSaving(false);
-      if (error) { toast.error('Failed to update transaction'); return; }
+      if (error) { hapticToast.error('Failed to update transaction'); return; }
       updateTransaction(data);
       revalidateForEntity('transaction');
+      hapticMedium();
       toast.success('Transaction updated');
     } else {
       const { data, error } = await supabase
@@ -225,7 +229,8 @@ export function TransactionSheet() {
         .select(selectClause)
         .single();
       setSaving(false);
-      if (error) { toast.error('Failed to save transaction'); return; }
+      if (error) { hapticToast.error('Failed to save transaction'); return; }
+      hapticMedium();
       addTransaction(data);
 
       // Update logging streak for user-initiated transactions
@@ -313,7 +318,7 @@ export function TransactionSheet() {
         .select(selectClause)
         .single();
       setSaving(false);
-      if (error) { toast.error('Failed to update adjustment'); return; }
+      if (error) { hapticToast.error('Failed to update adjustment'); return; }
       updateTransaction(data);
     } else {
       const { data, error } = await supabase
@@ -322,7 +327,7 @@ export function TransactionSheet() {
         .select(selectClause)
         .single();
       setSaving(false);
-      if (error) { toast.error('Failed to reconcile'); return; }
+      if (error) { hapticToast.error('Failed to reconcile'); return; }
       addTransaction(data);
     }
 

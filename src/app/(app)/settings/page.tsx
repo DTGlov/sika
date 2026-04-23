@@ -34,6 +34,7 @@ import {
 } from "@/components/settings/category-modal";
 import { CardThemePicker } from "@/components/settings/card-theme-picker";
 import { AppearanceSection } from "@/components/settings/appearance-section";
+import { HapticsSection } from "@/components/settings/haptics-section";
 import type { Category, CardTheme } from "@/types";
 
 const profileSchema = z
@@ -200,6 +201,9 @@ export default function SettingsPage() {
 
         {/* Appearance */}
         <AppearanceSection />
+
+        {/* Haptics */}
+        <HapticsSection />
 
         {/* Income Sources */}
         <div className="mb-6">
