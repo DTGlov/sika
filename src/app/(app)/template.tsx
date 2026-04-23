@@ -10,7 +10,7 @@ export default function AppTemplate({ children }: { children: React.ReactNode })
       initial={shouldReduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{
-        duration: shouldReduceMotion ? 0 : 0.22,
+        duration: shouldReduceMotion ? 0 : 0.16,
         ease: [0.22, 1, 0.36, 1],
       }}
     >
