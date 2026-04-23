@@ -17,7 +17,7 @@ export default async function MonthlyPage() {
       .eq('user_id', user.id)
       .order('month_start', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
     recap = data as MonthlyRecapType | null;
   }
 
