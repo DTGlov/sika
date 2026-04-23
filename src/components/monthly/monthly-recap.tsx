@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, Flame, Eye, Target, ArrowRight, Sparkles, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { shareMonthly } from '@/lib/share-monthly';
 import type { MonthlyCard, MonthlyAccent } from '@/types/monthly';
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -116,28 +117,28 @@ export function MonthlyRecap({ cards, recapId, monthStart, monthEnd }: MonthlyRe
     const shareUrl = `${window.location.origin}/monthly-share/${recapId}`;
     const shareText = `My month in money 🔥 — tracked with Sika`;
 
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'My Sika Month', text: shareText, url: shareUrl });
-        await fetch('/api/monthly/share', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ recap_id: recapId }),
-        });
-        setShared(true);
-      } catch {
-        // user dismissed
+    const result = await shareMonthly({
+      recapId,
+      title: 'My Sika Month',
+      text: shareText,
+      url: shareUrl,
+    });
+
+    if (result.success) {
+      if (result.method === 'clipboard') {
+        toast.success('Link copied');
       }
-    } else {
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success('Link copied');
+      // Mark as shared in DB for all successful share methods
       await fetch('/api/monthly/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ recap_id: recapId }),
-      });
+      }).catch(() => {});
       setShared(true);
+    } else if (result.reason === 'error') {
+      toast.error('Share failed');
     }
+    // user-cancelled: no toast
   };
 
   return (
