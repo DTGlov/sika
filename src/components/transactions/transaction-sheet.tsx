@@ -176,7 +176,8 @@ export function TransactionSheet() {
     if (txType === 'transfer') {
       setStep('accounts');
     } else if (txType === 'expense') {
-      if (getFromAccountBalance() <= 0) {
+      const balance = getFromAccountBalance();
+      if (balance <= 0 || parseFloat(amount) > balance) {
         setInsufficientOpen(true);
         return;
       }
@@ -555,7 +556,8 @@ export function TransactionSheet() {
               </Button>
               <Button
                 onClick={() => {
-                  if (getFromAccountBalance() <= 0) {
+                  const balance = getFromAccountBalance();
+                  if (balance <= 0 || parseFloat(amount) > balance) {
                     setInsufficientOpen(true);
                     return;
                   }
@@ -855,6 +857,7 @@ export function TransactionSheet() {
       onClose={() => setInsufficientOpen(false)}
       accountName={accounts.find(a => a.id === accountId)?.name ?? 'Account'}
       accountBalance={getFromAccountBalance()}
+      amountRequested={parseFloat(amount) || 0}
       onTopUp={handleInsufficientTopUp}
       onChangeAccount={handleInsufficientChangeAccount}
       onReconcile={handleInsufficientReconcile}
