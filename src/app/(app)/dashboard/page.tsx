@@ -302,7 +302,11 @@ function DashboardContent() {
         )}
 
         {/* Sika Monthly banner */}
-        {monthlyRecapId && <SikaMonthlyBanner recapId={monthlyRecapId} />}
+        {monthlyRecapId && (
+          <div className="mt-4 md:mt-6">
+            <SikaMonthlyBanner recapId={monthlyRecapId} />
+          </div>
+        )}
 
         {/* Virtual cycle card */}
         <div className="w-full md:max-w-[440px] md:mx-auto">
@@ -350,9 +354,9 @@ function DashboardContent() {
         {/* Financial health row */}
         <HealthRow />
 
-        {/* Income summary row */}
+        {/* Income summary row — desktop only (redundant on mobile where cycle card shows expected income) */}
         {monthlyIncome > 0 && (
-          <div className="relative">
+          <div className="hidden md:block relative">
             <button
               onClick={() => setShowIncomeBreakdown(v => !v)}
               className="flex items-center gap-1.5 text-sm transition-colors"
@@ -493,9 +497,13 @@ function DashboardContent() {
                   <Link
                     key={acc.id}
                     href="/accounts"
-                    className="flex-shrink-0 bg-card border border-border rounded-2xl p-3 min-w-[120px] hover:border-border transition-colors"
-                    style={{ borderLeftColor: cfg.color, borderLeftWidth: 3 }}
+                    className="flex-shrink-0 bg-card border border-border rounded-2xl p-3 min-w-[120px] hover:border-border transition-colors flex items-stretch gap-2"
                   >
+                    <div
+                      className="w-1 rounded-full shrink-0"
+                      style={{ backgroundColor: cfg.color }}
+                    />
+                    <div>
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="text-base">{cfg.emoji}</span>
                       <span className="text-muted-foreground text-xs truncate">{acc.name}</span>
@@ -503,6 +511,7 @@ function DashboardContent() {
                     <p className="text-sm font-bold tabular-nums" style={{ color: cfg.color }}>
                       {formatGHSCompact(balance)}
                     </p>
+                    </div>
                   </Link>
                 );
               })}

@@ -114,9 +114,11 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-foreground text-lg font-bold">
-            {phase === 'result' ? "Here's the read" : 'Should I buy it?'}
-          </h2>
+          {phase === 'result' ? (
+            <h2 className="text-foreground text-lg font-bold">Here's the read</h2>
+          ) : (
+            <div />
+          )}
           <button
             onClick={onClose}
             className="text-muted-foreground/70 hover:text-muted-foreground transition-colors p-1"
@@ -128,7 +130,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
 
         {/* INPUT PHASE */}
         {phase === 'input' && (
-          <div className="space-y-5">
+          <div className="space-y-5 mt-2">
             <div className="space-y-1.5">
               <label className="text-muted-foreground text-sm">What is it?</label>
               <Input
