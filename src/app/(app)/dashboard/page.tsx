@@ -500,10 +500,10 @@ function DashboardContent() {
                   <Link
                     key={acc.id}
                     href="/accounts"
-                    className="flex-shrink-0 bg-card border border-border rounded-2xl p-3 min-w-[120px] hover:border-border transition-colors flex items-stretch gap-2"
+                    className="flex-shrink-0 bg-card border border-border rounded-2xl p-3 min-w-[120px] hover:border-border transition-colors flex items-center gap-2"
                   >
                     <div
-                      className="w-1 rounded-full shrink-0"
+                      className="w-2 h-2 rounded-full shrink-0"
                       style={{ backgroundColor: cfg.color }}
                     />
                     <div>

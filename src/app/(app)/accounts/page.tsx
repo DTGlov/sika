@@ -170,7 +170,7 @@ export default function AccountsPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      className="w-1 h-10 rounded-full shrink-0 self-center"
+                      className="w-2 h-2 rounded-full shrink-0 self-center"
                       style={{ backgroundColor: cfg.color }}
                     />
                     <div
