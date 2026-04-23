@@ -3,132 +3,67 @@
 import { useRef, useEffect } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { formatGHS, formatGHSCompact } from '@/lib/utils';
-import type { CardTheme } from '@/types/card-theme';
-import { CARD_THEMES, resolveAmountColor } from '@/types/card-theme';
+import { CYCLE_CARD_THEMES, type CycleCardTheme } from '@/types/card-theme';
+import { MOTIF_COMPONENTS } from '@/components/cycle-card/motifs';
+import { EmvChip } from '@/components/cycle-card/chip';
 
-// ── Shared card surface ───────────────────────────────────────────
-// Used by both the full CycleCard and the mini preview in Settings.
+// ── Card surface ──────────────────────────────────────────────────
+// Anatomy: chip top-left | motif right | balance center | name + SIKA bottom
 
 interface CardSurfaceProps {
-  themeId: CardTheme;
+  themeId: CycleCardTheme;
   cycleNet: number;
-  cycleLabel: string;
   userName: string;
-  /** animated key — when it changes, the amount ticks in */
   amountKey?: number;
   mounted?: React.RefObject<boolean>;
-  mini?: boolean;
 }
 
-export function CardSurface({
-  themeId,
-  cycleNet,
-  cycleLabel,
-  userName,
-  amountKey,
-  mounted,
-  mini = false,
-}: CardSurfaceProps) {
-  const theme = CARD_THEMES[themeId];
-  const amountColor = resolveAmountColor(theme, cycleNet);
+export function CardSurface({ themeId, cycleNet, userName, amountKey, mounted }: CardSurfaceProps) {
+  const config = CYCLE_CARD_THEMES[themeId] ?? CYCLE_CARD_THEMES.sankofa;
+  const { palette } = config;
+  const Motif = MOTIF_COMPONENTS[themeId] ?? MOTIF_COMPONENTS.sankofa;
+
   const isNegative = cycleNet < 0;
   const prefix = isNegative ? '−' : '';
+  const balanceColor = isNegative ? '#F43F5E' : cycleNet === 0 ? '#A1A1AA' : palette.balanceText;
 
-  const chipStyle = {
-    background: `linear-gradient(135deg, ${hexWithAlpha(theme.accentColor, 0.55)} 0%, ${hexWithAlpha(theme.accentColor, 0.3)} 100%)`,
-    border: `1px solid ${hexWithAlpha(theme.accentColor, 0.25)}`,
-  };
+  const balanceNode = (
+    <span
+      style={{
+        color: balanceColor,
+        fontFamily: 'var(--font-geist-mono)',
+        fontWeight: 700,
+      }}
+      className="text-3xl md:text-4xl tabular-nums"
+    >
+      {prefix}{formatGHS(Math.abs(cycleNet))}
+    </span>
+  );
 
   return (
     <div
       className="relative overflow-hidden select-none"
       style={{
-        background: theme.background,
-        border: `1px solid ${theme.border}`,
+        backgroundColor: palette.background,
         aspectRatio: '85.6 / 54',
-        borderRadius: mini ? 12 : 20,
-        padding: mini ? 12 : undefined,
+        borderRadius: 20,
       }}
     >
-      {/* Top-left accent glow */}
-      <div
-        aria-hidden
-        className="absolute pointer-events-none"
-        style={{
-          top: mini ? -28 : -50,
-          left: mini ? -28 : -50,
-          width: mini ? 100 : 180,
-          height: mini ? 100 : 180,
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${theme.highlightColor} 0%, transparent 68%)`,
-        }}
-      />
+      {/* Motif layer */}
+      <Motif color={palette.motif} />
 
-      {/* Holographic sheen */}
+      {/* Content layer */}
       <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.04) 50%, transparent 70%)',
-        }}
-      />
-
-      {/* Top shadow for depth */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 pointer-events-none"
-        style={{
-          height: mini ? 24 : 40,
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, transparent 100%)',
-        }}
-      />
-
-      {/* Content */}
-      <div
-        className="relative h-full flex flex-col justify-between z-10"
-        style={{ padding: mini ? undefined : '20px 24px', height: '100%' }}
+        className="relative z-10 h-full flex flex-col justify-between"
+        style={{ padding: '20px 24px' }}
       >
-        {/* Top: SIKA + cycle label */}
-        <div className="flex items-start justify-between">
-          <span
-            style={{
-              color: theme.accentColor,
-              fontFamily: 'var(--font-geist-sans)',
-              fontSize: mini ? 9 : 13,
-              fontWeight: 700,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-            }}
-          >
-            Sika
-          </span>
-          <span
-            style={{
-              color: theme.textSecondary,
-              fontFamily: 'var(--font-geist-sans)',
-              fontSize: mini ? 7 : 11,
-              letterSpacing: '0.01em',
-            }}
-          >
-            {cycleLabel}
-          </span>
+        {/* Top: EMV Chip */}
+        <div>
+          <EmvChip primary={palette.chipPrimary} secondary={palette.chipSecondary} />
         </div>
 
-        {/* Middle: label + amount */}
+        {/* Center: Balance */}
         <div>
-          <div
-            style={{
-              color: theme.textSecondary,
-              fontFamily: 'var(--font-geist-sans)',
-              fontSize: mini ? 7 : 10,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              marginBottom: mini ? 2 : 4,
-            }}
-          >
-            This Month
-          </div>
-
           {amountKey !== undefined && mounted ? (
             <motion.div
               key={amountKey}
@@ -136,69 +71,42 @@ export function CardSurface({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
             >
-              <AmountText cycleNet={cycleNet} prefix={prefix} amountColor={amountColor} mini={mini} />
+              {balanceNode}
             </motion.div>
-          ) : (
-            <AmountText cycleNet={cycleNet} prefix={prefix} amountColor={amountColor} mini={mini} />
-          )}
+          ) : balanceNode}
         </div>
 
-        {/* Bottom: name + chip */}
-        <div className="flex items-end justify-between">
+        {/* Bottom: Name + SIKA brand */}
+        <div className="flex items-baseline justify-between">
           <span
             style={{
-              color: theme.textSecondary,
+              color: palette.nameText,
               fontFamily: 'var(--font-geist-mono)',
-              fontSize: mini ? 8 : 11,
+              fontSize: 11,
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              maxWidth: '70%',
+              maxWidth: '65%',
             }}
           >
             {userName}
           </span>
-
-          <div
+          <span
             style={{
-              ...chipStyle,
-              width: mini ? 18 : 26,
-              height: mini ? 13 : 18,
-              borderRadius: mini ? 3 : 4,
-              flexShrink: 0,
+              color: palette.brandText,
+              fontFamily: 'var(--font-geist-sans)',
+              fontSize: 13,
+              fontWeight: 700,
+              letterSpacing: '0.18em',
             }}
-          />
+          >
+            SIKA
+          </span>
         </div>
       </div>
     </div>
-  );
-}
-
-function AmountText({
-  cycleNet,
-  prefix,
-  amountColor,
-  mini,
-}: {
-  cycleNet: number;
-  prefix: string;
-  amountColor: string;
-  mini: boolean;
-}) {
-  return (
-    <span
-      style={{
-        color: amountColor,
-        fontFamily: 'var(--font-geist-mono)',
-        fontSize: mini ? 14 : undefined,
-        fontWeight: 700,
-      }}
-      className={mini ? '' : 'text-3xl md:text-4xl tabular-nums font-bold'}
-    >
-      {prefix}{formatGHS(Math.abs(cycleNet))}
-    </span>
   );
 }
 
@@ -208,7 +116,7 @@ interface CycleCardProps {
   cycleNet: number;
   cycleLabel: string;
   userName: string;
-  theme: CardTheme;
+  theme: CycleCardTheme;
   received: number;
   spent: number;
   expected: number;
@@ -216,7 +124,7 @@ interface CycleCardProps {
 
 export function CycleCard({
   cycleNet,
-  cycleLabel,
+  cycleLabel: _cycleLabel, // kept for API compat, no longer displayed on card
   userName,
   theme,
   received,
@@ -258,7 +166,6 @@ export function CycleCard({
           <CardSurface
             themeId={theme}
             cycleNet={cycleNet}
-            cycleLabel={cycleLabel}
             userName={userName}
             amountKey={cycleNet}
             mounted={mounted}
@@ -276,14 +183,4 @@ export function CycleCard({
       </div>
     </div>
   );
-}
-
-// ── Helpers ───────────────────────────────────────────────────────
-
-/** Convert #RRGGBB hex to rgba(r,g,b,alpha) string. */
-function hexWithAlpha(hex: string, alpha: number): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
 }

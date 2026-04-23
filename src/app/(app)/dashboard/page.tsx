@@ -321,7 +321,7 @@ function DashboardContent() {
                 cycleNet={dashboardStats?.cycleNet ?? 0}
                 cycleLabel={cycle.label}
                 userName={profile?.full_name?.toUpperCase() ?? 'SIKA USER'}
-                theme={profile?.card_theme ?? 'classic_gold'}
+                theme={(profile?.card_theme ?? 'sankofa') as import('@/types/card-theme').CycleCardTheme}
                 received={dashboardStats?.totalReceived ?? 0}
                 spent={dashboardStats?.totalSpentActual ?? 0}
                 expected={monthlyIncome}
