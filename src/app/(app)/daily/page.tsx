@@ -1,6 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+
+function ImageWithFallback({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setFailed(true)}
+      loading="lazy"
+    />
+  );
+}
 import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { format } from 'date-fns';
@@ -18,20 +32,29 @@ function StoryCard({ story }: { story: DailyStory }) {
   const label = CATEGORY_LABELS[story.category];
 
   return (
-    <div className="bg-card border border-border rounded-2xl px-4 py-4 space-y-2">
-      <p
-        className="text-[10px] font-bold uppercase tracking-wider"
-        style={{ color }}
-      >
-        {label}
-      </p>
-      <div className="flex items-start gap-2">
-        <span className="text-xl leading-none mt-0.5 shrink-0">{story.emoji}</span>
-        <h3 className="text-foreground font-semibold text-sm leading-snug">{story.title}</h3>
+    <article className="bg-card border border-border rounded-2xl overflow-hidden">
+      {story.image_url && (
+        <ImageWithFallback
+          src={story.image_url}
+          alt={story.title}
+          className="w-full h-48 md:h-56 object-cover"
+        />
+      )}
+      <div className="px-4 py-4 space-y-2">
+        <p
+          className="text-[10px] font-bold uppercase tracking-wider"
+          style={{ color }}
+        >
+          {label}
+        </p>
+        <div className="flex items-start gap-2">
+          <span className="text-xl leading-none mt-0.5 shrink-0">{story.emoji}</span>
+          <h3 className="text-foreground font-semibold text-sm leading-snug">{story.title}</h3>
+        </div>
+        <p className="text-muted-foreground text-sm leading-relaxed">{story.summary}</p>
+        <p className="text-muted-foreground/70 text-xs">— {story.source_name}</p>
       </div>
-      <p className="text-muted-foreground text-sm leading-relaxed">{story.summary}</p>
-      <p className="text-muted-foreground/70 text-xs">— {story.source_name}</p>
-    </div>
+    </article>
   );
 }
 
