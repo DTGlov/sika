@@ -8,6 +8,7 @@ interface InsufficientBalanceSheetProps {
   onClose: () => void;
   accountName: string;
   accountBalance: number;
+  amountRequested: number;
   onTopUp: () => void;
   onChangeAccount: () => void;
   onReconcile: () => void;
@@ -18,6 +19,7 @@ export function InsufficientBalanceSheet({
   onClose,
   accountName,
   accountBalance,
+  amountRequested,
   onTopUp,
   onChangeAccount,
   onReconcile,
@@ -25,6 +27,24 @@ export function InsufficientBalanceSheet({
   if (!open) return null;
 
   const isNegative = accountBalance < 0;
+  const isEmpty = accountBalance === 0;
+  const isInsufficient = accountBalance > 0 && amountRequested > accountBalance;
+
+  const headline = isNegative
+    ? `${accountName} is underwater`
+    : isEmpty
+    ? `${accountName} is empty`
+    : isInsufficient
+    ? `${accountName} only has ${formatGHS(accountBalance)}`
+    : `${accountName} is empty`;
+
+  const description = isNegative
+    ? `Balance is ${formatGHS(accountBalance)} — you're already overspent.`
+    : isEmpty
+    ? `${accountName} has no money to spend right now.`
+    : isInsufficient
+    ? `You're trying to spend ${formatGHS(amountRequested)}, but only ${formatGHS(accountBalance)} is available.`
+    : `${accountName} has no money to spend right now.`;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
@@ -46,12 +66,10 @@ export function InsufficientBalanceSheet({
           </div>
           <div>
             <h2 className="text-[#FAFAFA] font-semibold text-base leading-snug">
-              {accountName} is {isNegative ? 'underwater' : 'empty'}
+              {headline}
             </h2>
             <p className="text-[#71717A] text-sm mt-1 leading-relaxed">
-              {isNegative
-                ? `Balance is ${formatGHS(accountBalance)} — you're already overspent.`
-                : `${accountName} has no money to spend right now.`}
+              {description}
             </p>
           </div>
         </div>
