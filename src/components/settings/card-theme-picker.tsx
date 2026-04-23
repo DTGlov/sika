@@ -21,7 +21,7 @@ export function CardThemePicker() {
         {config.name}{config.meaning ? ` — ${config.meaning}` : ''}
       </p>
 
-      <div className="w-full max-w-[440px] md:max-w-[520px]">
+      <div className="w-full">
         <CardSurface
           themeId={themeId}
           cycleNet={2426}
