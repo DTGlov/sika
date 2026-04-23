@@ -335,6 +335,9 @@ function DashboardContent() {
           )}
         </div>
 
+        {/* Section divider — separates card+stats from rest of dashboard */}
+        <div className="my-6 border-t border-border/40" />
+
         {/* Should I buy it? */}
         {loading ? (
           <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-card border border-border">
