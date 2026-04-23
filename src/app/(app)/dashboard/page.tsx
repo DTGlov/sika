@@ -23,6 +23,7 @@ import { InsightStrip } from '@/components/dashboard/insight-strip';
 import { ShouldIBuyButton } from '@/components/decision/should-i-buy-button';
 import { SundayRecapCard } from '@/components/dashboard/sunday-recap-card';
 import { CycleCard } from '@/components/dashboard/cycle-card';
+import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
@@ -69,8 +70,13 @@ function DashboardContent() {
     router.push(`${pathname}?cycle=${next.startDateStr}`);
   }
 
-  const { loading, pendingRecurring, setPendingRecurring } = useDashboardData(cycle.startDateStr);
+  const { loading, refetch, pendingRecurring, setPendingRecurring } = useDashboardData(cycle.startDateStr);
   useProfile();
+
+  const handleRefresh = async () => {
+    router.refresh();
+    await refetch();
+  };
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showIncomeBreakdown, setShowIncomeBreakdown] = useState(false);
@@ -238,6 +244,7 @@ function DashboardContent() {
   const hasNudges = nudges.length > 0 || pendingRecurring.length > 0;
 
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="max-w-2xl mx-auto pb-8">
       <TopBar />
 
@@ -525,6 +532,7 @@ function DashboardContent() {
 
       <OnboardingModal open={showOnboarding} onClose={() => setShowOnboarding(false)} />
     </div>
+    </PullToRefresh>
   );
 }
 
