@@ -134,7 +134,7 @@ function DashboardContent() {
       .gte('generated_at', thirtyDaysAgo.toISOString())
       .order('month_start', { ascending: false })
       .limit(1)
-      .single()
+      .maybeSingle()
       .then(({ data }) => {
         if (data) setMonthlyRecapId(data.id);
       });
