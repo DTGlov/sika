@@ -130,8 +130,8 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
 
         {/* INPUT PHASE */}
         {phase === 'input' && (
-          <div className="space-y-5 mt-2">
-            <div className="space-y-1.5">
+          <div className="space-y-5">
+            <div className="space-y-2">
               <label className="text-muted-foreground text-sm">What is it?</label>
               <Input
                 ref={itemRef}
@@ -139,11 +139,11 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && canSubmit && handleAsk()}
-                className="h-12 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-accent"
+                className="h-12 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-1 focus-visible:ring-accent focus-visible:outline-none"
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="text-muted-foreground text-sm">How much? (₵)</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm pointer-events-none">₵</span>
@@ -156,7 +156,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && canSubmit && handleAsk()}
-                  className="h-12 pl-7 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-accent"
+                  className="h-12 pl-7 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-1 focus-visible:ring-accent focus-visible:outline-none"
                 />
               </div>
             </div>
