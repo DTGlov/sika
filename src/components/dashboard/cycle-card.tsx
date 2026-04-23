@@ -42,7 +42,7 @@ export function CardSurface({ themeId, cycleNet, userName, amountKey, mounted }:
 
   return (
     <div
-      className="relative overflow-hidden select-none"
+      className="relative overflow-hidden select-none border border-white/10"
       style={{
         backgroundColor: palette.background,
         aspectRatio: '85.6 / 54',
