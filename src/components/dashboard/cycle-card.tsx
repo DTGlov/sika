@@ -174,7 +174,7 @@ export function CycleCard({
       </div>
 
       {/* Supporting stats */}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground tabular-nums px-1">
+      <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-muted-foreground tabular-nums px-1">
         <span>Received <span className="text-muted-foreground">{formatGHSCompact(received)}</span></span>
         <span className="text-muted-foreground/60">·</span>
         <span>Spent <span className="text-muted-foreground">{formatGHSCompact(spent)}</span></span>

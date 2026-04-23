@@ -118,7 +118,7 @@ function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDele
       {/* Name + amount + actions */}
       <div className="px-4 py-3 flex items-center gap-3">
         <div
-          className="w-1 self-stretch rounded-full shrink-0"
+          className="w-2 h-2 rounded-full shrink-0 self-center"
           style={{ backgroundColor: accentColor }}
         />
         <div className="min-w-0 flex-1">
