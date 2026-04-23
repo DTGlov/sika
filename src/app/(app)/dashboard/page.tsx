@@ -327,6 +327,7 @@ function DashboardContent() {
                 expected={monthlyIncome}
               />
               <HintCard
+                className="mt-4"
                 hintId="dashboard_card_intro"
                 title="This is your month card"
                 body="It shows money that came in minus money that went out this month. Resets at the start of each month. Customize the style in Settings."
