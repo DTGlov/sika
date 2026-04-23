@@ -21,6 +21,7 @@ import { revalidateForEntity } from '@/lib/revalidation';
 import { HintCard } from '@/components/hint-card';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { NextCycleModal } from '@/components/goals/next-cycle-modal';
+import { InsufficientBalanceSheet } from './insufficient-balance-sheet';
 import { fetchGoals, fetchGoalAmounts } from '@/lib/goals';
 import { updateLoggingStreak, loggingMilestoneMessage } from '@/lib/streaks';
 import { awardMomentum } from '@/lib/momentum';
@@ -42,6 +43,7 @@ export function TransactionSheet() {
     editingTransaction,
     reconcileContext,
     dashboardStats,
+    openReconcileSheet,
   } = useTransactionStore();
   const { user, accounts, setStreaks, setMomentum, enqueueBadgeCelebrations } = useAuthStore();
   const { medium: hapticMedium } = useHaptics();
@@ -69,6 +71,9 @@ export function TransactionSheet() {
   const [sfBalance, setSfBalance] = useState<number | null>(null);
   const [sfBalanceLoading, setSfBalanceLoading] = useState(false);
   const [nextCycleGoal, setNextCycleGoal] = useState<Goal | null>(null);
+
+  // Insufficient balance guard
+  const [insufficientOpen, setInsufficientOpen] = useState(false);
 
   // Reconcile-specific state
   const [reconcileActual, setReconcileActual] = useState('');
@@ -163,12 +168,37 @@ export function TransactionSheet() {
     }
   }
 
+  function getFromAccountBalance(): number {
+    return dashboardStats?.accountBalances[accountId ?? ''] ?? 0;
+  }
+
   function handleNext() {
     if (txType === 'transfer') {
       setStep('accounts');
+    } else if (txType === 'expense') {
+      if (getFromAccountBalance() <= 0) {
+        setInsufficientOpen(true);
+        return;
+      }
+      setStep('category');
     } else {
       setStep('category');
     }
+  }
+
+  function handleInsufficientTopUp() {
+    setInsufficientOpen(false);
+    handleTypeChange('income');
+  }
+
+  function handleInsufficientChangeAccount() {
+    setInsufficientOpen(false);
+  }
+
+  function handleInsufficientReconcile() {
+    const balance = getFromAccountBalance();
+    openReconcileSheet({ accountId: accountId!, sikaBalance: balance });
+    setInsufficientOpen(false);
   }
 
   function handleBack() {
@@ -523,7 +553,15 @@ export function TransactionSheet() {
                 className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
                 Back
               </Button>
-              <Button onClick={() => setStep('details')} disabled={!accountId || !toAccountId}
+              <Button
+                onClick={() => {
+                  if (getFromAccountBalance() <= 0) {
+                    setInsufficientOpen(true);
+                    return;
+                  }
+                  setStep('details');
+                }}
+                disabled={!accountId || !toAccountId}
                 className="flex-1 h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl">
                 Next
               </Button>
@@ -811,6 +849,16 @@ export function TransactionSheet() {
         )}
       </SheetContent>
     </Sheet>
+
+    <InsufficientBalanceSheet
+      open={insufficientOpen}
+      onClose={() => setInsufficientOpen(false)}
+      accountName={accounts.find(a => a.id === accountId)?.name ?? 'Account'}
+      accountBalance={getFromAccountBalance()}
+      onTopUp={handleInsufficientTopUp}
+      onChangeAccount={handleInsufficientChangeAccount}
+      onReconcile={handleInsufficientReconcile}
+    />
 
     {nextCycleGoal && (
       <NextCycleModal
