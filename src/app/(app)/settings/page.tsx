@@ -35,7 +35,7 @@ import {
 import { CardThemePicker } from "@/components/settings/card-theme-picker";
 import { AppearanceSection } from "@/components/settings/appearance-section";
 import { HapticsSection } from "@/components/settings/haptics-section";
-import type { Category, CardTheme } from "@/types";
+import type { Category } from "@/types";
 
 const profileSchema = z
   .object({
@@ -225,12 +225,10 @@ export default function SettingsPage() {
           <HintCard
             hintId="card_theme_available"
             title="Customize your card"
-            body="You can change your card's style anytime. Default is Classic Gold, with 5 other styles to try."
+            body="Choose from 7 heritage-themed card styles inspired by Adinkra symbols and Ghanaian craft. Tap 'Change card' to browse."
             className="mb-4"
           />
-          <CardThemePicker
-            currentTheme={(profile?.card_theme ?? 'classic_gold') as CardTheme}
-          />
+          <CardThemePicker />
         </div>
 
         <form onSubmit={handleSubmit(onSaveProfile)} className="space-y-6">
