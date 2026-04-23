@@ -9,6 +9,7 @@ export interface DailyStory {
   source_url: string; // stored but NOT shown to user in v1
   emoji: string;
   published_at: string;
+  image_url: string | null; // full-width hero image, nullable
 }
 
 export interface DailyDigest {

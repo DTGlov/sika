@@ -16,12 +16,63 @@ export interface CandidateStory {
   title: string;
   description: string;
   published_at: string;
+  image_url: string | null;
 }
 
 const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '@_',
 });
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractImageUrl(item: any): string | null {
+  // 1. media:content url attribute (Media RSS)
+  const mediaContent = item['media:content'];
+  if (mediaContent) {
+    const contentArray = Array.isArray(mediaContent) ? mediaContent : [mediaContent];
+    for (const m of contentArray) {
+      const url = m?.['@_url'];
+      const medium = m?.['@_medium'];
+      if (url && (medium === 'image' || /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url))) {
+        return url;
+      }
+    }
+  }
+
+  // 2. media:thumbnail
+  const mediaThumb = item['media:thumbnail'];
+  if (mediaThumb) {
+    const thumbArray = Array.isArray(mediaThumb) ? mediaThumb : [mediaThumb];
+    const url = thumbArray[0]?.['@_url'];
+    if (url) return url;
+  }
+
+  // 3. enclosure with image type
+  const enclosure = item.enclosure;
+  if (enclosure) {
+    const encArray = Array.isArray(enclosure) ? enclosure : [enclosure];
+    for (const e of encArray) {
+      const url = e?.['@_url'];
+      const type = e?.['@_type'] ?? '';
+      if (url && type.startsWith('image/')) return url;
+    }
+  }
+
+  // 4. image field directly on item
+  if (item.image) {
+    if (typeof item.image === 'string') return item.image;
+    if (item.image.url) return typeof item.image.url === 'string' ? item.image.url : null;
+    if (item.image['@_url']) return item.image['@_url'];
+  }
+
+  // 5. First <img src="..."> in description HTML
+  const description = item.description ?? item.summary ?? item.content ?? '';
+  const descStr = typeof description === 'string' ? description : description?.['#text'] ?? '';
+  const imgMatch = descStr.match(/<img[^>]+src=["']([^"']+)["']/i);
+  if (imgMatch?.[1]) return imgMatch[1];
+
+  return null;
+}
 
 export async function fetchRssSources(supabase: import('@supabase/supabase-js').SupabaseClient): Promise<RssSource[]> {
   const { data } = await supabase
@@ -81,6 +132,7 @@ export async function fetchStoriesFromSource(source: RssSource): Promise<Candida
             .slice(0, 500)
             .trim(),
           published_at: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
+          image_url: extractImageUrl(item),
           _pubTime: pubTime,
         };
       })

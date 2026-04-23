@@ -13,6 +13,7 @@ const PLACEHOLDER_STORY: DailyStory = {
   source_url: '',
   emoji: '🌾',
   published_at: new Date().toISOString(),
+  image_url: null,
 };
 
 export async function generateDigest(): Promise<{ success: boolean; digest_date: string; is_fallback: boolean; story_count: number }> {
@@ -63,6 +64,7 @@ export async function generateDigest(): Promise<{ success: boolean; digest_date:
               source_name: candidate.source_name,
               source_url: candidate.source_url,
               published_at: candidate.published_at,
+              image_url: candidate.image_url,
             };
             return story;
           })
