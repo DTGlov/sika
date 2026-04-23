@@ -1,10 +1,24 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useHaptics } from '@/hooks/use-haptics';
 import { Vibrate } from 'lucide-react';
 
 export function HapticsSection() {
   const { enabled, setEnabled, medium } = useHaptics();
+  const [mounted, setMounted] = useState(false);
+  const [supported, setSupported] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setSupported(
+      typeof navigator !== 'undefined' &&
+      typeof navigator.vibrate === 'function'
+    );
+  }, []);
+
+  if (!mounted) return null;
+  if (!supported) return null;
 
   const handleToggle = async (newValue: boolean) => {
     setEnabled(newValue);
@@ -17,7 +31,7 @@ export function HapticsSection() {
         body: JSON.stringify({ enabled: newValue }),
       });
     } catch {
-      // silent fail — UI already updated
+      // silent fail
     }
   };
 
