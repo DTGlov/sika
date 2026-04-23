@@ -166,10 +166,13 @@ export default function AccountsPage() {
               <div
                 key={acc.id}
                 className="bg-card border border-border rounded-2xl p-4"
-                style={{ borderLeftColor: cfg.color, borderLeftWidth: 3 }}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
+                    <div
+                      className="w-1 h-10 rounded-full shrink-0 self-center"
+                      style={{ backgroundColor: cfg.color }}
+                    />
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
                       style={{ backgroundColor: cfg.color + '18' }}

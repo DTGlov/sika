@@ -95,9 +95,7 @@ function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDele
   const name = item.note ?? item.category?.name ?? FREQUENCY_LABELS[item.frequency];
 
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden"
-      style={{ borderLeftColor: accentColor, borderLeftWidth: 3 }}
-    >
+    <div className="bg-card border border-border rounded-2xl overflow-hidden">
       {/* Due date header */}
       <div className="px-4 pt-3 pb-2.5 flex items-center justify-between">
         <p
@@ -118,8 +116,12 @@ function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDele
       <div className="h-px bg-border" />
 
       {/* Name + amount + actions */}
-      <div className="px-4 py-3 flex items-center justify-between gap-2">
-        <div className="min-w-0">
+      <div className="px-4 py-3 flex items-center gap-3">
+        <div
+          className="w-1 self-stretch rounded-full shrink-0"
+          style={{ backgroundColor: accentColor }}
+        />
+        <div className="min-w-0 flex-1">
           <p className="text-foreground font-bold text-base truncate">{name}</p>
           <p className="text-muted-foreground/70 text-xs mt-0.5">
             {item.account?.name}
