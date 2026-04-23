@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useHaptics } from '@/hooks/use-haptics';
 import { motion } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -17,6 +18,7 @@ const AUTO_DISMISS_MS = 5000;
 
 export function BadgeUnlockModal({ open, badgeId, onClose }: BadgeUnlockModalProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { celebration } = useHaptics();
   const badge = BADGES_CATALOG[badgeId];
   const config = RARITY_CONFIG[badge.rarity];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,11 +26,13 @@ export function BadgeUnlockModal({ open, badgeId, onClose }: BadgeUnlockModalPro
 
   useEffect(() => {
     if (open) {
+      celebration();
       timerRef.current = setTimeout(onClose, AUTO_DISMISS_MS);
     }
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, onClose]);
 
   return (
