@@ -35,6 +35,7 @@ import {
 import { CardThemePicker } from "@/components/settings/card-theme-picker";
 import { AppearanceSection } from "@/components/settings/appearance-section";
 import { HapticsSection } from "@/components/settings/haptics-section";
+import { DangerZone } from "@/components/settings/danger-zone";
 import type { Category } from "@/types";
 
 const profileSchema = z
@@ -554,6 +555,16 @@ export default function SettingsPage() {
             <LogOut className="w-4 h-4 mr-2" /> Sign out
           </Button>
         </div>
+
+        {/* Danger zone */}
+        <DangerZone />
+
+        {/* Privacy link */}
+        <p className="mt-6 text-center text-xs text-muted-foreground/60">
+          <a href="/privacy" className="hover:text-muted-foreground transition-colors underline underline-offset-2">
+            Privacy policy
+          </a>
+        </p>
       </div>
 
       <CategoryModal
