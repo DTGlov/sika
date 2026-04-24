@@ -25,53 +25,105 @@ const parser = new XMLParser({
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function extractImageUrl(item: any): string | null {
-  // 1. media:content url attribute (Media RSS)
+function _extractImageUrlRaw(item: any): string | null {
+  // 1. media:content (direct)
   const mediaContent = item['media:content'];
   if (mediaContent) {
-    const contentArray = Array.isArray(mediaContent) ? mediaContent : [mediaContent];
-    for (const m of contentArray) {
+    const arr = Array.isArray(mediaContent) ? mediaContent : [mediaContent];
+    for (const m of arr) {
       const url = m?.['@_url'];
       const medium = m?.['@_medium'];
-      if (url && (medium === 'image' || /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url))) {
+      const type = m?.['@_type'] ?? '';
+      if (url && (medium === 'image' || type.startsWith('image/') || /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url))) {
         return url;
       }
     }
   }
 
-  // 2. media:thumbnail
+  // 2. media:thumbnail (direct)
   const mediaThumb = item['media:thumbnail'];
   if (mediaThumb) {
-    const thumbArray = Array.isArray(mediaThumb) ? mediaThumb : [mediaThumb];
-    const url = thumbArray[0]?.['@_url'];
+    const arr = Array.isArray(mediaThumb) ? mediaThumb : [mediaThumb];
+    const url = arr[0]?.['@_url'];
     if (url) return url;
   }
 
-  // 3. enclosure with image type
-  const enclosure = item.enclosure;
-  if (enclosure) {
-    const encArray = Array.isArray(enclosure) ? enclosure : [enclosure];
-    for (const e of encArray) {
-      const url = e?.['@_url'];
-      const type = e?.['@_type'] ?? '';
-      if (url && type.startsWith('image/')) return url;
+  // 3. media:group > media:content / media:thumbnail (BBC-style nesting)
+  const mediaGroup = item['media:group'];
+  if (mediaGroup) {
+    const nestedContent = mediaGroup['media:content'];
+    if (nestedContent) {
+      const arr = Array.isArray(nestedContent) ? nestedContent : [nestedContent];
+      for (const m of arr) {
+        const url = m?.['@_url'];
+        if (url) return url;
+      }
+    }
+    const nestedThumb = mediaGroup['media:thumbnail'];
+    if (nestedThumb) {
+      const arr = Array.isArray(nestedThumb) ? nestedThumb : [nestedThumb];
+      const url = arr[0]?.['@_url'];
+      if (url) return url;
     }
   }
 
-  // 4. image field directly on item
+  // 4. enclosure with image type
+  const enclosure = item.enclosure;
+  if (enclosure) {
+    const arr = Array.isArray(enclosure) ? enclosure : [enclosure];
+    for (const e of arr) {
+      const url = e?.['@_url'];
+      const type = e?.['@_type'] ?? '';
+      if (url && (type.startsWith('image/') || /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url))) {
+        return url;
+      }
+    }
+  }
+
+  // 5. itunes:image
+  const itunesImage = item['itunes:image'];
+  if (itunesImage) {
+    const url = itunesImage['@_href'] ?? itunesImage;
+    if (typeof url === 'string') return url;
+  }
+
+  // 6. image field (various shapes)
   if (item.image) {
     if (typeof item.image === 'string') return item.image;
     if (item.image.url) return typeof item.image.url === 'string' ? item.image.url : null;
     if (item.image['@_url']) return item.image['@_url'];
+    if (item.image['#text']) return item.image['#text'];
   }
 
-  // 5. First <img src="..."> in description HTML
+  // 7. content:encoded — first <img src=""> from full article HTML
+  // Catches CNBC, Bloomberg, TechCrunch, WordPress feeds
+  const contentEncoded = item['content:encoded'];
+  if (contentEncoded) {
+    const str = typeof contentEncoded === 'string'
+      ? contentEncoded
+      : contentEncoded?.['#text'] ?? String(contentEncoded);
+    const match = str.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (match?.[1]) return match[1];
+  }
+
+  // 8. description / summary HTML — first <img src="">
   const description = item.description ?? item.summary ?? item.content ?? '';
-  const descStr = typeof description === 'string' ? description : description?.['#text'] ?? '';
-  const imgMatch = descStr.match(/<img[^>]+src=["']([^"']+)["']/i);
-  if (imgMatch?.[1]) return imgMatch[1];
+  const descStr = typeof description === 'string'
+    ? description
+    : description?.['#text'] ?? String(description);
+  const descMatch = descStr.match(/<img[^>]+src=["']([^"']+)["']/i);
+  if (descMatch?.[1]) return descMatch[1];
 
   return null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractImageUrl(item: any): string | null {
+  const url = _extractImageUrlRaw(item);
+  if (!url) return null;
+  // Discard relative URLs and data URIs — only keep absolute http(s) URLs
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return null;
+  return url;
 }
 
 export async function fetchRssSources(supabase: import('@supabase/supabase-js').SupabaseClient): Promise<RssSource[]> {
