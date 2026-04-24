@@ -31,11 +31,13 @@ type TempSource = {
 
 const FREQUENCIES: IncomeFrequency[] = ['monthly', 'weekly', 'biweekly', 'irregular'];
 
-const EXTRA_TEMPLATES: TempSource[] = [
-  { _key: 'weekly-allowance', name: 'Weekly Allowance', amount: 600, frequency: 'weekly', expected_day: 1 },
-  { _key: 'monthly-allowance', name: 'Monthly Allowance', amount: 2600, frequency: 'irregular', expected_day: null },
-  { _key: 'side-hustle', name: 'Side Hustle', amount: 1000, frequency: 'irregular', expected_day: null },
-  { _key: 'benefit', name: 'Benefit / Subsidy', amount: 500, frequency: 'monthly', expected_day: 1 },
+type ExtraTemplate = Omit<TempSource, 'amount'>;
+
+const EXTRA_TEMPLATES: ExtraTemplate[] = [
+  { _key: 'weekly-allowance', name: 'Weekly Allowance', frequency: 'weekly', expected_day: 1 },
+  { _key: 'monthly-allowance', name: 'Monthly Allowance', frequency: 'irregular', expected_day: null },
+  { _key: 'side-hustle', name: 'Side Hustle', frequency: 'irregular', expected_day: null },
+  { _key: 'benefit', name: 'Benefit / Subsidy', frequency: 'monthly', expected_day: 1 },
 ];
 
 const primarySchema = z.object({
@@ -59,6 +61,8 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
   const [primarySource, setPrimarySource] = useState<TempSource | null>(null);
   const [extraSources, setExtraSources] = useState<TempSource[]>([]);
   const [saving, setSaving] = useState(false);
+  const [activeSourceKey, setActiveSourceKey] = useState<string | null>(null);
+  const [inputAmount, setInputAmount] = useState('');
 
   const {
     register,
@@ -73,10 +77,23 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
   const frequency = watch('frequency');
 
-  function addTemplate(t: TempSource) {
-    if (!extraSources.find(s => s._key === t._key)) {
-      setExtraSources(prev => [...prev, t]);
-    }
+  function handleChipTap(t: ExtraTemplate) {
+    if (extraSources.some(s => s._key === t._key)) return;
+    setActiveSourceKey(t._key);
+    setInputAmount('');
+  }
+
+  function handleChipConfirm(t: ExtraTemplate) {
+    const amount = parseFloat(inputAmount);
+    if (!amount || amount <= 0) return;
+    setExtraSources(prev => [...prev, { ...t, amount }]);
+    setActiveSourceKey(null);
+    setInputAmount('');
+  }
+
+  function handleChipCancel() {
+    setActiveSourceKey(null);
+    setInputAmount('');
   }
 
   function removeExtra(key: string) {
@@ -139,6 +156,8 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
     setStep(1);
     setPrimarySource(null);
     setExtraSources([]);
+    setActiveSourceKey(null);
+    setInputAmount('');
     onClose();
   }
 
@@ -288,11 +307,56 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   {EXTRA_TEMPLATES.map(t => {
                     const added = extraSources.some(s => s._key === t._key);
+                    const isInput = activeSourceKey === t._key;
+
+                    if (isInput) {
+                      return (
+                        <div
+                          key={t._key}
+                          className="col-span-2 flex items-center gap-2 p-2.5 rounded-xl border"
+                          style={{ borderColor: '#00D9A3', backgroundColor: '#00D9A309' }}
+                        >
+                          <div className="flex-1 flex items-center gap-1 bg-input rounded-lg px-2.5 py-1.5">
+                            <span className="text-muted-foreground text-sm font-mono shrink-0">{CURRENCY_SYMBOL}</span>
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              autoFocus
+                              value={inputAmount}
+                              onChange={e => setInputAmount(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') handleChipConfirm(t);
+                                if (e.key === 'Escape') handleChipCancel();
+                              }}
+                              placeholder="0.00"
+                              className="flex-1 bg-transparent text-foreground text-sm outline-none min-w-0"
+                            />
+                          </div>
+                          <button
+                            onClick={() => handleChipConfirm(t)}
+                            disabled={!inputAmount || parseFloat(inputAmount) <= 0}
+                            className="w-8 h-8 rounded-lg bg-[#00D9A3] text-[#0A0A0B] flex items-center justify-center disabled:opacity-40 shrink-0 transition-opacity"
+                            aria-label="Confirm amount"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={handleChipCancel}
+                            className="w-8 h-8 rounded-lg bg-muted text-muted-foreground flex items-center justify-center shrink-0"
+                            aria-label="Cancel"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      );
+                    }
+
                     return (
                       <button
                         key={t._key}
-                        onClick={() => added ? removeExtra(t._key) : addTemplate(t)}
-                        className="text-left p-3 rounded-xl border transition-all"
+                        onClick={() => handleChipTap(t)}
+                        disabled={added}
+                        className="text-left p-3 rounded-xl border transition-all disabled:cursor-default"
                         style={{
                           borderColor: added ? '#00D9A3' : 'var(--border)',
                           backgroundColor: added ? '#00D9A311' : 'var(--input)',
