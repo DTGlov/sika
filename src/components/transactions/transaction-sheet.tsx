@@ -15,8 +15,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AmountKeypad } from './amount-keypad';
 import { CategoryGrid } from './category-grid';
+import { IncomeCategoryPicker, INCOME_PRESETS } from './income-category-picker';
+import type { IncomePresetKey } from './income-category-picker';
 import { ACCOUNT_TYPE_CONFIG } from '@/lib/accounts';
 import { formatGHS } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { revalidateForEntity } from '@/lib/revalidation';
 import { HintCard } from '@/components/hint-card';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -63,6 +66,11 @@ export function TransactionSheet() {
   const [note, setNote] = useState('');
   const [txDate, setTxDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [saving, setSaving] = useState(false);
+
+  // Income category picker state
+  const [incomeCategoryKey, setIncomeCategoryKey] = useState<IncomePresetKey | null>(null);
+  const [incomeCustomEmoji, setIncomeCustomEmoji] = useState('');
+  const [incomeCustomLabel, setIncomeCustomLabel] = useState('');
 
   // Target goal payment
   const [sinkingFundGoals, setSinkingFundGoals] = useState<Goal[]>([]);
@@ -126,7 +134,6 @@ export function TransactionSheet() {
       setTxDate(editingTransaction.transaction_date);
       setStep(editingTransaction.type === 'adjustment' ? 'reconcile' : 'amount');
       if (editingTransaction.type === 'adjustment') {
-        // Reverse-compute actual balance for editing: show the stored diff
         setReconcileActual('');
       }
     } else {
@@ -151,6 +158,9 @@ export function TransactionSheet() {
       setPaidFromGoalId(null);
       setSfExpanded(false);
       setSfBalance(null);
+      setIncomeCategoryKey(null);
+      setIncomeCustomEmoji('');
+      setIncomeCustomLabel('');
     }, 300);
   }
 
@@ -220,6 +230,22 @@ export function TransactionSheet() {
     if (result.tier_changed) setTierUpTier(result.new_tier);
   }
 
+  function resolveIncomeCategory(): { effectiveCategoryId: string | null; notePrefix: string } {
+    if (!incomeCategoryKey) return { effectiveCategoryId: null, notePrefix: '' };
+    if (incomeCategoryKey === 'other') {
+      const prefix = [incomeCustomEmoji, incomeCustomLabel].filter(Boolean).join(' ');
+      return { effectiveCategoryId: null, notePrefix: prefix ? `${prefix} — ` : '' };
+    }
+    const preset = INCOME_PRESETS.find(p => p.key === incomeCategoryKey);
+    const matched = preset
+      ? categories.find(c =>
+          c.name.toLowerCase() === preset.label.toLowerCase() &&
+          (c.category_type === 'income' || c.category_type === 'adjustment')
+        )
+      : null;
+    return { effectiveCategoryId: matched?.id ?? null, notePrefix: '' };
+  }
+
   async function handleSave() {
     if (!user || parseFloat(amount) <= 0) return;
     if (txType === 'transfer' && (!accountId || !toAccountId || accountId === toAccountId)) {
@@ -228,13 +254,21 @@ export function TransactionSheet() {
     }
     setSaving(true);
 
+    let effectiveCategoryId = categoryId;
+    let effectiveNote = note;
+    if (txType === 'income') {
+      const { effectiveCategoryId: incCatId, notePrefix } = resolveIncomeCategory();
+      effectiveCategoryId = incCatId;
+      effectiveNote = notePrefix + note;
+    }
+
     const payload = {
       amount: parseFloat(amount),
       type: txType,
-      category_id: (txType === 'transfer' || txType === 'adjustment') ? null : categoryId,
+      category_id: (txType === 'transfer' || txType === 'adjustment') ? null : effectiveCategoryId,
       account_id: accountId,
       to_account_id: txType === 'transfer' ? toAccountId : null,
-      note: note || null,
+      note: effectiveNote || null,
       transaction_date: txDate,
       paid_from_goal_id: txType === 'expense' ? paidFromGoalId : null,
     };
@@ -264,7 +298,7 @@ export function TransactionSheet() {
       if (error) { hapticToast.error('Failed to save transaction'); return; }
       hapticMedium();
       addTransaction(data);
-      const cat = categories.find(c => c.id === categoryId);
+      const cat = categories.find(c => c.id === effectiveCategoryId);
       analytics.transactionLogged({
         type: txType,
         bucket: cat?.bucket?.name as string | undefined,
@@ -281,20 +315,17 @@ export function TransactionSheet() {
         } else if (result.freeze_earned) {
           toast(`❄️ Streak freeze earned! ${result.streaks.freezes_banked} banked.`);
         }
-        // Check streak-triggered badges
         checkAndUnlockBadges(supabase, user.id, 'streak_updated').then(({ newlyUnlocked }) => {
           if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
         });
       });
       handleMomentumAward('transaction_logged');
-      // Check transaction-triggered badges
       checkAndUnlockBadges(supabase, user.id, 'transaction_logged').then(({ newlyUnlocked }) => {
         if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
       });
 
       if (paidFromGoalId && txType === 'expense') {
         revalidateForEntity('sinking_fund_payment');
-        // Check if target goal is now fulfilled
         const goal = sinkingFundGoals.find(g => g.id === paidFromGoalId);
         if (goal && goal.target_amount != null && !goal.completed_at) {
           const { contributions } = await fetchGoalAmounts(supabase, goal.id);
@@ -336,7 +367,7 @@ export function TransactionSheet() {
 
     const payload = {
       user_id: user.id,
-      amount: reconcileDiff, // signed: positive=increase, negative=decrease
+      amount: reconcileDiff,
       type: 'adjustment' as const,
       category_id: null,
       account_id: accountId,
@@ -380,7 +411,6 @@ export function TransactionSheet() {
   const numAmount = parseFloat(amount) || 0;
   const canProceedAmount = numAmount > 0;
 
-  // Target goal payment validation
   const sfOverpayment = paidFromGoalId && sfBalance !== null && numAmount > sfBalance;
   const sfAfterBalance = sfBalance !== null ? sfBalance - numAmount : null;
   const sfWillFulfill = sfAfterBalance !== null && sfAfterBalance <= 0 && numAmount > 0 && sfBalance !== null && sfBalance > 0;
@@ -398,17 +428,20 @@ export function TransactionSheet() {
     reconcile: 'Reconcile balance',
   };
 
+  const incomeCategoryValid = incomeCategoryKey !== null &&
+    (incomeCategoryKey !== 'other' || incomeCustomLabel.trim().length > 0);
+
   return (
     <>
     <Sheet open={isLogSheetOpen} onOpenChange={(open) => !open && handleClose()}>
       <SheetContent
         side="bottom"
-        className="bg-[#141416] border-t border-[#27272A] rounded-t-3xl px-4 pb-8 pt-4 max-h-[92svh] overflow-y-auto"
+        className="bg-card border-t border-border rounded-t-3xl px-4 pb-8 pt-4 max-h-[92svh] overflow-y-auto"
       >
-        <div className="w-10 h-1 bg-[#27272A] rounded-full mx-auto mb-4" />
+        <div className="w-10 h-1 bg-muted rounded-full mx-auto mb-4" />
 
         <SheetHeader className="mb-4">
-          <SheetTitle className="text-[#FAFAFA] text-lg font-bold text-left">
+          <SheetTitle className="text-foreground text-lg font-bold text-left">
             {stepTitles[step]}
           </SheetTitle>
         </SheetHeader>
@@ -418,8 +451,10 @@ export function TransactionSheet() {
           {stepList.map((s, i) => (
             <div
               key={s}
-              className="h-1 flex-1 rounded-full transition-colors"
-              style={{ background: stepList.indexOf(step) >= i ? '#00D9A3' : '#27272A' }}
+              className={cn(
+                'h-1 flex-1 rounded-full transition-colors',
+                stepList.indexOf(step) >= i ? 'bg-[#00D9A3]' : 'bg-muted'
+              )}
             />
           ))}
         </div>
@@ -439,7 +474,7 @@ export function TransactionSheet() {
               <button
                 type="button"
                 onClick={() => handleTypeChange('adjustment')}
-                className="w-full flex items-center justify-center gap-1.5 text-xs text-[#52525B] hover:text-[#A1A1AA] transition-colors py-1"
+                className="w-full flex items-center justify-center gap-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors py-1"
               >
                 <Scale className="w-3.5 h-3.5" />
                 Reconcile an account balance instead
@@ -449,7 +484,7 @@ export function TransactionSheet() {
             {/* Account chips — not for transfer */}
             {txType !== 'transfer' && accounts.length > 0 && (
               <div>
-                <p className="text-[#71717A] text-xs mb-2">Account</p>
+                <p className="text-muted-foreground text-xs mb-2">Account</p>
                 <div className="flex flex-wrap gap-2">
                   {accounts.map(acc => {
                     const cfg = ACCOUNT_TYPE_CONFIG[acc.type];
@@ -459,12 +494,11 @@ export function TransactionSheet() {
                         key={acc.id}
                         type="button"
                         onClick={() => setAccountId(acc.id)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all"
-                        style={{
-                          borderColor: active ? cfg.color : '#27272A',
-                          backgroundColor: active ? cfg.color + '18' : '#1C1C1F',
-                          color: active ? cfg.color : '#71717A',
-                        }}
+                        className={cn(
+                          'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all',
+                          !active && 'border-border bg-muted text-muted-foreground'
+                        )}
+                        style={active ? { borderColor: cfg.color, backgroundColor: cfg.color + '18', color: cfg.color } : undefined}
                       >
                         <span>{cfg.emoji}</span>
                         <span>{acc.name}</span>
@@ -488,18 +522,30 @@ export function TransactionSheet() {
         {/* STEP: Category */}
         {step === 'category' && (
           <div className="space-y-4">
-            <CategoryGrid
-              categories={categories}
-              selectedId={categoryId}
-              onSelect={setCategoryId}
-              transactionType={txType}
-            />
+            {txType === 'income' ? (
+              <IncomeCategoryPicker
+                selectedKey={incomeCategoryKey}
+                onSelect={setIncomeCategoryKey}
+                customEmoji={incomeCustomEmoji}
+                customLabel={incomeCustomLabel}
+                onCustomChange={(e, l) => { setIncomeCustomEmoji(e); setIncomeCustomLabel(l); }}
+              />
+            ) : (
+              <CategoryGrid
+                categories={categories}
+                selectedId={categoryId}
+                onSelect={setCategoryId}
+                transactionType={txType}
+              />
+            )}
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleBack}
-                className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
+                className="flex-1 h-12 border-border text-muted-foreground hover:bg-muted rounded-xl">
                 Back
               </Button>
-              <Button onClick={() => setStep('details')}
+              <Button
+                onClick={() => setStep('details')}
+                disabled={txType === 'income' && !incomeCategoryValid}
                 className="flex-1 h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl">
                 Next
               </Button>
@@ -511,44 +557,42 @@ export function TransactionSheet() {
         {step === 'accounts' && (
           <div className="space-y-5">
             <div className="space-y-2">
-              <p className="text-[#A1A1AA] text-sm">From</p>
+              <p className="text-muted-foreground text-sm">From</p>
               <div className="flex flex-wrap gap-2">
                 {accounts.map(acc => {
                   const cfg = ACCOUNT_TYPE_CONFIG[acc.type];
                   const active = accountId === acc.id;
                   return (
                     <button key={acc.id} type="button" onClick={() => setAccountId(acc.id)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all"
-                      style={{
-                        borderColor: active ? cfg.color : '#27272A',
-                        backgroundColor: active ? cfg.color + '18' : '#1C1C1F',
-                        color: active ? cfg.color : '#71717A',
-                      }}>
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all',
+                        !active && 'border-border bg-muted text-muted-foreground'
+                      )}
+                      style={active ? { borderColor: cfg.color, backgroundColor: cfg.color + '18', color: cfg.color } : undefined}>
                       <span>{cfg.emoji}</span><span>{acc.name}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
-            <div className="flex items-center gap-2 text-[#52525B]">
-              <div className="flex-1 h-px bg-[#27272A]" />
+            <div className="flex items-center gap-2 text-muted-foreground/60">
+              <div className="flex-1 h-px bg-border" />
               <ArrowRight className="w-4 h-4" />
-              <div className="flex-1 h-px bg-[#27272A]" />
+              <div className="flex-1 h-px bg-border" />
             </div>
             <div className="space-y-2">
-              <p className="text-[#A1A1AA] text-sm">To</p>
+              <p className="text-muted-foreground text-sm">To</p>
               <div className="flex flex-wrap gap-2">
                 {accounts.filter(a => a.id !== accountId).map(acc => {
                   const cfg = ACCOUNT_TYPE_CONFIG[acc.type];
                   const active = toAccountId === acc.id;
                   return (
                     <button key={acc.id} type="button" onClick={() => setToAccountId(acc.id)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all"
-                      style={{
-                        borderColor: active ? cfg.color : '#27272A',
-                        backgroundColor: active ? cfg.color + '18' : '#1C1C1F',
-                        color: active ? cfg.color : '#71717A',
-                      }}>
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all',
+                        !active && 'border-border bg-muted text-muted-foreground'
+                      )}
+                      style={active ? { borderColor: cfg.color, backgroundColor: cfg.color + '18', color: cfg.color } : undefined}>
                       <span>{cfg.emoji}</span><span>{acc.name}</span>
                     </button>
                   );
@@ -557,7 +601,7 @@ export function TransactionSheet() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleBack}
-                className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
+                className="flex-1 h-12 border-border text-muted-foreground hover:bg-muted rounded-xl">
                 Back
               </Button>
               <Button
@@ -589,19 +633,18 @@ export function TransactionSheet() {
             {/* Account selector */}
             {!reconcileContext && (
               <div>
-                <p className="text-[#A1A1AA] text-sm mb-2">Account</p>
+                <p className="text-muted-foreground text-sm mb-2">Account</p>
                 <div className="flex flex-wrap gap-2">
                   {accounts.map(acc => {
                     const cfg = ACCOUNT_TYPE_CONFIG[acc.type];
                     const active = accountId === acc.id;
                     return (
                       <button key={acc.id} type="button" onClick={() => setAccountId(acc.id)}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all"
-                        style={{
-                          borderColor: active ? cfg.color : '#27272A',
-                          backgroundColor: active ? cfg.color + '18' : '#1C1C1F',
-                          color: active ? cfg.color : '#71717A',
-                        }}>
+                        className={cn(
+                          'flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-all',
+                          !active && 'border-border bg-muted text-muted-foreground'
+                        )}
+                        style={active ? { borderColor: cfg.color, backgroundColor: cfg.color + '18', color: cfg.color } : undefined}>
                         <span>{cfg.emoji}</span><span>{acc.name}</span>
                       </button>
                     );
@@ -612,17 +655,17 @@ export function TransactionSheet() {
 
             {/* Sika's current balance */}
             {accountId && (
-              <div className="bg-[#1C1C1F] border border-[#27272A] rounded-xl px-4 py-3 flex items-center justify-between">
-                <span className="text-[#71717A] text-sm">Sika shows</span>
-                <span className="text-[#FAFAFA] font-semibold tabular-nums">{formatGHS(sikaBalance)}</span>
+              <div className="bg-muted border border-border rounded-xl px-4 py-3 flex items-center justify-between">
+                <span className="text-muted-foreground text-sm">Sika shows</span>
+                <span className="text-foreground font-semibold tabular-nums">{formatGHS(sikaBalance)}</span>
               </div>
             )}
 
             {/* Actual balance input */}
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">Actual current balance</label>
+              <label className="text-muted-foreground text-sm">Actual current balance</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">₵</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">₵</span>
                 <Input
                   type="number"
                   min="0"
@@ -630,7 +673,7 @@ export function TransactionSheet() {
                   placeholder="0.00"
                   value={reconcileActual}
                   onChange={(e) => setReconcileActual(e.target.value)}
-                  className="h-12 pl-7 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3] amount"
+                  className="h-12 pl-7 bg-muted border-border text-foreground focus-visible:ring-[#00D9A3] amount"
                 />
               </div>
             </div>
@@ -641,7 +684,7 @@ export function TransactionSheet() {
                 className="rounded-xl px-4 py-3 flex items-center justify-between"
                 style={{ backgroundColor: reconcileIsPositive ? '#00D9A318' : '#F43F5E18' }}
               >
-                <span className="text-[#A1A1AA] text-sm">Adjustment</span>
+                <span className="text-muted-foreground text-sm">Adjustment</span>
                 <span
                   className="font-semibold tabular-nums text-sm"
                   style={{ color: reconcileIsPositive ? '#00D9A3' : '#F43F5E' }}
@@ -653,19 +696,19 @@ export function TransactionSheet() {
 
             {/* Note */}
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">Note (optional)</label>
+              <label className="text-muted-foreground text-sm">Note (optional)</label>
               <Input
                 placeholder="e.g. Bank statement reconciliation"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="h-11 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#52525B] focus-visible:ring-[#00D9A3]"
+                className="h-11 bg-muted border-border text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-[#00D9A3]"
               />
             </div>
 
             <div className="flex gap-2">
               {!reconcileContext && (
                 <Button variant="outline" onClick={() => handleTypeChange('expense')}
-                  className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
+                  className="flex-1 h-12 border-border text-muted-foreground hover:bg-muted rounded-xl">
                   Cancel
                 </Button>
               )}
@@ -688,21 +731,21 @@ export function TransactionSheet() {
         {step === 'details' && (
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">Note (optional)</label>
+              <label className="text-muted-foreground text-sm">Note (optional)</label>
               <Input
                 placeholder="What was this for?"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="h-12 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] placeholder:text-[#71717A] focus-visible:ring-[#00D9A3]"
+                className="h-12 bg-muted border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-[#00D9A3]"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[#A1A1AA] text-sm">Date</label>
+              <label className="text-muted-foreground text-sm">Date</label>
               <Input
                 type="date"
                 value={txDate}
                 onChange={(e) => setTxDate(e.target.value)}
-                className="h-12 bg-[#1C1C1F] border-[#27272A] text-[#FAFAFA] focus-visible:ring-[#00D9A3]"
+                className="h-12 bg-muted border-border text-foreground focus-visible:ring-[#00D9A3]"
               />
             </div>
 
@@ -716,9 +759,9 @@ export function TransactionSheet() {
                       setSfExpanded(v => !v);
                       setSfHintDismissed(false);
                     }}
-                    className="flex items-center gap-1.5 text-xs text-[#71717A] hover:text-[#A1A1AA] transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <span className="text-[#52525B]">{sfExpanded ? '▾' : '▸'}</span>
+                    <span className="text-muted-foreground/60">{sfExpanded ? '▾' : '▸'}</span>
                     Paid from a target?
                   </button>
                   <Popover>
@@ -727,7 +770,7 @@ export function TransactionSheet() {
                         <button
                           type="button"
                           aria-label="Why isn't my perpetual goal here?"
-                          className="text-[#71717A] hover:text-[#A1A1AA] transition-colors cursor-pointer"
+                          className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                         >
                           <Info className="w-3.5 h-3.5" />
                         </button>
@@ -759,7 +802,7 @@ export function TransactionSheet() {
                       <select
                         value={paidFromGoalId ?? ''}
                         onChange={e => { setPaidFromGoalId(e.target.value || null); setSfBalance(null); }}
-                        className="w-full bg-[#1C1C1F] border border-[#27272A] rounded-xl px-3 py-2.5 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#00D9A3] transition-colors"
+                        className="w-full bg-muted border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
                       >
                         <option value="">— Not from a target</option>
                         {sinkingFundGoals.map(g => (
@@ -770,8 +813,8 @@ export function TransactionSheet() {
                       </select>
 
                       {/* Perpetual goals note */}
-                      <div className="border-t border-[#27272A] mt-2 pt-2">
-                        <p className="text-xs text-[#71717A] leading-relaxed px-1">
+                      <div className="border-t border-border mt-2 pt-2">
+                        <p className="text-xs text-muted-foreground leading-relaxed px-1">
                           Perpetual goals (like Life Savings) don&apos;t appear here — they&apos;re protected.
                         </p>
                       </div>
@@ -786,12 +829,12 @@ export function TransactionSheet() {
                                 Not enough in this target yet
                               </p>
                             </div>
-                            <p className="text-[#A1A1AA] text-xs leading-relaxed">
+                            <p className="text-muted-foreground text-xs leading-relaxed">
                               Goal has{' '}
-                              <span className="text-[#FAFAFA] font-medium">{formatGHS(sfBalance)}</span>{' '}
+                              <span className="text-foreground font-medium">{formatGHS(sfBalance)}</span>{' '}
                               saved. You can either:
                             </p>
-                            <ul className="text-[#71717A] text-xs space-y-0.5 ml-2">
+                            <ul className="text-muted-foreground text-xs space-y-0.5 ml-2">
                               <li>• Reduce this payment to {formatGHS(sfBalance)} or less</li>
                               <li>• Contribute {formatGHS(numAmount - sfBalance)} more to the goal first</li>
                               <li>• Uncheck &ldquo;Paid from target&rdquo; and log as a regular expense</li>
@@ -807,18 +850,15 @@ export function TransactionSheet() {
                             </div>
                           </div>
                         ) : (
-                          <div className="rounded-xl bg-[#1C1C1F] border border-[#27272A] px-3 py-2.5 space-y-1">
+                          <div className="rounded-xl bg-muted border border-border px-3 py-2.5 space-y-1">
                             <div className="flex justify-between text-xs">
-                              <span className="text-[#71717A]">Goal balance</span>
-                              <span className="text-[#FAFAFA] tabular-nums">{formatGHS(sfBalance)}</span>
+                              <span className="text-muted-foreground">Goal balance</span>
+                              <span className="text-foreground tabular-nums">{formatGHS(sfBalance)}</span>
                             </div>
                             {numAmount > 0 && (
                               <div className="flex justify-between text-xs">
-                                <span className="text-[#71717A]">After this payment</span>
-                                <span
-                                  className="tabular-nums font-medium"
-                                  style={{ color: sfWillFulfill ? '#00D9A3' : '#FAFAFA' }}
-                                >
+                                <span className="text-muted-foreground">After this payment</span>
+                                <span className={cn('tabular-nums font-medium', sfWillFulfill ? 'text-[#00D9A3]' : 'text-foreground')}>
                                   {sfWillFulfill
                                     ? '₵0 — goal will be fulfilled'
                                     : formatGHS(Math.max(0, sfAfterBalance ?? 0)) + ' remaining'}
@@ -826,7 +866,7 @@ export function TransactionSheet() {
                               </div>
                             )}
                             {!sfWillFulfill && (
-                              <p className="text-[#71717A] text-xs pt-0.5">
+                              <p className="text-muted-foreground text-xs pt-0.5">
                                 This expense won't count against your buckets.
                               </p>
                             )}
@@ -835,7 +875,7 @@ export function TransactionSheet() {
                       )}
 
                       {paidFromGoalId && sfBalanceLoading && (
-                        <p className="text-[#52525B] text-xs">Checking goal balance…</p>
+                        <p className="text-muted-foreground/60 text-xs">Checking goal balance…</p>
                       )}
                     </motion.div>
                   )}
@@ -845,7 +885,7 @@ export function TransactionSheet() {
 
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleBack}
-                className="flex-1 h-12 border-[#27272A] text-[#A1A1AA] hover:bg-[#1C1C1F] rounded-xl">
+                className="flex-1 h-12 border-border text-muted-foreground hover:bg-muted rounded-xl">
                 Back
               </Button>
               <Button onClick={handleSave} disabled={saving || !canProceedAmount || !!sfOverpayment}
