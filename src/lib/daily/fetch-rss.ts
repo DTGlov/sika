@@ -113,6 +113,20 @@ export async function fetchStoriesFromSource(source: RssSource): Promise<Candida
       .slice(0, 10)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((item: any) => {
+        // TEMP DEBUG: log first item per source to identify RSS image field names
+        if (rawItems.indexOf(item) === 0) {
+          console.log(`[RSS DEBUG] Source: ${source.name}`);
+          console.log(`[RSS DEBUG] Item keys:`, Object.keys(item));
+          console.log(`[RSS DEBUG] media:content:`, JSON.stringify(item['media:content'])?.slice(0, 500));
+          console.log(`[RSS DEBUG] media:thumbnail:`, JSON.stringify(item['media:thumbnail'])?.slice(0, 500));
+          console.log(`[RSS DEBUG] enclosure:`, JSON.stringify(item.enclosure)?.slice(0, 500));
+          console.log(`[RSS DEBUG] image:`, JSON.stringify(item.image)?.slice(0, 500));
+          console.log(`[RSS DEBUG] description sample:`, String(item.description ?? '').slice(0, 300));
+          console.log(`[RSS DEBUG] content:encoded sample:`, String(item['content:encoded'] ?? '').slice(0, 300));
+          const extractedUrl = extractImageUrl(item);
+          console.log(`[RSS DEBUG] Extracted image_url:`, extractedUrl);
+        }
+
         const pubDate = item.pubDate ?? item.published ?? item.updated ?? '';
         const pubTime = pubDate ? new Date(pubDate).getTime() : 0;
 
