@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { TrendingUp, Flame, Eye, Target, ArrowRight, Sparkles, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { shareMonthly } from '@/lib/share-monthly';
+import { analytics } from '@/lib/analytics/identify';
 import type { MonthlyCard, MonthlyAccent } from '@/types/monthly';
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -99,6 +100,7 @@ export function MonthlyRecap({ cards, recapId, monthStart, monthEnd }: MonthlyRe
   useEffect(() => {
     if (viewedRef.current) return;
     viewedRef.current = true;
+    analytics.monthlyRecapViewed();
     fetch('/api/monthly/view', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -125,6 +127,7 @@ export function MonthlyRecap({ cards, recapId, monthStart, monthEnd }: MonthlyRe
     });
 
     if (result.success) {
+      analytics.monthlyRecapShared();
       if (result.method === 'clipboard') {
         toast.success('Link copied');
       }

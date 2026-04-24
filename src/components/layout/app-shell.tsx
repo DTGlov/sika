@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { useAuthStore } from '@/stores/auth-store';
+import { identifyUser } from '@/lib/analytics/identify';
 import { TransactionSheet } from '@/components/transactions/transaction-sheet';
 import { AddTransactionFab } from '@/components/transactions/add-transaction-fab';
 import { BottomNav } from './bottom-nav';
@@ -19,6 +20,7 @@ export function AppShell({ user, children }: AppShellProps) {
 
   useEffect(() => {
     setUser(user);
+    identifyUser(user.id);
   }, [user, setUser]);
 
   return (

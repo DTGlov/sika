@@ -222,7 +222,7 @@ export default function AccountsPage() {
                   {balancesLoading ? (
                     <Skeleton className="h-6 w-28 bg-muted" />
                   ) : (
-                    <p className="text-xl font-bold tabular-nums" style={{ color: cfg.color }}>
+                    <p className="text-xl font-bold tabular-nums sika-sensitive" style={{ color: cfg.color }}>
                       {formatGHS(balance)}
                     </p>
                   )}

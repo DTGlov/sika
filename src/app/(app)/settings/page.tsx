@@ -36,6 +36,7 @@ import { CardThemePicker } from "@/components/settings/card-theme-picker";
 import { AppearanceSection } from "@/components/settings/appearance-section";
 import { HapticsSection } from "@/components/settings/haptics-section";
 import { DangerZone } from "@/components/settings/danger-zone";
+import { resetAnalytics } from "@/lib/analytics/identify";
 import type { Category } from "@/types";
 
 const profileSchema = z
@@ -107,6 +108,7 @@ export default function SettingsPage() {
   }
 
   async function handleSignOut() {
+    resetAnalytics();
     await supabase.auth.signOut();
     reset();
     router.push("/login");

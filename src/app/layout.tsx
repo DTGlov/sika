@@ -6,6 +6,7 @@ import { PwaRegister } from '@/components/pwa-register';
 import { PwaSplash } from '@/components/pwa-splash';
 import { createClient } from '@/lib/supabase/server';
 import { ProgressBarProvider } from '@/components/progress-bar';
+import { PostHogProvider } from '@/lib/analytics/posthog-provider';
 import './globals.css';
 
 const geistSans = Geist({
@@ -80,11 +81,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           disableTransitionOnChange
           storageKey="sika-theme"
         >
-          <ProgressBarProvider />
-          <PwaSplash />
-          {children}
-          <Toaster richColors position="top-center" />
-          <PwaRegister />
+          <PostHogProvider>
+            <ProgressBarProvider />
+            <PwaSplash />
+            {children}
+            <Toaster richColors position="top-center" />
+            <PwaRegister />
+          </PostHogProvider>
         </ThemeProvider>
       </body>
     </html>
