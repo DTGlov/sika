@@ -2,9 +2,12 @@
 
 import posthog from 'posthog-js';
 
-export function identifyUser(userId: string) {
+export function identifyUser(
+  userId: string,
+  properties?: { name?: string; email?: string }
+) {
   if (typeof window === 'undefined') return;
-  posthog.identify(userId);
+  posthog.identify(userId, properties);
 }
 
 export function resetAnalytics() {

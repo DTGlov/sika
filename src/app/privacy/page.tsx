@@ -57,9 +57,10 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-foreground font-semibold text-base mb-2">5. Anonymous usage analytics</h2>
+            <h2 className="text-foreground font-semibold text-base mb-2">5. Usage analytics</h2>
             <p className="mb-2">Sika uses PostHog to understand how features are used — which screens get engagement, where users get stuck, and which actions flow naturally. This includes session replay, which records the structure of your interactions (which screens you visit, which buttons you tap) to help us debug issues and improve the app.</p>
-            <p>All financial data — transaction amounts, account balances, goal values, notes, and anything you type — is automatically masked and never captured in replays. We see navigation patterns, not your money. You can read PostHog&apos;s privacy policy at <a href="https://posthog.com/privacy" className="text-[#00D9A3] hover:text-[#00F5B8] transition-colors">posthog.com/privacy</a>.</p>
+            <p className="mb-2">When you sign up, your name and email are associated with your activity in our analytics. This is used internally to understand user experience and debug issues. We do not share this information with any party other than PostHog, our analytics provider.</p>
+            <p>All financial data — transaction amounts, account balances, goal values, notes, and anything you type — is automatically masked and never captured in session replays. We see your navigation patterns, not your money. You can read PostHog&apos;s privacy policy at <a href="https://posthog.com/privacy" className="text-[#00D9A3] hover:text-[#00F5B8] transition-colors">posthog.com/privacy</a>.</p>
           </section>
 
           <section>
