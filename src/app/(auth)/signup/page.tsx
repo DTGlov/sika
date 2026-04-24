@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { Loader2, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
+import { analytics } from '@/lib/analytics/identify';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -46,6 +47,7 @@ export default function SignupPage() {
       setServerError(error.message);
       return;
     }
+    analytics.signedUp();
     if (data.user && !data.session) {
       router.push('/dashboard');
       router.refresh();

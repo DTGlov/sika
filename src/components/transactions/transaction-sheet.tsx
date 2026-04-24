@@ -22,6 +22,7 @@ import { HintCard } from '@/components/hint-card';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { NextCycleModal } from '@/components/goals/next-cycle-modal';
 import { InsufficientBalanceSheet } from './insufficient-balance-sheet';
+import { analytics } from '@/lib/analytics/identify';
 import { fetchGoals, fetchGoalAmounts } from '@/lib/goals';
 import { updateLoggingStreak, loggingMilestoneMessage } from '@/lib/streaks';
 import { awardMomentum } from '@/lib/momentum';
@@ -263,6 +264,11 @@ export function TransactionSheet() {
       if (error) { hapticToast.error('Failed to save transaction'); return; }
       hapticMedium();
       addTransaction(data);
+      const cat = categories.find(c => c.id === categoryId);
+      analytics.transactionLogged({
+        type: txType,
+        bucket: cat?.bucket?.name as string | undefined,
+      });
 
       // Update logging streak for user-initiated transactions
       updateLoggingStreak(supabase, user.id).then(result => {

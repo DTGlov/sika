@@ -34,7 +34,7 @@ export function CardSurface({ themeId, cycleNet, userName, amountKey, mounted }:
         fontFamily: 'var(--font-geist-mono)',
         fontWeight: 700,
       }}
-      className="text-3xl md:text-4xl tabular-nums"
+      className="text-3xl md:text-4xl tabular-nums sika-sensitive"
     >
       {prefix}{formatGHS(Math.abs(cycleNet))}
     </span>

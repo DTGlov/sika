@@ -8,6 +8,7 @@ import { Loader2, Sparkles, ChevronRight, ChevronLeft, Check, X } from 'lucide-r
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
+import { analytics } from '@/lib/analytics/identify';
 import { CURRENCY_SYMBOL } from '@/lib/constants';
 import {
   calculateMonthlyEquivalent,
@@ -142,6 +143,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
     if (updatedProfile) setProfile(updatedProfile);
     setIncomeSources(sources);
+    analytics.onboardingCompleted({ stepsCompleted: 4 });
     setSaving(false);
     onClose();
   }
