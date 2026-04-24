@@ -47,8 +47,8 @@ export default function SignupPage() {
       return;
     }
     if (data.user && !data.session) {
-      toast.success('Account created — check your email');
-      router.push(`/verify-email?email=${encodeURIComponent(values.email)}`);
+      router.push('/dashboard');
+      router.refresh();
       return;
     }
     router.push('/dashboard');
@@ -132,7 +132,6 @@ export default function SignupPage() {
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create account'}
           </Button>
           <p className="text-center text-xs text-muted-foreground">
-            We&apos;ll send you a verification email.{' '}
             <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">
               Privacy policy
             </Link>

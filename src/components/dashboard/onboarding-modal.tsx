@@ -317,7 +317,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                           style={{ borderColor: '#00D9A3', backgroundColor: '#00D9A309' }}
                         >
                           <div className="flex-1 flex items-center gap-1 bg-input rounded-lg px-2.5 py-1.5">
-                            <span className="text-muted-foreground text-sm font-mono shrink-0">{CURRENCY_SYMBOL}</span>
+                            <span className="text-muted-foreground font-mono shrink-0" style={{ fontSize: 16 }}>{CURRENCY_SYMBOL}</span>
                             <input
                               type="number"
                               inputMode="decimal"
@@ -329,7 +329,8 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                                 if (e.key === 'Escape') handleChipCancel();
                               }}
                               placeholder="0.00"
-                              className="flex-1 bg-transparent text-foreground text-sm outline-none min-w-0"
+                              className="flex-1 bg-transparent text-foreground outline-none min-w-0"
+                              style={{ fontSize: 16 }}
                             />
                           </div>
                           <button
