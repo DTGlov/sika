@@ -27,15 +27,14 @@ export function DangerZone() {
     try {
       const res = await fetch('/api/profile/delete', { method: 'DELETE' });
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error ?? 'Something went wrong. Try again.');
+        setError('Could not delete account. Email dtglover21@gmail.com for help.');
         setLoading(false);
         return;
       }
       reset();
       router.push('/login');
     } catch {
-      setError('Something went wrong. Try again.');
+      setError('Could not delete account. Email dtglover21@gmail.com for help.');
       setLoading(false);
     }
   }

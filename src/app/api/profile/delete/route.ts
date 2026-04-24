@@ -10,15 +10,16 @@ export async function DELETE() {
   const svc = createServiceClient();
   const uid = user.id;
 
-  // Delete in FK-safe order: leaf tables first, then referenced tables
+  // Verified user-scoped tables (FK-safe order: dependents first)
+  // Do NOT include shared tables: badges, sika_daily_digests, sika_daily_sources
   const tables = [
     'transactions',
     'recurring_transactions',
     'purchase_decisions',
     'daily_insights',
     'monthly_recaps',
-    'weekly_recaps',
     'user_daily_reads',
+    'momentum_events',
     'user_badges',
     'streaks',
     'income_nudge_dismissals',
@@ -28,14 +29,26 @@ export async function DELETE() {
     'categories',
     'accounts',
     'budget_buckets',
-  ] as const;
+    'momentum',
+  ];
+
+  const tableErrors: string[] = [];
 
   for (const table of tables) {
-    const { error } = await svc.from(table).delete().eq('user_id', uid);
-    if (error && error.code !== 'PGRST116') {
-      console.error(`Delete failed for ${table}:`, error.message);
-      return NextResponse.json({ error: `Failed to delete ${table}` }, { status: 500 });
+    try {
+      const { error } = await svc.from(table).delete().eq('user_id', uid);
+      if (error) {
+        console.error(`Failed to delete ${table}:`, error.message);
+        tableErrors.push(table);
+      }
+    } catch (err) {
+      console.error(`Exception deleting ${table}:`, err);
+      tableErrors.push(table);
     }
+  }
+
+  if (tableErrors.length > 0) {
+    console.warn(`Non-fatal table errors during account deletion for ${uid}:`, tableErrors);
   }
 
   const { error: profileErr } = await svc.from('profiles').delete().eq('id', uid);
