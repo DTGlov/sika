@@ -40,11 +40,11 @@ export function CategoryGrid({ categories, selectedId, onSelect, transactionType
             'flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all',
             selectedId === cat.id
               ? 'border-[#00D9A3] bg-[#00D9A3]/10'
-              : 'border-[#27272A] bg-[#1C1C1F] hover:border-[#3F3F46]'
+              : 'border-border bg-muted hover:border-muted-foreground/30'
           )}
         >
           <span className="text-xl">{getIconEmoji(cat.icon)}</span>
-          <span className="text-xs text-[#A1A1AA] text-center leading-tight font-medium line-clamp-2">
+          <span className="text-xs text-muted-foreground text-center leading-tight font-medium line-clamp-2">
             {cat.name}
           </span>
         </button>
