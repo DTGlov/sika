@@ -16,12 +16,18 @@ interface AppShellProps {
 }
 
 export function AppShell({ user, children }: AppShellProps) {
-  const { setUser } = useAuthStore();
+  const { setUser, profile } = useAuthStore();
 
   useEffect(() => {
     setUser(user);
-    identifyUser(user.id);
   }, [user, setUser]);
+
+  useEffect(() => {
+    identifyUser(user.id, {
+      name: profile?.full_name ?? user.user_metadata?.full_name ?? undefined,
+      email: user.email ?? undefined,
+    });
+  }, [user, profile]);
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
