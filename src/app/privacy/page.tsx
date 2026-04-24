@@ -88,7 +88,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-foreground font-semibold text-base mb-2">10. Contact</h2>
-            <p>Questions about this policy or your data? Email us at <span className="text-foreground">hello@getsika.app</span>.</p>
+            <p>Questions about this policy or your data? Email us at <span className="text-foreground">dtglover21@gmail.com</span>.</p>
           </section>
         </div>
 
