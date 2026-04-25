@@ -48,7 +48,7 @@ async function getUserTheme(): Promise<'light' | 'dark'> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return 'dark';
+    if (!user) return 'light';
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -58,9 +58,9 @@ async function getUserTheme(): Promise<'light' | 'dark'> {
 
     const pref = profile?.theme_preference;
     if (pref === 'light' || pref === 'dark') return pref;
-    return 'dark';
+    return 'light';
   } catch {
-    return 'dark';
+    return 'light';
   }
 }
 
