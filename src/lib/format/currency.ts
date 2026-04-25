@@ -37,11 +37,14 @@ export function formatCurrency(
   options?: { compact?: boolean },
 ): string {
   const locale = CURRENCY_LOCALES[currencyCode] ?? "en-US";
+  // GHS renders as "GH₵" with narrowSymbol — use 'code' to get the clean "GHS" prefix instead
+  const currencyDisplay = currencyCode === "GHS" ? "code" : "narrowSymbol";
   try {
     if (options?.compact && Math.abs(amount) >= 1000) {
       return new Intl.NumberFormat(locale, {
         style: "currency",
         currency: currencyCode,
+        currencyDisplay,
         notation: "compact",
         maximumFractionDigits: 1,
       }).format(amount);
@@ -49,6 +52,7 @@ export function formatCurrency(
     return new Intl.NumberFormat(locale, {
       style: "currency",
       currency: currencyCode,
+      currencyDisplay,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
