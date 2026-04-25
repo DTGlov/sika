@@ -187,7 +187,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
                   onChange={e => setName(e.target.value)}
                   maxLength={80}
                   placeholder="e.g. Life Savings"
-                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors"
+                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
 
@@ -199,7 +199,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
                   onChange={e => setDescription(e.target.value)}
                   rows={2}
                   placeholder="Optional note about this goal"
-                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors resize-none"
+                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors resize-none"
                 />
               </div>
 
@@ -247,7 +247,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
                       value={targetAmount}
                       onChange={e => setTargetAmount(e.target.value)}
                       placeholder="0.00"
-                      className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors"
+                      className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors"
                     />
                   </div>
                   <div>
@@ -256,7 +256,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
                       type="date"
                       value={deadline}
                       onChange={e => setDeadline(e.target.value)}
-                      className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent transition-colors"
+                      className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-base text-foreground focus:outline-none focus:border-accent transition-colors"
                     />
                   </div>
                 </div>
@@ -268,7 +268,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
                 <select
                   value={fundingAccountId}
                   onChange={e => setFundingAccountId(e.target.value)}
-                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent transition-colors"
+                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-base text-foreground focus:outline-none focus:border-accent transition-colors"
                 >
                   <option value="">Select account</option>
                   {accounts.map(a => (

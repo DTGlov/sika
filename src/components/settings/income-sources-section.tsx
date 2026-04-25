@@ -255,7 +255,7 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
             <Label className="text-muted-foreground text-sm">Notes (optional)</Label>
             <textarea
               rows={2}
-              className="w-full rounded-xl h-16 px-3 py-2 text-sm bg-input border border-border text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+              className="w-full rounded-xl h-16 px-3 py-2 text-base bg-input border border-border text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-accent resize-none"
               placeholder="Any details…"
               {...register('notes')}
             />

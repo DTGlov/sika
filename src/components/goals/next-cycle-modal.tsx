@@ -122,7 +122,7 @@ export function NextCycleModal({ open, onClose, completedGoal }: NextCycleModalP
                     value={name}
                     onChange={e => setName(e.target.value)}
                     maxLength={80}
-                    className="w-full bg-input border border-border rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
+                    className="w-full bg-input border border-border rounded-xl px-3 py-2 text-base text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -134,7 +134,7 @@ export function NextCycleModal({ open, onClose, completedGoal }: NextCycleModalP
                       step="0.01"
                       value={targetAmount}
                       onChange={e => setTargetAmount(e.target.value)}
-                      className="w-full bg-input border border-border rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
+                      className="w-full bg-input border border-border rounded-xl px-3 py-2 text-base text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
                     />
                   </div>
                   <div>
@@ -143,7 +143,7 @@ export function NextCycleModal({ open, onClose, completedGoal }: NextCycleModalP
                       type="date"
                       value={deadline}
                       onChange={e => setDeadline(e.target.value)}
-                      className="w-full bg-input border border-border rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
+                      className="w-full bg-input border border-border rounded-xl px-3 py-2 text-base text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
                     />
                   </div>
                 </div>

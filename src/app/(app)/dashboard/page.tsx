@@ -523,7 +523,7 @@ function DashboardContent() {
         <HintCard
           hintId="dashboard_buckets_intro"
           title="How buckets work"
-          body="Your income is split 50/30/20 by default: Needs (must-haves like rent, food, transport), Wants (eating out, entertainment, gym), Future (savings, investments, emergency fund). Customize the split in Settings."
+          body="Your income is split 50/30/20 by default: Needs (must-haves like rent, food, transport), Wants (eating out, entertainment, gym), Savings (savings, investments, emergency fund). Customize the split in Settings."
           cta="Got it"
         />
         <BucketStrip />

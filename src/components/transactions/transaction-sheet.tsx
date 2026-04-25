@@ -802,7 +802,7 @@ export function TransactionSheet() {
                       <select
                         value={paidFromGoalId ?? ''}
                         onChange={e => { setPaidFromGoalId(e.target.value || null); setSfBalance(null); }}
-                        className="w-full bg-muted border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
+                        className="w-full bg-muted border border-border rounded-xl px-3 py-2.5 text-base text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
                       >
                         <option value="">— Not from a target</option>
                         {sinkingFundGoals.map(g => (
