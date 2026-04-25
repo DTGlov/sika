@@ -3,7 +3,8 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { useTransition, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Home, Receipt, Wallet, Target, RefreshCw, Settings, TrendingUp } from 'lucide-react';
+import { Home, Receipt, Wallet, Target, RefreshCw, Settings } from 'lucide-react';
+import { SikaMark } from '@/components/brand/sika-mark';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Home', icon: Home },
@@ -37,10 +38,10 @@ export function SideRail() {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-border shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-[#00D9A3] flex items-center justify-center shrink-0">
-          <TrendingUp className="w-4 h-4 text-[#0A0A0B]" aria-hidden />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+          <SikaMark size={32} variant="gold-on-navy" />
         </div>
-        <span className="text-[#00D9A3] font-bold text-xl hidden lg:block tracking-tight">
+        <span className="text-[#D4A017] font-bold text-xl hidden lg:block tracking-tight">
           Sika
         </span>
       </div>
@@ -63,14 +64,14 @@ export function SideRail() {
                 <>
                   <motion.div
                     layoutId="side-nav-bg"
-                    className="absolute inset-0 rounded-xl bg-[#00D9A3]/10"
+                    className="absolute inset-0 rounded-xl bg-[#D4A017]/10"
                     transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                   />
-                  <div className="absolute left-0 top-2.5 bottom-2.5 w-[3px] bg-[#00D9A3] rounded-r-full" />
+                  <div className="absolute left-0 top-2.5 bottom-2.5 w-[3px] bg-[#D4A017] rounded-r-full" />
                 </>
               )}
               <Icon
-                className={`w-5 h-5 shrink-0 relative z-10 transition-colors ${showActive ? 'text-[#00D9A3]' : 'text-muted-foreground'}`}
+                className={`w-5 h-5 shrink-0 relative z-10 transition-colors ${showActive ? 'text-[#D4A017]' : 'text-muted-foreground'}`}
                 aria-hidden
               />
               <span

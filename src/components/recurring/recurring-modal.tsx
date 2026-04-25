@@ -298,7 +298,7 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
                     className="h-9 rounded-lg text-xs font-medium transition-all"
                     style={{
                       backgroundColor: scheduleDay === i ? '#00D9A3' : 'var(--input)',
-                      color: scheduleDay === i ? '#0A0A0B' : 'var(--muted-foreground)',
+                      color: scheduleDay === i ? '#0E1A2E' : 'var(--muted-foreground)',
                     }}
                   >
                     {day[0]}
@@ -419,7 +419,7 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-11 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+            className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editItem ? 'Save changes' : 'Create'}
           </Button>

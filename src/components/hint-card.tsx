@@ -48,12 +48,12 @@ export function HintCard({ hintId, title, body, icon: Icon, variant = 'inline', 
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8, height: 0 }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
-        className={`bg-card border border-[#00D9A3]/30 rounded-2xl p-4 ${className ?? ''}`}
+        className={`bg-card border border-[#D4A017]/30 rounded-2xl p-4 ${className ?? ''}`}
       >
         <div className="flex items-start gap-3">
           {Icon && (
             <div className="shrink-0 mt-0.5">
-              <Icon className="w-4 h-4 text-[#00D9A3]" />
+              <Icon className="w-4 h-4 text-[#D4A017]" />
             </div>
           )}
           <div className="flex-1 min-w-0">
@@ -62,7 +62,7 @@ export function HintCard({ hintId, title, body, icon: Icon, variant = 'inline', 
             {cta && (
               <button
                 onClick={handleDismiss}
-                className="mt-3 h-7 px-3 rounded-lg bg-[#00D9A3] text-[#0A0A0B] text-xs font-semibold hover:bg-[#00B088] transition-colors"
+                className="mt-3 h-7 px-3 rounded-lg bg-[#D4A017] text-[#0E1A2E] text-xs font-semibold hover:bg-[#B8891A] transition-colors"
               >
                 {cta}
               </button>
@@ -118,7 +118,7 @@ export function BucketsTooltip({ className }: BucketsTooltipProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           showCloseButton
-          className="max-w-[calc(100vw-32px)] sm:max-w-md bg-background border-[#00D9A3]/30 shadow-[0_0_60px_rgba(0,217,163,0.25),0_0_20px_rgba(0,217,163,0.15)] p-6"
+          className="max-w-[calc(100vw-32px)] sm:max-w-md bg-background border-[#D4A017]/30 shadow-[0_0_60px_rgba(0,217,163,0.25),0_0_20px_rgba(0,217,163,0.15)] p-6"
         >
           <DialogTitle className="text-xl font-semibold text-foreground mb-4">
             Your buckets

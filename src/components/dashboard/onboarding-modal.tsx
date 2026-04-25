@@ -199,8 +199,8 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
             {step === 1 && (
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#00D9A3]/10 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-[#00D9A3]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#D4A017]/10 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-[#D4A017]" />
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-foreground">How do you earn?</h2>
@@ -212,7 +212,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                 </p>
                 <Button
                   onClick={() => setStep(2)}
-                  className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+                  className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
                 >
                   Add my income <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -286,7 +286,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
                   <Button
                     type="submit"
-                    className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+                    className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
                   >
                     Continue <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
@@ -338,7 +338,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                           <button
                             onClick={() => handleChipConfirm(t)}
                             disabled={!inputAmount || parseFloat(inputAmount) <= 0}
-                            className="w-8 h-8 rounded-lg bg-[#00D9A3] text-[#0A0A0B] flex items-center justify-center disabled:opacity-40 shrink-0 transition-opacity"
+                            className="w-8 h-8 rounded-lg bg-[#D4A017] text-[#0E1A2E] flex items-center justify-center disabled:opacity-40 shrink-0 transition-opacity"
                             aria-label="Confirm amount"
                           >
                             <Check className="w-4 h-4" />
@@ -367,7 +367,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                       >
                         <div className="flex items-start justify-between">
                           <p className="text-foreground text-xs font-medium leading-tight">{t.name}</p>
-                          {added && <Check className="w-3 h-3 text-[#00D9A3] shrink-0 ml-1" />}
+                          {added && <Check className="w-3 h-3 text-[#D4A017] shrink-0 ml-1" />}
                         </div>
                         <p className="text-muted-foreground text-xs mt-0.5">{FREQUENCY_LABELS[t.frequency]}</p>
                       </button>
@@ -393,7 +393,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
                 <Button
                   onClick={() => setStep(4)}
-                  className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+                  className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
                 >
                   {extraSources.length > 0 ? 'Continue' : 'Skip for now'} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -410,7 +410,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                   <ChevronLeft className="w-4 h-4" /> Back
                 </button>
                 <h2 className="text-lg font-bold text-foreground mb-1">Your monthly income</h2>
-                <div className="text-3xl font-bold text-[#00D9A3] mb-5">
+                <div className="text-3xl font-bold text-[#D4A017] mb-5">
                   {formatGHS(totalMonthly)}
                 </div>
 
@@ -454,7 +454,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                 <Button
                   onClick={handleFinish}
                   disabled={saving}
-                  className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+                  className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Looks good, let's start →"}
                 </Button>

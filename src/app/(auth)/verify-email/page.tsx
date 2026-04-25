@@ -4,7 +4,8 @@ import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { MailCheck, TrendingUp } from 'lucide-react';
+import { MailCheck } from 'lucide-react';
+import { SikaMark } from '@/components/brand/sika-mark';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -45,8 +46,8 @@ function VerifyEmailContent() {
     >
       <div className="mb-8 text-center">
         <div className="inline-flex items-center gap-2 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-[#00D9A3] flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-[#0A0A0B]" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+            <SikaMark size={40} variant="gold-on-navy" />
           </div>
           <span className="text-2xl font-bold tracking-tight">Sika</span>
         </div>
@@ -57,9 +58,9 @@ function VerifyEmailContent() {
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 280, damping: 22, delay: 0.1 }}
-          className="w-16 h-16 rounded-2xl bg-[#00D9A3]/10 border border-[#00D9A3]/20 flex items-center justify-center mx-auto mb-4"
+          className="w-16 h-16 rounded-2xl bg-[#D4A017]/10 border border-[#D4A017]/20 flex items-center justify-center mx-auto mb-4"
         >
-          <MailCheck className="w-8 h-8 text-[#00D9A3]" />
+          <MailCheck className="w-8 h-8 text-[#D4A017]" />
         </motion.div>
 
         <h1 className="text-xl font-bold text-foreground mb-2">Check your email</h1>
@@ -77,14 +78,14 @@ function VerifyEmailContent() {
         <Button
           onClick={handleResend}
           disabled={cooldown > 0 || !email}
-          className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend verification email'}
         </Button>
 
         <p className="mt-4 text-sm text-muted-foreground">
           Wrong email?{' '}
-          <Link href="/signup" className="text-[#00D9A3] hover:text-[#00F5B8] font-medium transition-colors">
+          <Link href="/signup" className="text-[#D4A017] hover:text-[#E8B520] font-medium transition-colors">
             Sign up again
           </Link>
         </p>
@@ -102,8 +103,8 @@ function VerifyEmailSkeleton() {
     <div className="w-full max-w-sm">
       <div className="mb-8 text-center">
         <div className="inline-flex items-center gap-2 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-[#00D9A3] flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-[#0A0A0B]" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+            <SikaMark size={40} variant="gold-on-navy" />
           </div>
           <span className="text-2xl font-bold tracking-tight">Sika</span>
         </div>

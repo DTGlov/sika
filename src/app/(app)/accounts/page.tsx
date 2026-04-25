@@ -113,7 +113,7 @@ export default function AccountsPage() {
         <h1 className="text-2xl font-bold text-foreground">Accounts</h1>
         <Button
           onClick={() => { setEditAccount(undefined); setModalOpen(true); }}
-          className="h-9 px-3 text-sm bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-medium rounded-xl gap-1.5"
+          className="h-9 px-3 text-sm bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-medium rounded-xl gap-1.5"
         >
           <Plus className="w-4 h-4" /> Add
         </Button>

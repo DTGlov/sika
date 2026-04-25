@@ -34,7 +34,7 @@ export function MomentumFloat({ points, id, onDone }: MomentumFloatProps) {
       initial={{ opacity: 0, y: 0, scale: 0.8 }}
       animate={{ opacity: [0, 1, 1, 0], y: -60, scale: 1 }}
       transition={{ duration: 1.6, ease: 'easeOut' }}
-      className="pointer-events-none fixed bottom-28 right-4 z-[200] flex items-center gap-1 rounded-full bg-[#00D9A3]/20 border border-[#00D9A3]/40 px-3 py-1 text-sm font-semibold text-[#00D9A3] shadow-lg"
+      className="pointer-events-none fixed bottom-28 right-4 z-[200] flex items-center gap-1 rounded-full bg-[#D4A017]/20 border border-[#D4A017]/40 px-3 py-1 text-sm font-semibold text-[#D4A017] shadow-lg"
     >
       +{points} pts
     </motion.div>
@@ -88,7 +88,7 @@ export function TierUpModal({ open, onClose, tier }: TierUpModalProps) {
         </p>
         <button
           onClick={onClose}
-          className="mt-6 w-full h-11 rounded-xl font-semibold text-sm text-[#0A0A0B] transition-colors hover:opacity-90"
+          className="mt-6 w-full h-11 rounded-xl font-semibold text-sm text-[#0E1A2E] transition-colors hover:opacity-90"
           style={{ background: tier.color }}
         >
           Let&apos;s go!

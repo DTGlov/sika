@@ -36,7 +36,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         style={{
           width: 1200,
           height: 630,
-          backgroundColor: '#0A0A0B',
+          backgroundColor: '#0E1A2E',
           display: 'flex',
           flexDirection: 'column',
           padding: 64,
@@ -70,7 +70,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#0A0A0B',
+                color: '#0E1A2E',
                 fontWeight: 800,
                 fontSize: 20,
               }}

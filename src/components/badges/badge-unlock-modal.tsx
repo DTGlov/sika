@@ -76,7 +76,7 @@ export function BadgeUnlockModal({ open, badgeId, onClose }: BadgeUnlockModalPro
         <button
           onClick={onClose}
           className="w-full h-11 rounded-xl font-semibold text-sm transition-colors hover:opacity-90"
-          style={{ background: config.frameColor, color: '#0A0A0B' }}
+          style={{ background: config.frameColor, color: '#0E1A2E' }}
         >
           Continue
         </button>

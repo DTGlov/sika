@@ -346,7 +346,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
                     type="button"
                     onClick={handleReconcileFromModal}
                     disabled={reconcileSaving || reconcileActual === '' || (parseFloat(reconcileActual) || 0) === currentBalance}
-                    className="w-full h-10 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl text-sm"
+                    className="w-full h-10 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl text-sm"
                   >
                     {reconcileSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create adjustment & close'}
                   </Button>
@@ -359,7 +359,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full h-11 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+              className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
             >
               {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editAccount ? 'Save changes' : 'Add account'}
             </Button>

@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Settings, TrendingUp } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { format } from 'date-fns';
 import { getGreeting } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth-store';
+import { SikaMark } from '@/components/brand/sika-mark';
 
 export function TopBar() {
   const { profile } = useAuthStore();
@@ -16,8 +17,8 @@ export function TopBar() {
       style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1.5rem)' }}
     >
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-[#00D9A3] flex items-center justify-center">
-          <TrendingUp className="w-4 h-4 text-[#0A0A0B]" />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+          <SikaMark size={32} variant="gold-on-navy" />
         </div>
         <div>
           <p className="text-sm text-muted-foreground">

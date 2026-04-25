@@ -19,7 +19,7 @@ export function GoalsWidget({ goals }: GoalsWidgetProps) {
     <div>
       <div className="flex items-center justify-between mb-2">
         <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Goals</p>
-        <Link href="/goals" className="text-[#00D9A3] text-xs hover:text-[#00F5B8] transition-colors">
+        <Link href="/goals" className="text-[#D4A017] text-xs hover:text-[#E8B520] transition-colors">
           See all
         </Link>
       </div>

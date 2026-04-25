@@ -202,9 +202,9 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
                     onClick={() => setValue('category_type', t)}
                     className="flex-1 h-9 rounded-xl text-xs font-medium border transition-all"
                     style={{
-                      borderColor: active ? '#00D9A3' : 'var(--border)',
-                      backgroundColor: active ? '#00D9A3' + '18' : 'var(--input)',
-                      color: active ? '#00D9A3' : 'var(--muted-foreground)',
+                      borderColor: active ? '#D4A017' : 'var(--border)',
+                      backgroundColor: active ? '#D4A017' + '18' : 'var(--input)',
+                      color: active ? '#D4A017' : 'var(--muted-foreground)',
                     }}
                   >
                     {TYPE_META[t].label}
@@ -257,8 +257,8 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
                     onClick={() => setValue('icon', active ? null : opt.key)}
                     className="h-9 w-9 rounded-xl text-lg flex items-center justify-center border transition-all"
                     style={{
-                      borderColor: active ? '#00D9A3' : 'var(--border)',
-                      backgroundColor: active ? '#00D9A3' + '18' : 'var(--input)',
+                      borderColor: active ? '#D4A017' : 'var(--border)',
+                      backgroundColor: active ? '#D4A017' + '18' : 'var(--input)',
                     }}
                   >
                     {opt.emoji}
@@ -271,7 +271,7 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-11 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+            className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editCategory ? 'Save changes' : 'Add category'}
           </Button>

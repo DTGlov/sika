@@ -20,7 +20,7 @@ export function StreakStrip({ streaks }: StreakStripProps) {
   return (
     <button
       onClick={() => router.push('/streaks')}
-      className="w-full text-left bg-[#141416] border border-[#27272A] rounded-2xl px-4 py-3 hover:border-[#3F3F46] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9A3]"
+      className="w-full text-left bg-[#141416] border border-[#27272A] rounded-2xl px-4 py-3 hover:border-[#3F3F46] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A017]"
     >
       <div className="flex items-center gap-3 flex-wrap">
         {/* Logging streak */}

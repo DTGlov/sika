@@ -81,8 +81,8 @@ export function InsufficientBalanceSheet({
             className="w-full flex items-center justify-between p-4 bg-[#1C1C1F] hover:bg-[#27272A] rounded-xl transition-colors text-left"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#00D9A3]/10 flex items-center justify-center shrink-0">
-                <Plus className="w-4 h-4 text-[#00D9A3]" />
+              <div className="w-8 h-8 rounded-lg bg-[#D4A017]/10 flex items-center justify-center shrink-0">
+                <Plus className="w-4 h-4 text-[#D4A017]" />
               </div>
               <div>
                 <p className="text-[#FAFAFA] text-sm font-medium">Top up {accountName}</p>

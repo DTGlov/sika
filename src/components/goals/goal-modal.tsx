@@ -296,7 +296,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full h-11 rounded-xl font-semibold text-sm text-[#0A0A0B] transition-colors disabled:opacity-50"
+                className="w-full h-11 rounded-xl font-semibold text-sm text-[#0E1A2E] transition-colors disabled:opacity-50"
                 style={{ background: color }}
               >
                 {saving ? 'Saving…' : goal ? 'Save Changes' : 'Create Goal'}

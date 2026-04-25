@@ -14,7 +14,7 @@ export function SikaDailyBanner({ digest }: SikaDailyBannerProps) {
   return (
     <button
       onClick={() => router.push('/daily')}
-      className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-card border border-[#00D9A3]/20 shadow-[0_0_20px_rgba(0,217,163,0.08)] hover:border-[#00D9A3]/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-card border border-[#D4A017]/20 shadow-[0_0_20px_rgba(0,217,163,0.08)] hover:border-[#D4A017]/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
     >
       <div className="flex items-center gap-3">
         <div className="text-xl">📰</div>

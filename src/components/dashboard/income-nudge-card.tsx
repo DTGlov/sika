@@ -21,7 +21,7 @@ export function IncomeNudgeCard({ nudge, onLog, onSnooze, onDismiss }: IncomeNud
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="bg-card border border-[#00D9A3]/30 rounded-2xl p-4"
+      className="bg-card border border-[#D4A017]/30 rounded-2xl p-4"
     >
       <div className="flex items-start gap-3">
         <span className="text-2xl shrink-0">💰</span>
@@ -36,7 +36,7 @@ export function IncomeNudgeCard({ nudge, onLog, onSnooze, onDismiss }: IncomeNud
           <div className="flex items-center gap-2 mt-3">
             <button
               onClick={() => onLog(nudge)}
-              className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-[#00D9A3] text-[#0A0A0B] text-xs font-semibold hover:bg-[#00B088] transition-colors"
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-[#D4A017] text-[#0E1A2E] text-xs font-semibold hover:bg-[#B8891A] transition-colors"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
               Yes, log it
@@ -89,7 +89,7 @@ export function PendingRecurringCard({ name, amount, dueDate, onConfirm, onSkip 
           <div className="flex items-center gap-2 mt-3">
             <button
               onClick={onConfirm}
-              className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-[#FBBF24] text-[#0A0A0B] text-xs font-semibold hover:bg-[#F59E0B] transition-colors"
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-[#FBBF24] text-[#0E1A2E] text-xs font-semibold hover:bg-[#F59E0B] transition-colors"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
               Log it

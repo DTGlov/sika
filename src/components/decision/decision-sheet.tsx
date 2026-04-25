@@ -216,7 +216,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
             <Button
               onClick={handleAsk}
               disabled={!canSubmit}
-              className="w-full h-13 bg-[#00D9A3] hover:bg-[#00B088] disabled:opacity-40 text-[#0A0A0B] font-semibold text-base rounded-xl"
+              className="w-full h-13 bg-[#D4A017] hover:bg-[#B8891A] disabled:opacity-40 text-[#0E1A2E] font-semibold text-base rounded-xl"
             >
               Let Sika decide
             </Button>
@@ -226,7 +226,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
         {/* LOADING PHASE */}
         {phase === 'loading' && (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <Loader2 className="w-8 h-8 text-[#00D9A3] animate-spin" />
+            <Loader2 className="w-8 h-8 text-[#D4A017] animate-spin" />
             <p className="text-muted-foreground text-sm">Sika is thinking...</p>
           </div>
         )}
@@ -309,7 +309,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
               </Button>
               <Button
                 onClick={() => handleOutcome('bought')}
-                className="flex-1 h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+                className="flex-1 h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
               >
                 I bought it
               </Button>

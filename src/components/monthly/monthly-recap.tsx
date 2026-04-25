@@ -13,7 +13,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const ACCENT_CLASS: Record<MonthlyAccent, string> = {
-  green: 'text-[#00D9A3]',
+  green: 'text-[#D4A017]',
   amber: 'text-[#FBBF24]',
   red: 'text-[#F43F5E]',
   blue: 'text-[#60A5FA]',
@@ -21,7 +21,7 @@ const ACCENT_CLASS: Record<MonthlyAccent, string> = {
 };
 
 const ACCENT_BG: Record<MonthlyAccent, string> = {
-  green: 'bg-[#00D9A3]/10 border-[#00D9A3]/20',
+  green: 'bg-[#D4A017]/10 border-[#D4A017]/20',
   amber: 'bg-[#FBBF24]/10 border-[#FBBF24]/20',
   red: 'bg-[#F43F5E]/10 border-[#F43F5E]/20',
   blue: 'bg-[#60A5FA]/10 border-[#60A5FA]/20',
@@ -166,7 +166,7 @@ export function MonthlyRecap({ cards, recapId, monthStart, monthEnd }: MonthlyRe
       >
         <button
           onClick={handleShare}
-          className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-card border border-border text-muted-foreground hover:border-[#00D9A3]/40 hover:text-[#00D9A3] transition-colors text-sm font-medium"
+          className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-card border border-border text-muted-foreground hover:border-[#D4A017]/40 hover:text-[#D4A017] transition-colors text-sm font-medium"
         >
           <Share2 className="w-4 h-4" />
           {shared ? 'Shared ✓' : 'Share my month'}

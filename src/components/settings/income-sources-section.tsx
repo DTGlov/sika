@@ -282,7 +282,7 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-11 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+            className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editSource ? 'Save changes' : 'Add source'}
           </Button>
@@ -329,12 +329,12 @@ export function IncomeSourcesSection() {
       <div className="bg-card border border-border rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Wallet className="w-4 h-4 text-[#00D9A3]" />
+            <Wallet className="w-4 h-4 text-[#D4A017]" />
             <h2 className="text-foreground font-semibold">Income Sources</h2>
           </div>
           <Button
             onClick={() => openAdd()}
-            className="h-8 px-3 text-xs bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-medium rounded-lg gap-1"
+            className="h-8 px-3 text-xs bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-medium rounded-lg gap-1"
           >
             <Plus className="w-3.5 h-3.5" /> Add source
           </Button>
@@ -351,7 +351,7 @@ export function IncomeSourcesSection() {
                     setEditSource(undefined);
                     setModalOpen(true);
                   }}
-                  className="text-left p-3 rounded-xl border border-border hover:border-[#00D9A3]/50 bg-muted hover:bg-muted transition-colors"
+                  className="text-left p-3 rounded-xl border border-border hover:border-[#D4A017]/50 bg-muted hover:bg-muted transition-colors"
                   title={`${formatGHS(t.amount)} · ${FREQUENCY_LABELS[t.frequency]}`}
                 >
                   <p className="text-foreground text-xs font-medium leading-tight">{t.name}</p>
