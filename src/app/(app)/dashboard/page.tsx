@@ -23,6 +23,7 @@ import { InsightStrip } from '@/components/dashboard/insight-strip';
 import { ShouldIBuyButton } from '@/components/decision/should-i-buy-button';
 import { SundayRecapCard } from '@/components/dashboard/sunday-recap-card';
 import { CycleCard } from '@/components/dashboard/cycle-card';
+import { BucketStrip } from '@/components/dashboard/bucket-strip';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth-store';
@@ -525,6 +526,9 @@ function DashboardContent() {
 
         {/* Goals widget */}
         {goalProgresses.length > 0 && <GoalsWidget goals={goalProgresses} />}
+
+        {/* Bucket strip — visible on all sizes, links to /buckets detail page */}
+        <BucketStrip />
 
         {/* Weekly chart */}
         {loading ? (
