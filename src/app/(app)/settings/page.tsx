@@ -66,7 +66,7 @@ function getIconEmoji(icon: string | null): string {
 export default function SettingsPage() {
   const router = useRouter();
   const { user, profile, incomeSources, reset } = useAuthStore();
-  const { format, symbol } = useCurrency();
+  const { format } = useCurrency();
   const { setCategories, categories, bumpMutation } = useTransactionStore();
   const { refetch } = useProfile();
   const supabase = createClient();
@@ -259,14 +259,8 @@ export default function SettingsPage() {
               Computed from your active income sources above
             </p>
             <div className="h-12 px-4 bg-muted border border-border rounded-xl flex items-center">
-              <span className="text-muted-foreground font-mono mr-2">{symbol}</span>
               <span className="text-foreground font-semibold text-base">
-                {totalIncome > 0
-                  ? totalIncome.toLocaleString("en-GH", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })
-                  : "—"}
+                {totalIncome > 0 ? format(totalIncome) : "—"}
               </span>
             </div>
           </div>
