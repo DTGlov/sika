@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Green rounded square background — matches splash icon box #00D9A3 -->
+  <rect width="512" height="512" rx="112" ry="112" fill="#00D9A3" />
+
+  <!-- TrendingUp (lucide), near-black #0A0A0B, centered — matches splash exactly -->
+  <!-- Original lucide viewBox is 0 0 24 24; we scale to ~272px and center in 512 -->
+  <g transform="translate(120, 120) scale(11.33)" stroke="#0A0A0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+    <polyline points="16 7 22 7 22 13" />
+  </g>
+</svg>
