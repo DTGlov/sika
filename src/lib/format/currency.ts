@@ -40,22 +40,26 @@ export function formatCurrency(
   // GHS renders as "GH₵" with narrowSymbol — use 'code' to get the clean "GHS" prefix instead
   const currencyDisplay = currencyCode === "GHS" ? "code" : "narrowSymbol";
   try {
+    let formatted: string;
     if (options?.compact && Math.abs(amount) >= 1000) {
-      return new Intl.NumberFormat(locale, {
+      formatted = new Intl.NumberFormat(locale, {
         style: "currency",
         currency: currencyCode,
         currencyDisplay,
         notation: "compact",
         maximumFractionDigits: 1,
       }).format(amount);
+    } else {
+      formatted = new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: currencyCode,
+        currencyDisplay,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(amount);
     }
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: currencyCode,
-      currencyDisplay,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
+    // Intl emits U+00A0 (non-breaking space) between code and number — normalize to regular space
+    return formatted.replace(/\u00A0/g, " ");
   } catch {
     return `${currencyCode} ${amount.toFixed(2)}`;
   }
