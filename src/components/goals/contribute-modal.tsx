@@ -175,7 +175,7 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
                 <select
                   value={fromAccountId}
                   onChange={e => setFromAccountId(e.target.value)}
-                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent transition-colors"
+                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-base text-foreground focus:outline-none focus:border-accent transition-colors"
                 >
                   <option value="">Select account</option>
                   {sourceAccounts.map(a => (
@@ -194,7 +194,7 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
                   placeholder="0.00"
-                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors"
+                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
 
@@ -205,7 +205,7 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
                   type="date"
                   value={transactionDate}
                   onChange={e => setTransactionDate(e.target.value)}
-                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent transition-colors"
+                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-base text-foreground focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
 
@@ -216,7 +216,7 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
                   value={note}
                   onChange={e => setNote(e.target.value)}
                   placeholder={`Contribution to ${goal.name}`}
-                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors"
+                  className="w-full bg-input border border-border rounded-xl px-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
 

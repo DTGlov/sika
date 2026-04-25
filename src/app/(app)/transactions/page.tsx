@@ -394,7 +394,7 @@ function TransactionsContent() {
                     type="number" min="0" step="0.01" placeholder="Min"
                     value={urlAmountMin}
                     onChange={e => updateParam('amtMin', e.target.value)}
-                    className="pl-6 h-9 bg-input border-border text-foreground text-sm focus-visible:ring-accent"
+                    className="pl-6 h-9 bg-input border-border text-foreground text-base focus-visible:ring-accent"
                   />
                 </div>
                 <span className="text-muted-foreground/60 text-xs">–</span>
@@ -404,7 +404,7 @@ function TransactionsContent() {
                     type="number" min="0" step="0.01" placeholder="Max"
                     value={urlAmountMax}
                     onChange={e => updateParam('amtMax', e.target.value)}
-                    className="pl-6 h-9 bg-input border-border text-foreground text-sm focus-visible:ring-accent"
+                    className="pl-6 h-9 bg-input border-border text-foreground text-base focus-visible:ring-accent"
                   />
                 </div>
               </div>
