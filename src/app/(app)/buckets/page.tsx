@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { useAuthStore } from '@/stores/auth-store';
-import { useDashboardData } from '@/hooks/use-dashboard-data';
 import { useProfile } from '@/hooks/use-profile';
 import { getCycleForDate } from '@/lib/cycle';
 import { createClient } from '@/lib/supabase/client';
@@ -13,7 +12,25 @@ import { formatGHS } from '@/lib/utils';
 import { BUCKET_CONFIG } from '@/lib/constants';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 import type { BudgetBucket, BucketName } from '@/types';
+
+interface RawCategory {
+  id: string;
+  name: string;
+  icon: string | null;
+  bucket_id: string | null;
+  is_archived: boolean;
+}
+
+interface RawTransaction {
+  id: string;
+  amount: number;
+  type: string;
+  category_id: string | null;
+  transaction_date: string;
+  note: string | null;
+}
 
 const ICON_MAP: Record<string, string> = {
   home: '🏠', 'shopping-cart': '🛒', zap: '⚡', droplet: '💧', wifi: '📶',
@@ -36,60 +53,74 @@ export default function BucketsPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const profile = useAuthStore((s) => s.profile);
-
   useProfile();
-  const cycleStartDay = profile?.cycle_start_day ?? 1;
-  const cycle = getCycleForDate(new Date(), cycleStartDay);
-  const { loading } = useDashboardData(cycle.startDateStr);
 
   const dashboardStats = useTransactionStore((s) => s.dashboardStats);
-  const transactions = useTransactionStore((s) => s.transactions);
-  const categories = useTransactionStore((s) => s.categories);
 
-  // Budget buckets — not in global store, fetch directly
+  const cycleStartDay = profile?.cycle_start_day ?? 1;
+  const cycle = getCycleForDate(new Date(), cycleStartDay);
+
+  // All data fetched directly — the transaction store's `transactions` array
+  // only holds session-added transactions, not the full cycle history.
   const [buckets, setBuckets] = useState<BudgetBucket[]>([]);
+  const [categories, setCategories] = useState<RawCategory[]>([]);
+  const [transactions, setTransactions] = useState<RawTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>('');
 
   useEffect(() => {
     if (!user) return;
     const supabase = createClient();
-    supabase
-      .from('budget_buckets')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('sort_order')
-      .then(({ data }) => {
-        if (!data || data.length === 0) return;
-        setBuckets(data as BudgetBucket[]);
-        const needs = data.find((b) => b.name === 'needs');
-        setActiveTab(needs?.id ?? data[0].id);
-      });
+    const cycleStart = format(cycle.start, 'yyyy-MM-dd');
+    const cycleEnd = format(cycle.end, 'yyyy-MM-dd');
+
+    Promise.all([
+      supabase
+        .from('budget_buckets')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('sort_order'),
+      supabase
+        .from('categories')
+        .select('id, name, icon, bucket_id, is_archived')
+        .or(`user_id.eq.${user.id},user_id.is.null`)
+        .eq('is_archived', false),
+      supabase
+        .from('transactions')
+        .select('id, amount, type, category_id, transaction_date, note')
+        .eq('user_id', user.id)
+        .gte('transaction_date', cycleStart)
+        .lte('transaction_date', cycleEnd)
+        .eq('type', 'expense')
+        .order('transaction_date', { ascending: false }),
+    ]).then(([{ data: bkts }, { data: cats }, { data: txns }]) => {
+      if (bkts && bkts.length > 0) {
+        setBuckets(bkts as BudgetBucket[]);
+        const needs = bkts.find((b) => b.name === 'needs');
+        setActiveTab(needs?.id ?? bkts[0].id);
+      }
+      if (cats) setCategories(cats as RawCategory[]);
+      if (txns) setTransactions(txns as RawTransaction[]);
+      setLoading(false);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Set of category IDs that belong to the active bucket
+  // Set of category IDs belonging to the active bucket
   const bucketCategoryIds = useMemo(() => {
     if (!activeTab) return new Set<string>();
     return new Set(
       categories
-        .filter((c) => c.bucket_id === activeTab && !c.is_archived)
+        .filter((c) => c.bucket_id === activeTab)
         .map((c) => c.id)
     );
   }, [categories, activeTab]);
 
-  // Transactions filtered by bucket membership via category_id
+  // Transactions for the active bucket, sorted newest-first
   const bucketTransactions = useMemo(() => {
-    if (!activeTab) return [];
+    if (!activeTab || bucketCategoryIds.size === 0) return [];
     return transactions
-      .filter(
-        (t) =>
-          t.type === 'expense' &&
-          t.category_id != null &&
-          bucketCategoryIds.has(t.category_id)
-      )
-      .sort(
-        (a, b) =>
-          new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime()
-      )
+      .filter((t) => t.category_id != null && bucketCategoryIds.has(t.category_id))
       .slice(0, 20);
   }, [transactions, bucketCategoryIds, activeTab]);
 
@@ -100,8 +131,6 @@ export default function BucketsPage() {
   const limit = activeBucketName ? (dashboardStats?.bucketLimits[activeBucketName] ?? 0) : 0;
   const pct = limit > 0 ? Math.min(100, (spent / limit) * 100) : 0;
   const remaining = Math.max(0, limit - spent);
-
-  const bucketsLoading = loading || buckets.length === 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -121,7 +150,7 @@ export default function BucketsPage() {
         </p>
 
         {/* Tab row */}
-        {bucketsLoading ? (
+        {loading ? (
           <div className="flex gap-2 mb-7 border-b border-border pb-1">
             {[1, 2, 3].map((i) => (
               <Skeleton key={i} className="flex-1 h-10 rounded-lg bg-muted" />
@@ -147,7 +176,7 @@ export default function BucketsPage() {
         )}
 
         {/* Active bucket header */}
-        {bucketsLoading || !dashboardStats ? (
+        {loading || !dashboardStats ? (
           <div className="mb-7 space-y-3">
             <Skeleton className="h-10 w-48 rounded-xl bg-muted" />
             <Skeleton className="h-1.5 rounded-full bg-muted" />
@@ -179,7 +208,7 @@ export default function BucketsPage() {
           Recent in {config.label}
         </p>
 
-        {loading && transactions.length === 0 ? (
+        {loading ? (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-14 rounded-xl bg-card" />

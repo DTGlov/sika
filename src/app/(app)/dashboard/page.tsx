@@ -422,14 +422,6 @@ function DashboardContent() {
 
         {/* Buckets — desktop only */}
         <div className="hidden md:block space-y-4">
-          {/* Buckets intro — shown once until dismissed */}
-          <HintCard
-            hintId="dashboard_buckets_intro"
-            title="How buckets work"
-            body="Your income is split 50/30/20 by default: Needs (must-haves like rent, food, transport), Wants (eating out, entertainment, gym), Future (savings, investments, emergency fund). Customize the split in Settings."
-            cta="Got it"
-          />
-
           {/* Bucket rings */}
           <div>
           <div className="flex items-center justify-between mb-2">
@@ -528,6 +520,12 @@ function DashboardContent() {
         {goalProgresses.length > 0 && <GoalsWidget goals={goalProgresses} />}
 
         {/* Bucket strip — visible on all sizes, links to /buckets detail page */}
+        <HintCard
+          hintId="dashboard_buckets_intro"
+          title="How buckets work"
+          body="Your income is split 50/30/20 by default: Needs (must-haves like rent, food, transport), Wants (eating out, entertainment, gym), Future (savings, investments, emergency fund). Customize the split in Settings."
+          cta="Got it"
+        />
         <BucketStrip />
 
         {/* Weekly chart */}
