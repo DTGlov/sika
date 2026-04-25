@@ -35,7 +35,7 @@ export function AmountKeypad({ value, onChange, type, onTypeChange }: AmountKeyp
           <span
             className={cn(
               'amount text-5xl font-bold tracking-tight',
-              type === 'income' ? 'text-[#00D9A3]' : 'text-foreground'
+              type === 'income' ? 'text-[#D4A017]' : 'text-foreground'
             )}
           >
             {value || '0'}
@@ -51,7 +51,7 @@ export function AmountKeypad({ value, onChange, type, onTypeChange }: AmountKeyp
             className={cn(
               'px-3 py-1 rounded-full text-xs font-medium capitalize transition-colors',
               type === t
-                ? 'bg-[#00D9A3] text-[#0A0A0B]'
+                ? 'bg-[#D4A017] text-[#0E1A2E]'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             )}
           >

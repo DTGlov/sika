@@ -148,7 +148,7 @@ export default function MomentumPage() {
             {(Object.entries(MOMENTUM_AMOUNTS) as [string, number][]).map(([key, pts]) => (
               <div key={key} className="flex items-center justify-between px-4 py-3">
                 <p className="text-sm text-muted-foreground">{EVENT_LABELS[key] ?? key}</p>
-                <span className="text-sm font-semibold text-[#00D9A3] tabular-nums">+{pts}</span>
+                <span className="text-sm font-semibold text-[#D4A017] tabular-nums">+{pts}</span>
               </div>
             ))}
           </div>
@@ -167,7 +167,7 @@ export default function MomentumPage() {
                       {formatDistanceToNow(new Date(e.created_at), { addSuffix: true })}
                     </p>
                   </div>
-                  <span className="text-sm font-semibold text-[#00D9A3] tabular-nums ml-3">+{e.points}</span>
+                  <span className="text-sm font-semibold text-[#D4A017] tabular-nums ml-3">+{e.points}</span>
                 </div>
               ))}
             </div>

@@ -40,7 +40,7 @@ export function IncomeCategoryPicker({
               className={cn(
                 'flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all',
                 isSelected
-                  ? 'border-[#00D9A3] bg-[#00D9A3]/10'
+                  ? 'border-[#D4A017] bg-[#D4A017]/10'
                   : 'border-border bg-muted hover:border-muted-foreground/30'
               )}
             >
@@ -60,7 +60,7 @@ export function IncomeCategoryPicker({
         className={cn(
           'w-full flex items-center gap-2 p-3 rounded-xl border transition-all text-left',
           isOtherSelected
-            ? 'border-[#00D9A3] bg-[#00D9A3]/10'
+            ? 'border-[#D4A017] bg-[#D4A017]/10'
             : 'border-border bg-muted hover:border-muted-foreground/30'
         )}
       >

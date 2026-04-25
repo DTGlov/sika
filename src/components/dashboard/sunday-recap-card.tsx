@@ -86,7 +86,7 @@ export function SundayRecapCard() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
-      className="bg-card border border-[#00D9A3]/20 rounded-2xl p-4"
+      className="bg-card border border-[#D4A017]/20 rounded-2xl p-4"
     >
       <div className="flex items-start justify-between mb-3">
         <p className="text-foreground text-sm font-semibold">📊 Your week in money</p>

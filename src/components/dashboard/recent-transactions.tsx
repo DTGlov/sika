@@ -22,7 +22,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
         <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Recent</p>
         <Link
           href="/transactions"
-          className="flex items-center gap-1 text-[#00D9A3] text-xs font-medium hover:text-[#00F5B8] transition-colors"
+          className="flex items-center gap-1 text-[#D4A017] text-xs font-medium hover:text-[#E8B520] transition-colors"
         >
           View all <ArrowRight className="w-3 h-3" />
         </Link>
@@ -58,7 +58,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                   <p className="text-muted-foreground text-xs">{formatTransactionDate(txn.transaction_date)}</p>
                 </div>
               </div>
-              <p className={`amount text-sm font-semibold ${txn.type === 'income' ? 'text-[#00D9A3]' : 'text-foreground'}`}>
+              <p className={`amount text-sm font-semibold ${txn.type === 'income' ? 'text-[#D4A017]' : 'text-foreground'}`}>
                 {txn.type === 'income' ? '+' : '-'}{formatGHS(txn.amount)}
               </p>
             </div>

@@ -90,7 +90,7 @@ export function NextCycleModal({ open, onClose, completedGoal }: NextCycleModalP
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">{completedGoal.icon ?? '🎯'}</span>
                   <div>
-                    <p className="text-xs text-[#00D9A3] font-medium uppercase tracking-wider">
+                    <p className="text-xs text-[#D4A017] font-medium uppercase tracking-wider">
                       Goal completed!
                     </p>
                     <h2 className="text-foreground font-bold text-base leading-tight">
@@ -122,7 +122,7 @@ export function NextCycleModal({ open, onClose, completedGoal }: NextCycleModalP
                     value={name}
                     onChange={e => setName(e.target.value)}
                     maxLength={80}
-                    className="w-full bg-input border border-border rounded-xl px-3 py-2 text-base text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
+                    className="w-full bg-input border border-border rounded-xl px-3 py-2 text-base text-foreground focus:outline-none focus:border-[#D4A017] transition-colors"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -134,7 +134,7 @@ export function NextCycleModal({ open, onClose, completedGoal }: NextCycleModalP
                       step="0.01"
                       value={targetAmount}
                       onChange={e => setTargetAmount(e.target.value)}
-                      className="w-full bg-input border border-border rounded-xl px-3 py-2 text-base text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
+                      className="w-full bg-input border border-border rounded-xl px-3 py-2 text-base text-foreground focus:outline-none focus:border-[#D4A017] transition-colors"
                     />
                   </div>
                   <div>
@@ -143,7 +143,7 @@ export function NextCycleModal({ open, onClose, completedGoal }: NextCycleModalP
                       type="date"
                       value={deadline}
                       onChange={e => setDeadline(e.target.value)}
-                      className="w-full bg-input border border-border rounded-xl px-3 py-2 text-base text-foreground focus:outline-none focus:border-[#00D9A3] transition-colors"
+                      className="w-full bg-input border border-border rounded-xl px-3 py-2 text-base text-foreground focus:outline-none focus:border-[#D4A017] transition-colors"
                     />
                   </div>
                 </div>
@@ -172,7 +172,7 @@ export function NextCycleModal({ open, onClose, completedGoal }: NextCycleModalP
                 <button
                   onClick={handleConfirm}
                   disabled={saving}
-                  className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#0A0A0B] transition-colors disabled:opacity-50"
+                  className="flex-1 h-10 rounded-xl font-semibold text-sm text-[#0E1A2E] transition-colors disabled:opacity-50"
                   style={{ background: accentColor }}
                 >
                   {saving ? 'Creating…' : 'Start next cycle'}

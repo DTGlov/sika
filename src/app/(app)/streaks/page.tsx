@@ -86,7 +86,7 @@ export default function StreaksPage() {
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground">Last logged</span>
-              <span className={loggedToday ? 'text-[#00D9A3]' : 'text-foreground'}>{lastLoggedLabel}</span>
+              <span className={loggedToday ? 'text-[#D4A017]' : 'text-foreground'}>{lastLoggedLabel}</span>
             </div>
             {loggingMilestone && streaks && (
               <div className="flex justify-between text-xs">
@@ -108,8 +108,8 @@ export default function StreaksPage() {
           className="bg-card border border-border rounded-2xl p-5"
         >
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-[#00D9A3]/10 flex items-center justify-center">
-              <Coins className="w-4 h-4 text-[#00D9A3]" />
+            <div className="w-8 h-8 rounded-lg bg-[#D4A017]/10 flex items-center justify-center">
+              <Coins className="w-4 h-4 text-[#D4A017]" />
             </div>
             <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Saving</p>
           </div>
@@ -128,7 +128,7 @@ export default function StreaksPage() {
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground">Last contributed</span>
-              <span className={savedThisWeek ? 'text-[#00D9A3]' : 'text-foreground'}>{lastSavedLabel}</span>
+              <span className={savedThisWeek ? 'text-[#D4A017]' : 'text-foreground'}>{lastSavedLabel}</span>
             </div>
             {savingsMilestone && streaks && (
               <div className="flex justify-between text-xs">

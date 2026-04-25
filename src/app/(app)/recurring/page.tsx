@@ -303,7 +303,7 @@ function RecurringContent() {
               setDefaultModalValues(tab !== 'paused' ? { type: tab } : {});
               setModalOpen(true);
             }}
-            className="h-9 px-3 text-sm bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-medium rounded-xl gap-1.5"
+            className="h-9 px-3 text-sm bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-medium rounded-xl gap-1.5"
           >
             <Plus className="w-4 h-4" /> Add
           </Button>
@@ -424,7 +424,7 @@ function EmptyState({ tab, onAdd }: { tab: TabValue; onAdd: () => void }) {
       </p>
       <Button
         onClick={onAdd}
-        className="h-9 px-4 text-sm bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+        className="h-9 px-4 text-sm bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
       >
         <Plus className="w-4 h-4 mr-1.5" />
         Add {isExpense ? 'expense' : 'income'}

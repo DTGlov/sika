@@ -13,8 +13,8 @@ export function ShouldIBuyButton() {
         onClick={() => setOpen(true)}
         className="w-full bg-card border border-border rounded-2xl px-4 py-3 flex items-center gap-3 hover:bg-muted hover:border-border transition-colors text-left"
       >
-        <div className="w-9 h-9 rounded-xl bg-[#00D9A3]/10 flex items-center justify-center shrink-0">
-          <ShoppingBag className="w-4 h-4 text-[#00D9A3]" />
+        <div className="w-9 h-9 rounded-xl bg-[#D4A017]/10 flex items-center justify-center shrink-0">
+          <ShoppingBag className="w-4 h-4 text-[#D4A017]" />
         </div>
         <div className="flex-1">
           <p className="text-foreground text-sm font-semibold">Should I buy it?</p>

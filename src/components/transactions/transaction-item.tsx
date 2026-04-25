@@ -93,7 +93,7 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
                   </span>
                 )}
                 {txn.paid_from_goal_id && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#00D9A318] text-[#00D9A3] font-medium">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#00D9A318] text-[#D4A017] font-medium">
                     🎯 From fund
                   </span>
                 )}
@@ -105,9 +105,9 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
 
           <div className="flex items-center gap-2">
             <p className={`amount text-sm font-semibold ${
-              txn.type === 'income' ? 'text-[#00D9A3]' :
+              txn.type === 'income' ? 'text-[#D4A017]' :
               txn.type === 'transfer' ? 'text-muted-foreground' :
-              txn.type === 'adjustment' ? (txn.amount >= 0 ? 'text-[#00D9A3]' : 'text-[#F43F5E]') :
+              txn.type === 'adjustment' ? (txn.amount >= 0 ? 'text-[#D4A017]' : 'text-[#F43F5E]') :
               'text-foreground'
             }`}>
               {txn.type === 'income' ? '+' :

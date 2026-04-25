@@ -111,7 +111,7 @@ export const CYCLE_CARD_THEMES: Record<CycleCardTheme, ThemeConfig> = {
     id: 'obsidian',
     name: 'Obsidian',
     palette: {
-      background: '#0A0A0B',
+      background: '#0E1A2E',
       motif: '#C87533',
       chipPrimary: '#B88050',
       chipSecondary: '#8F5F3A',

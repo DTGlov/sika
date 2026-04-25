@@ -80,7 +80,7 @@ export default function GoalsPage() {
           </div>
           <button
             onClick={openCreate}
-            className="h-9 px-3 rounded-xl bg-[#00D9A3] text-[#0A0A0B] text-sm font-semibold flex items-center gap-1.5 hover:bg-[#00B088] transition-colors"
+            className="h-9 px-3 rounded-xl bg-[#D4A017] text-[#0E1A2E] text-sm font-semibold flex items-center gap-1.5 hover:bg-[#B8891A] transition-colors"
           >
             <Plus className="w-4 h-4" />
             New Goal
@@ -282,7 +282,7 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, on
             </span>
             <div className="flex items-center gap-2">
               {is_on_track != null && !completed && (
-                <span className={is_on_track ? 'text-[#00D9A3]' : 'text-[#F97316]'}>
+                <span className={is_on_track ? 'text-[#D4A017]' : 'text-[#F97316]'}>
                   {is_on_track ? '↑ On track' : '↓ Behind'}
                 </span>
               )}

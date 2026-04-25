@@ -39,7 +39,7 @@ export function CategoryGrid({ categories, selectedId, onSelect, transactionType
           className={cn(
             'flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all',
             selectedId === cat.id
-              ? 'border-[#00D9A3] bg-[#00D9A3]/10'
+              ? 'border-[#D4A017] bg-[#D4A017]/10'
               : 'border-border bg-muted hover:border-muted-foreground/30'
           )}
         >

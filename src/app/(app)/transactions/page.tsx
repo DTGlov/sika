@@ -256,15 +256,15 @@ function TransactionsContent() {
             onClick={() => setShowFilters(v => !v)}
             className="relative h-10 px-3 rounded-xl border transition-colors flex items-center gap-1.5 text-sm font-medium shrink-0"
             style={{
-              borderColor: showFilters || activeFilterCount > 0 ? '#00D9A3' : 'var(--border)',
-              backgroundColor: showFilters || activeFilterCount > 0 ? '#00D9A318' : 'var(--muted)',
-              color: showFilters || activeFilterCount > 0 ? '#00D9A3' : 'var(--muted-foreground)',
+              borderColor: showFilters || activeFilterCount > 0 ? '#D4A017' : 'var(--border)',
+              backgroundColor: showFilters || activeFilterCount > 0 ? '#D4A01718' : 'var(--muted)',
+              color: showFilters || activeFilterCount > 0 ? '#D4A017' : 'var(--muted-foreground)',
             }}
           >
             <SlidersHorizontal className="w-4 h-4" />
             Filters
             {activeFilterCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#00D9A3] text-[#0A0A0B] text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#D4A017] text-[#0E1A2E] text-[10px] font-bold flex items-center justify-center">
                 {activeFilterCount}
               </span>
             )}
@@ -284,9 +284,9 @@ function TransactionsContent() {
                     onClick={() => updateParam('type', t)}
                     className="h-7 px-3 rounded-lg text-xs font-medium capitalize border transition-all"
                     style={{
-                      borderColor: urlType === t ? '#00D9A3' : 'var(--border)',
-                      backgroundColor: urlType === t ? '#00D9A318' : 'var(--card)',
-                      color: urlType === t ? '#00D9A3' : 'var(--muted-foreground)',
+                      borderColor: urlType === t ? '#D4A017' : 'var(--border)',
+                      backgroundColor: urlType === t ? '#D4A01718' : 'var(--card)',
+                      color: urlType === t ? '#D4A017' : 'var(--muted-foreground)',
                     }}
                   >
                     {t === 'all' ? 'All types' : t}
@@ -304,9 +304,9 @@ function TransactionsContent() {
                     onClick={() => updateParam('account', 'all')}
                     className="h-7 px-3 rounded-lg text-xs font-medium border transition-all"
                     style={{
-                      borderColor: urlAccount === 'all' ? '#00D9A3' : 'var(--border)',
-                      backgroundColor: urlAccount === 'all' ? '#00D9A318' : 'var(--card)',
-                      color: urlAccount === 'all' ? '#00D9A3' : 'var(--muted-foreground)',
+                      borderColor: urlAccount === 'all' ? '#D4A017' : 'var(--border)',
+                      backgroundColor: urlAccount === 'all' ? '#D4A01718' : 'var(--card)',
+                      color: urlAccount === 'all' ? '#D4A017' : 'var(--muted-foreground)',
                     }}
                   >
                     All accounts
@@ -317,9 +317,9 @@ function TransactionsContent() {
                       onClick={() => updateParam('account', a.id)}
                       className="h-7 px-3 rounded-lg text-xs font-medium border transition-all"
                       style={{
-                        borderColor: urlAccount === a.id ? '#00D9A3' : 'var(--border)',
-                        backgroundColor: urlAccount === a.id ? '#00D9A318' : 'var(--card)',
-                        color: urlAccount === a.id ? '#00D9A3' : 'var(--muted-foreground)',
+                        borderColor: urlAccount === a.id ? '#D4A017' : 'var(--border)',
+                        backgroundColor: urlAccount === a.id ? '#D4A01718' : 'var(--card)',
+                        color: urlAccount === a.id ? '#D4A017' : 'var(--muted-foreground)',
                       }}
                     >
                       {a.name}
@@ -340,9 +340,9 @@ function TransactionsContent() {
                       onClick={() => updateParam('bucket', b)}
                       className="h-7 px-3 rounded-lg text-xs font-medium capitalize border transition-all"
                       style={{
-                        borderColor: urlBucket === b ? '#00D9A3' : 'var(--border)',
-                        backgroundColor: urlBucket === b ? '#00D9A318' : 'var(--card)',
-                        color: urlBucket === b ? '#00D9A3' : 'var(--muted-foreground)',
+                        borderColor: urlBucket === b ? '#D4A017' : 'var(--border)',
+                        backgroundColor: urlBucket === b ? '#D4A01718' : 'var(--card)',
+                        color: urlBucket === b ? '#D4A017' : 'var(--muted-foreground)',
                       }}
                     >
                       {b === 'all' ? 'All buckets' : b}
@@ -360,9 +360,9 @@ function TransactionsContent() {
                   onClick={() => updateParam('category', 'all')}
                   className="h-7 px-3 rounded-lg text-xs font-medium border transition-all"
                   style={{
-                    borderColor: urlCategory === 'all' ? '#00D9A3' : 'var(--border)',
-                    backgroundColor: urlCategory === 'all' ? '#00D9A318' : 'var(--card)',
-                    color: urlCategory === 'all' ? '#00D9A3' : 'var(--muted-foreground)',
+                    borderColor: urlCategory === 'all' ? '#D4A017' : 'var(--border)',
+                    backgroundColor: urlCategory === 'all' ? '#D4A01718' : 'var(--card)',
+                    color: urlCategory === 'all' ? '#D4A017' : 'var(--muted-foreground)',
                   }}
                 >
                   All categories
@@ -373,9 +373,9 @@ function TransactionsContent() {
                     onClick={() => updateParam('category', c.id)}
                     className="h-7 px-3 rounded-lg text-xs font-medium border transition-all"
                     style={{
-                      borderColor: urlCategory === c.id ? '#00D9A3' : 'var(--border)',
-                      backgroundColor: urlCategory === c.id ? '#00D9A318' : 'var(--card)',
-                      color: urlCategory === c.id ? '#00D9A3' : 'var(--muted-foreground)',
+                      borderColor: urlCategory === c.id ? '#D4A017' : 'var(--border)',
+                      backgroundColor: urlCategory === c.id ? '#D4A01718' : 'var(--card)',
+                      color: urlCategory === c.id ? '#D4A017' : 'var(--muted-foreground)',
                     }}
                   >
                     {c.name}
@@ -420,9 +420,9 @@ function TransactionsContent() {
                     onClick={() => updateParam('sort', value)}
                     className="h-7 px-3 rounded-lg text-xs font-medium border transition-all"
                     style={{
-                      borderColor: urlSort === value ? '#00D9A3' : 'var(--border)',
-                      backgroundColor: urlSort === value ? '#00D9A318' : 'var(--card)',
-                      color: urlSort === value ? '#00D9A3' : 'var(--muted-foreground)',
+                      borderColor: urlSort === value ? '#D4A017' : 'var(--border)',
+                      backgroundColor: urlSort === value ? '#D4A01718' : 'var(--card)',
+                      color: urlSort === value ? '#D4A017' : 'var(--muted-foreground)',
                     }}
                   >
                     {label}
@@ -446,7 +446,7 @@ function TransactionsContent() {
         {!showFilters && (activeFilterCount > 0 || search) && (
           <button
             onClick={() => { clearAllFilters(); setSearch(''); }}
-            className="flex items-center gap-1.5 mt-1 text-xs text-[#00D9A3] hover:text-[#00F5B8] transition-colors"
+            className="flex items-center gap-1.5 mt-1 text-xs text-[#D4A017] hover:text-[#E8B520] transition-colors"
           >
             <X className="w-3 h-3" /> Clear filters
           </button>
@@ -465,7 +465,7 @@ function TransactionsContent() {
           {(activeFilterCount > 0 || search) && (
             <button
               onClick={() => { clearAllFilters(); setSearch(''); }}
-              className="mt-3 text-xs text-[#00D9A3] hover:text-[#00F5B8] transition-colors"
+              className="mt-3 text-xs text-[#D4A017] hover:text-[#E8B520] transition-colors"
             >
               Clear filters
             </button>

@@ -335,7 +335,7 @@ export default function SettingsPage() {
           <Button
             type="submit"
             disabled={isSubmitting || !isDirty}
-            className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold rounded-xl"
+            className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
           >
             {isSubmitting ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -364,7 +364,7 @@ export default function SettingsPage() {
                 setEditingCat(undefined);
                 setCatModalOpen(true);
               }}
-              className="h-8 px-3 text-xs bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-medium rounded-xl gap-1"
+              className="h-8 px-3 text-xs bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-medium rounded-xl gap-1"
             >
               <Plus className="w-3.5 h-3.5" /> Add
             </Button>
@@ -440,8 +440,8 @@ export default function SettingsPage() {
             {incomeCats.length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <span className="text-[#00D9A3] text-xs font-bold">+</span>
-                  <p className="text-xs font-medium uppercase tracking-wider text-[#00D9A3]">
+                  <span className="text-[#D4A017] text-xs font-bold">+</span>
+                  <p className="text-xs font-medium uppercase tracking-wider text-[#D4A017]">
                     Income
                   </p>
                 </div>
@@ -520,7 +520,7 @@ export default function SettingsPage() {
                         </div>
                         <button
                           onClick={() => handleRestoreCategory(cat.id)}
-                          className="text-xs text-[#00D9A3] hover:text-[#00F5B8] transition-colors"
+                          className="text-xs text-[#D4A017] hover:text-[#E8B520] transition-colors"
                         >
                           Restore
                         </button>

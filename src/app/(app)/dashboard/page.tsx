@@ -283,7 +283,7 @@ function DashboardContent() {
 
         {/* Sika Daily banner — skeleton while loading, banner/nothing once resolved */}
         {digestLoading ? (
-          <div className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-card border border-[#00D9A3]/10">
+          <div className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-card border border-[#D4A017]/10">
             <div className="flex items-center gap-3">
               <div className="w-6 h-6 rounded-full bg-muted animate-pulse" />
               <div className="space-y-1.5">
@@ -482,7 +482,7 @@ function DashboardContent() {
           <div className="hidden md:block">
             <div className="flex items-center justify-between mb-2">
               <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Accounts</p>
-              <Link href="/accounts" className="text-[#00D9A3] text-xs hover:text-[#00F5B8] transition-colors">
+              <Link href="/accounts" className="text-[#D4A017] text-xs hover:text-[#E8B520] transition-colors">
                 See all
               </Link>
             </div>

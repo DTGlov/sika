@@ -52,16 +52,16 @@ export function BottomNav() {
               {showActive && (
                 <motion.div
                   layoutId="bottom-nav-indicator"
-                  className="absolute top-0 left-4 right-4 h-[2px] rounded-full bg-[#00D9A3]"
+                  className="absolute top-0 left-4 right-4 h-[2px] rounded-full bg-[#D4A017]"
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
               <Icon
-                className={`w-5 h-5 transition-colors ${showActive ? 'text-[#00D9A3]' : 'text-muted-foreground'}`}
+                className={`w-5 h-5 transition-colors ${showActive ? 'text-[#D4A017]' : 'text-muted-foreground'}`}
                 aria-hidden
               />
               <span
-                className={`text-[10px] font-medium leading-none transition-colors ${showActive ? 'text-[#00D9A3]' : 'text-muted-foreground'}`}
+                className={`text-[10px] font-medium leading-none transition-colors ${showActive ? 'text-[#D4A017]' : 'text-muted-foreground'}`}
               >
                 {label}
               </span>

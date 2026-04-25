@@ -13,7 +13,7 @@ function CustomTooltip({ active, payload, label }: { active?: boolean; payload?:
   return (
     <div className="bg-card border border-border rounded-xl px-3 py-2">
       <p className="text-muted-foreground text-xs mb-0.5">{label}</p>
-      <p className="amount text-[#00D9A3] text-sm font-semibold">{formatGHS(payload[0].value)}</p>
+      <p className="amount text-[#D4A017] text-sm font-semibold">{formatGHS(payload[0].value)}</p>
     </div>
   );
 }

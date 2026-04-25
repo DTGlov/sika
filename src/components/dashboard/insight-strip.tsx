@@ -9,7 +9,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const ACCENT_STYLES: Record<string, { border: string; glow: string; text: string }> = {
-  green:   { border: 'border-[#00D9A3]/20', glow: 'shadow-[0_0_20px_rgba(0,217,163,0.06)]',   text: 'text-[#00D9A3]' },
+  green:   { border: 'border-[#D4A017]/20', glow: 'shadow-[0_0_20px_rgba(0,217,163,0.06)]',   text: 'text-[#D4A017]' },
   amber:   { border: 'border-[#FBBF24]/20', glow: 'shadow-[0_0_20px_rgba(251,191,36,0.06)]',  text: 'text-[#FBBF24]' },
   red:     { border: 'border-[#F87171]/20', glow: 'shadow-[0_0_20px_rgba(248,113,113,0.06)]', text: 'text-[#F87171]' },
   blue:    { border: 'border-[#60A5FA]/20', glow: 'shadow-[0_0_20px_rgba(96,165,250,0.06)]',  text: 'text-[#60A5FA]' },
