@@ -23,7 +23,7 @@ export function BucketStrip() {
     >
       <div className="flex items-center justify-between mb-5">
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Buckets · This cycle
+          Buckets · This month
         </p>
         <span className="text-muted-foreground text-sm">→</span>
       </div>
