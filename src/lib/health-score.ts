@@ -7,7 +7,7 @@ import { getLabelConfig, FACTOR_NAMES, FACTOR_WEIGHTS } from '@/types/health';
 import type { HealthScore, HealthFactor } from '@/types/health';
 import type { IncomeSource } from '@/types';
 
-const BUCKET_NAMES = ['needs', 'wants', 'future'] as const;
+const BUCKET_NAMES = ['needs', 'wants', 'savings'] as const;
 type BucketKey = typeof BUCKET_NAMES[number];
 
 /**
@@ -22,7 +22,7 @@ export async function computeHealthScore(
   const [profileRes, streaksRes, activeGoalsRes, accountsRes, incomeSourcesRes] = await Promise.all([
     supabase
       .from('profiles')
-      .select('cycle_start_day, monthly_income, needs_percent, wants_percent, future_percent')
+      .select('cycle_start_day, monthly_income, needs_percent, wants_percent, savings_percent')
       .eq('id', userId)
       .single(),
     supabase
@@ -60,7 +60,7 @@ export async function computeHealthScore(
   const cycleStartDay = profile?.cycle_start_day ?? 1;
   const needsPct = profile?.needs_percent ?? 50;
   const wantsPct = profile?.wants_percent ?? 30;
-  const futurePct = profile?.future_percent ?? 20;
+  const futurePct = profile?.savings_percent ?? 20;
   const monthlyIncome = incomeSources.length > 0
     ? totalMonthlyIncome(incomeSources)
     : (profile?.monthly_income ?? 0);
@@ -196,12 +196,12 @@ function computeBudgetDiscipline(
   const limits: Record<BucketKey, number> = {
     needs: monthlyIncome * needsPct / 100,
     wants: monthlyIncome * wantsPct / 100,
-    future: monthlyIncome * futurePct / 100,
+    savings: monthlyIncome * futurePct / 100,
   };
 
   let totalChecks = 0;
   let withinCount = 0;
-  const bucketOverCounts: Record<BucketKey, number> = { needs: 0, wants: 0, future: 0 };
+  const bucketOverCounts: Record<BucketKey, number> = { needs: 0, wants: 0, savings: 0 };
 
   for (const cycle of completedCycles) {
     const start = format(cycle.start, 'yyyy-MM-dd');

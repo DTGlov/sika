@@ -111,13 +111,13 @@ export function useDashboardData(cycleStartDateStr?: string) {
       .filter((t) => t.transaction_date === todayStr)
       .reduce((s, t) => s + t.amount, 0);
 
-    const bucketSpend: Record<BucketName, number> = { needs: 0, wants: 0, future: 0 };
+    const bucketSpend: Record<BucketName, number> = { needs: 0, wants: 0, savings: 0 };
     const monthlyIncome =
       incomeSources.length > 0 ? totalMonthlyIncome(incomeSources) : profile.monthly_income;
     const bucketLimits: Record<BucketName, number> = {
       needs: (monthlyIncome * profile.needs_percent) / 100,
       wants: (monthlyIncome * profile.wants_percent) / 100,
-      future: (monthlyIncome * profile.future_percent) / 100,
+      savings: (monthlyIncome * profile.savings_percent) / 100,
     };
 
     const SAVINGS_ACCOUNT_TYPES = new Set(['savings', 'investment']);
@@ -131,15 +131,15 @@ export function useDashboardData(cycleStartDateStr?: string) {
       }
     }
 
-    // Future bucket: also count goal contributions and savings-account transfers.
-    // This reflects money committed to future-you this cycle, not just future-bucket expenses.
+    // Savings bucket: also count goal contributions and savings-account transfers.
+    // This reflects money committed to future-you this cycle, not just savings-bucket expenses.
     const cycleTxnList = (cycleTxns ?? []) as Transaction[];
     for (const txn of cycleTxnList) {
       if (txn.type !== 'transfer') continue;
 
       // Rule 1: any goal contribution (transfer with goal_id set)
       if (txn.goal_id) {
-        bucketSpend.future += txn.amount;
+        bucketSpend.savings += txn.amount;
         continue;
       }
 
@@ -151,7 +151,7 @@ export function useDashboardData(cycleStartDateStr?: string) {
         toType && SAVINGS_ACCOUNT_TYPES.has(toType) &&
         (!fromType || !SAVINGS_ACCOUNT_TYPES.has(fromType))
       ) {
-        bucketSpend.future += txn.amount;
+        bucketSpend.savings += txn.amount;
       }
     }
 

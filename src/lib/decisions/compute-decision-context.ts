@@ -5,7 +5,7 @@ import type { RecurringTransaction } from '@/types';
 type PurchaseInput = {
   item_name: string;
   amount: number;
-  bucket: 'needs' | 'wants' | 'future';
+  bucket: 'needs' | 'wants' | 'savings';
   urgency?: 'now' | 'can_wait' | 'not_sure';
 };
 
@@ -14,7 +14,7 @@ type DecisionContext = {
   purchase: {
     item_name: string;
     amount: number;
-    bucket: 'needs' | 'wants' | 'future';
+    bucket: 'needs' | 'wants' | 'savings';
     urgency: 'now' | 'can_wait' | 'not_sure' | null;
   };
   current_cycle: {
@@ -25,7 +25,7 @@ type DecisionContext = {
   buckets: {
     needs: { spent: number; budget: number; pct: number; pct_time: number; remaining: number };
     wants: { spent: number; budget: number; pct: number; pct_time: number; remaining: number };
-    future: { spent: number; commitment: number; pct: number; remaining: number };
+    savings: { spent: number; commitment: number; pct: number; remaining: number };
   };
   after_purchase: {
     target_bucket_spent: number;
@@ -77,7 +77,7 @@ export async function computeDecisionContext(
   const [profileRes, bucketsRes, recentTxnsRes, thirtyDTxnsRes, goalsRes, recurringRes] = await Promise.all([
     supabase
       .from('profiles')
-      .select('full_name, monthly_income, needs_percent, wants_percent, future_percent, cycle_start_day')
+      .select('full_name, monthly_income, needs_percent, wants_percent, savings_percent, cycle_start_day')
       .eq('id', userId)
       .single(),
     supabase.from('budget_buckets').select('id, name').eq('user_id', userId),
@@ -124,7 +124,7 @@ export async function computeDecisionContext(
   const cycleStartDay = profile?.cycle_start_day ?? 1;
   const needsPct = (profile?.needs_percent ?? 50) / 100;
   const wantsPct = (profile?.wants_percent ?? 30) / 100;
-  const futurePct = (profile?.future_percent ?? 20) / 100;
+  const futurePct = (profile?.savings_percent ?? 20) / 100;
 
   // Cycle position
   const todayDay = now.getUTCDate();
@@ -147,7 +147,7 @@ export async function computeDecisionContext(
   }
 
   // Bucket spend this cycle
-  const bucketSpend: Record<string, number> = { needs: 0, wants: 0, future: 0 };
+  const bucketSpend: Record<string, number> = { needs: 0, wants: 0, savings: 0 };
   for (const tx of recentTxns) {
     const cat = (Array.isArray(tx.category) ? tx.category[0] : tx.category) as {
       name: string; icon: string | null; bucket_id: string | null;
@@ -160,7 +160,7 @@ export async function computeDecisionContext(
 
   const needsBudget = monthlyIncome * needsPct;
   const wantsBudget = monthlyIncome * wantsPct;
-  const futureCommitment = monthlyIncome * futurePct;
+  const savingsCommitment = monthlyIncome * futurePct;
 
   // 7d spend and 30d avg daily
   const last7dSpend = recentTxns.reduce((s, t) => s + t.amount, 0);
@@ -182,7 +182,7 @@ export async function computeDecisionContext(
     ? needsBudget
     : purchase.bucket === 'wants'
     ? wantsBudget
-    : futureCommitment;
+    : savingsCommitment;
 
   const currentSpent = bucketSpend[purchase.bucket] ?? 0;
   const targetBucketSpent = currentSpent + purchase.amount;
@@ -214,11 +214,11 @@ export async function computeDecisionContext(
         pct_time: pctTime,
         remaining: Math.max(0, wantsBudget - bucketSpend.wants),
       },
-      future: {
-        spent: bucketSpend.future,
-        commitment: futureCommitment,
-        pct: futureCommitment > 0 ? Math.round((bucketSpend.future / futureCommitment) * 100) : 0,
-        remaining: Math.max(0, futureCommitment - bucketSpend.future),
+      savings: {
+        spent: bucketSpend.savings,
+        commitment: savingsCommitment,
+        pct: savingsCommitment > 0 ? Math.round((bucketSpend.savings / savingsCommitment) * 100) : 0,
+        remaining: Math.max(0, savingsCommitment - bucketSpend.savings),
       },
     },
     after_purchase: {

@@ -46,7 +46,7 @@ import type { GoalProgress } from '@/types/goal';
 import type { DailyDigest } from '@/types/daily';
 import type { DailyInsightRow } from '@/types/insight';
 
-const BUCKETS: BucketName[] = ['needs', 'wants', 'future'];
+const BUCKETS: BucketName[] = ['needs', 'wants', 'savings'];
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -444,7 +444,7 @@ function DashboardContent() {
                       spent={dashboardStats?.bucketSpend[bucket] ?? 0}
                       limit={dashboardStats?.bucketLimits[bucket] ?? 0}
                       index={i}
-                      earmarked={bucket === 'future' ? sinkingFundEarmarked : undefined}
+                      earmarked={bucket === 'savings' ? sinkingFundEarmarked : undefined}
                     />
                   ));
             })()}

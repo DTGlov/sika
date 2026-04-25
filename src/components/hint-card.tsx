@@ -92,7 +92,7 @@ interface BucketsTooltipProps {
 const BUCKET_ROWS = [
   { key: 'needs', color: '#00D9A3' },
   { key: 'wants', color: '#FBBF24' },
-  { key: 'future', color: '#60A5FA' },
+  { key: 'savings', color: '#60A5FA' },
 ] as const;
 
 export function BucketsTooltip({ className }: BucketsTooltipProps) {
@@ -102,7 +102,7 @@ export function BucketsTooltip({ className }: BucketsTooltipProps) {
   const percents = {
     needs: profile?.needs_percent ?? 50,
     wants: profile?.wants_percent ?? 30,
-    future: profile?.future_percent ?? 20,
+    savings: profile?.savings_percent ?? 20,
   };
 
   return (

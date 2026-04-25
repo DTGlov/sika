@@ -43,10 +43,10 @@ const profileSchema = z
   .object({
     needs_percent: z.number().min(0).max(100),
     wants_percent: z.number().min(0).max(100),
-    future_percent: z.number().min(0).max(100),
+    savings_percent: z.number().min(0).max(100),
     cycle_start_day: z.number().int().min(1).max(28),
   })
-  .refine((d) => d.needs_percent + d.wants_percent + d.future_percent === 100, {
+  .refine((d) => d.needs_percent + d.wants_percent + d.savings_percent === 100, {
     message: "Percentages must sum to 100",
     path: ["needs_percent"],
   });
@@ -56,7 +56,7 @@ type ProfileForm = z.infer<typeof profileSchema>;
 const BUCKET_COLORS: Record<string, string> = {
   needs: "#00D9A3",
   wants: "#FBBF24",
-  future: "#60A5FA",
+  savings: "#60A5FA",
 };
 
 function getIconEmoji(icon: string | null): string {
@@ -86,7 +86,7 @@ export default function SettingsPage() {
       resetForm({
         needs_percent: profile.needs_percent,
         wants_percent: profile.wants_percent,
-        future_percent: profile.future_percent,
+        savings_percent: profile.savings_percent,
         cycle_start_day: profile.cycle_start_day ?? 1,
       });
     }
@@ -285,16 +285,16 @@ export default function SettingsPage() {
             </h2>
             <p className="text-muted-foreground text-xs mb-4">Must add up to 100</p>
             <div className="grid grid-cols-3 gap-3">
-              {(["needs", "wants", "future"] as const).map((bucket) => {
+              {(["needs", "wants", "savings"] as const).map((bucket) => {
                 const colors = {
                   needs: "#00D9A3",
                   wants: "#FBBF24",
-                  future: "#60A5FA",
+                  savings: "#60A5FA",
                 };
                 const labels = {
                   needs: "Needs",
                   wants: "Wants",
-                  future: "Future",
+                  savings: "Savings",
                 };
                 const pct = profile
                   ? (profile[`${bucket}_percent`] as number)
@@ -350,7 +350,7 @@ export default function SettingsPage() {
           <HintCard
             hintId="settings_categories"
             title="Categories explained"
-            body="Categories organize your transactions. Expense categories belong to a bucket (Needs/Wants/Future). Income and adjustment categories don't — they exist outside the budget split."
+            body="Categories organize your transactions. Expense categories belong to a bucket (Needs/Wants/Savings). Income and adjustment categories don't — they exist outside the budget split."
             icon={Tag}
             variant="inline"
             className="mt-4"
@@ -372,14 +372,14 @@ export default function SettingsPage() {
 
           <div className="space-y-5">
             {/* Spending categories grouped by bucket */}
-            {(["needs", "wants", "future"] as const).map((bName) => {
+            {(["needs", "wants", "savings"] as const).map((bName) => {
               const bCats = expenseByBucket[bName] ?? [];
               if (bCats.length === 0) return null;
               const color = BUCKET_COLORS[bName];
               const label = {
                 needs: "Needs",
                 wants: "Wants",
-                future: "Future",
+                savings: "Savings",
               }[bName];
               return (
                 <div key={bName}>

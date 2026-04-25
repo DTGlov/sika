@@ -17,18 +17,18 @@ export const BUCKET_CONFIG: Record<BucketName, { label: string; color: string; d
     description: 'Lifestyle',
     explanation: 'Optional quality-of-life expenses — eating out, entertainment, subscriptions, hobbies, shopping.',
   },
-  future: {
-    label: 'Future',
+  savings: {
+    label: 'Savings',
     color: '#60A5FA',
     description: 'Savings & Investments',
-    explanation: 'Money committed to future-you this month — via goal contributions, savings transfers, or Future-category expenses.',
+    explanation: 'Money committed to future-you this month — transfers to savings/investment accounts, goal contributions, or Savings-category expenses.',
   },
 };
 
 export const DEFAULT_BUCKET_PERCENTS: Record<BucketName, number> = {
   needs: 50,
   wants: 30,
-  future: 20,
+  savings: 20,
 };
 
 export const TRANSACTION_TYPES = [

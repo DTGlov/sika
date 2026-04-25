@@ -38,7 +38,7 @@ Return ONE JSON object:
   "reasoning": "1-2 short paragraphs of analysis in Sika voice. Keep each paragraph 2-3 sentences max. Reference actual numbers.",
   "impact": {
     "bucket_after": {
-      "bucket": "needs" | "wants" | "future",
+      "bucket": "needs" | "wants" | "savings",
       "pct_after": <number>,
       "over_budget": <boolean>
     },

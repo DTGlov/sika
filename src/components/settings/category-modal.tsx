@@ -48,7 +48,7 @@ export const ICON_OPTIONS: { key: string; emoji: string }[] = [
 const BUCKET_COLORS: Record<string, string> = {
   needs: '#00D9A3',
   wants: '#FBBF24',
-  future: '#60A5FA',
+  savings: '#60A5FA',
 };
 
 const TYPE_META: Record<string, { label: string; hint: string }> = {
