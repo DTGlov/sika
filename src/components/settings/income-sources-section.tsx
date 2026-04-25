@@ -16,7 +16,7 @@ import {
   FREQUENCY_COLORS,
   DAY_OF_WEEK,
 } from '@/lib/income';
-import { formatGHS } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,7 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CURRENCY_SYMBOL } from '@/lib/constants';
 import type { IncomeSource, IncomeFrequency } from '@/types';
 
 const FREQUENCIES: IncomeFrequency[] = ['monthly', 'weekly', 'biweekly', 'irregular'];
@@ -78,6 +77,7 @@ interface IncomeSourceModalProps {
 
 function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceModalProps) {
   const { user, incomeSources, setIncomeSources, profile, setProfile } = useAuthStore();
+  const { symbol } = useCurrency();
   const { bumpMutation } = useTransactionStore();
   const supabase = createClient();
 
@@ -180,7 +180,7 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
           <div className="space-y-1.5">
             <Label className="text-muted-foreground text-sm">Amount</Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{CURRENCY_SYMBOL}</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{symbol}</span>
               <Input
                 type="number"
                 min="0.01"
@@ -294,6 +294,7 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
 
 export function IncomeSourcesSection() {
   const { user, incomeSources, setIncomeSources, profile, setProfile } = useAuthStore();
+  const { format } = useCurrency();
   const { bumpMutation } = useTransactionStore();
   const supabase = createClient();
   const [modalOpen, setModalOpen] = useState(false);
@@ -352,10 +353,10 @@ export function IncomeSourcesSection() {
                     setModalOpen(true);
                   }}
                   className="text-left p-3 rounded-xl border border-border hover:border-[#D4A017]/50 bg-muted hover:bg-muted transition-colors"
-                  title={`${formatGHS(t.amount)} · ${FREQUENCY_LABELS[t.frequency]}`}
+                  title={`${format(t.amount)} · ${FREQUENCY_LABELS[t.frequency]}`}
                 >
                   <p className="text-foreground text-xs font-medium leading-tight">{t.name}</p>
-                  <p className="text-muted-foreground text-xs mt-0.5">{formatGHS(t.amount)}</p>
+                  <p className="text-muted-foreground text-xs mt-0.5">{format(t.amount)}</p>
                 </button>
               ))}
             </div>
@@ -388,9 +389,9 @@ export function IncomeSourcesSection() {
                       )}
                     </div>
                     <div className="flex items-baseline gap-2 mt-0.5">
-                      <span className="text-muted-foreground text-xs">{formatGHS(source.amount)}</span>
+                      <span className="text-muted-foreground text-xs">{format(source.amount)}</span>
                       {showEq && (
-                        <span className="text-muted-foreground/70 text-[11px]">≈ {formatGHS(monthlyEq)}/mo</span>
+                        <span className="text-muted-foreground/70 text-[11px]">≈ {format(monthlyEq)}/mo</span>
                       )}
                     </div>
                   </div>
@@ -415,7 +416,7 @@ export function IncomeSourcesSection() {
 
             <div className="flex items-center justify-between pt-3 mt-1 border-t border-border">
               <span className="text-muted-foreground text-sm">Total monthly income</span>
-              <span className="text-foreground text-base font-bold">{formatGHS(total)}</span>
+              <span className="text-foreground text-base font-bold">{format(total)}</span>
             </div>
           </div>
         )}

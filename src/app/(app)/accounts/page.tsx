@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useProfile } from '@/hooks/use-profile';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { ACCOUNT_TYPE_CONFIG, computeAccountBalances } from '@/lib/accounts';
-import { formatGHS } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { revalidateForEntity } from '@/lib/revalidation';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,6 +21,7 @@ export default function AccountsPage() {
   const { mutationCount, openReconcileSheet } = useTransactionStore();
   const supabase = createClient();
   useProfile();
+  const { format } = useCurrency();
 
   const [balances, setBalances] = useState<Record<string, number>>({});
   const [balancesLoading, setBalancesLoading] = useState(true);
@@ -147,7 +148,7 @@ export default function AccountsPage() {
         {balancesLoading ? (
           <Skeleton className="h-9 w-40 bg-muted" />
         ) : (
-          <p className="text-3xl font-bold text-foreground tabular-nums">{formatGHS(totalBalance)}</p>
+          <p className="text-3xl font-bold text-foreground tabular-nums">{format(totalBalance)}</p>
         )}
         <p className="text-sm text-muted-foreground mt-1">The money currently in your accounts.</p>
       </div>
@@ -223,7 +224,7 @@ export default function AccountsPage() {
                     <Skeleton className="h-6 w-28 bg-muted" />
                   ) : (
                     <p className="text-xl font-bold tabular-nums sika-sensitive" style={{ color: cfg.color }}>
-                      {formatGHS(balance)}
+                      {format(balance)}
                     </p>
                   )}
                 </div>

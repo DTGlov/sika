@@ -14,7 +14,7 @@ import { awardMomentum } from '@/lib/momentum';
 import { checkAndUnlockBadges } from '@/lib/badges';
 import { MomentumFloatContainer, TierUpModal } from '@/components/momentum-float';
 import type { TierConfig } from '@/types/momentum';
-import { formatGHS } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import type { GoalProgress } from '@/types/goal';
 
 interface ContributeModalProps {
@@ -26,6 +26,7 @@ interface ContributeModalProps {
 export function ContributeModal({ open, onClose, goalProgress }: ContributeModalProps) {
   const supabase = createClient();
   const { user, accounts, setStreaks, setMomentum, enqueueBadgeCelebrations } = useAuthStore();
+  const { format: formatMoney } = useCurrency();
   const [momentumFloats, setMomentumFloats] = useState<Array<{ id: string; points: number }>>([]);
   const [tierUpTier, setTierUpTier] = useState<TierConfig | null>(null);
 
@@ -96,7 +97,7 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
       checkAndUnlockBadges(supabase, user.id, 'contribution_made').then(({ newlyUnlocked }) => {
         if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
       });
-      toast.success(`${formatGHS(numAmount)} added to ${goal.name}`);
+      toast.success(`${formatMoney(numAmount)} added to ${goal.name}`);
       onClose();
     } catch {
       toast.error('Something went wrong');
@@ -144,7 +145,7 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
                   <span className="text-muted-foreground">{goal.name}</span>
                   {target_amount && (
                     <span className="text-muted-foreground">
-                      {formatGHS(afterAmount)} / {formatGHS(target_amount)}
+                      {formatMoney(afterAmount)} / {formatMoney(target_amount)}
                     </span>
                   )}
                 </div>
@@ -161,10 +162,10 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
                 )}
                 <div className="flex justify-between text-xs">
                   <span className="text-muted-foreground">
-                    Current: <span className="text-foreground">{formatGHS(current_amount)}</span>
+                    Current: <span className="text-foreground">{formatMoney(current_amount)}</span>
                   </span>
                   {numAmount > 0 && (
-                    <span style={{ color: accentColor }}>+{formatGHS(numAmount)}</span>
+                    <span style={{ color: accentColor }}>+{formatMoney(numAmount)}</span>
                   )}
                 </div>
               </div>

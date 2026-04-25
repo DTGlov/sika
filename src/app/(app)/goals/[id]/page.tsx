@@ -16,7 +16,7 @@ import { useTransactionStore } from '@/stores/transaction-store';
 import { createClient } from '@/lib/supabase/client';
 import { computeGoalProgress, fetchGoalAmounts } from '@/lib/goals';
 import { revalidateForEntity } from '@/lib/revalidation';
-import { formatGHS, formatGHSCompact } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import type { Goal, GoalProgress } from '@/types/goal';
 import type { Transaction } from '@/types';
 
@@ -25,6 +25,7 @@ export default function GoalDetailPage() {
   const router = useRouter();
   const supabase = createClient();
   const { user, accounts } = useAuthStore();
+  const { format: formatMoney, formatCompact } = useCurrency();
   const { mutationCount } = useTransactionStore();
 
   const [goalProgress, setGoalProgress] = useState<GoalProgress | null>(null);
@@ -201,11 +202,11 @@ export default function GoalDetailPage() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span style={{ color: accentColor }} className="font-bold text-2xl tabular-nums">
-                {formatGHS(current_amount)}
+                {formatMoney(current_amount)}
               </span>
               {goal.target_amount && (
                 <span className="text-muted-foreground self-end">
-                  of {formatGHS(goal.target_amount)}
+                  of {formatMoney(goal.target_amount)}
                 </span>
               )}
             </div>
@@ -214,11 +215,11 @@ export default function GoalDetailPage() {
             {isTarget && (totalContributions > 0 || totalPayments > 0) && (
               <div className="flex gap-3 text-xs">
                 <span className="text-muted-foreground">
-                  <span style={{ color: accentColor }}>+{formatGHSCompact(totalContributions)}</span> saved
+                  <span style={{ color: accentColor }}>+{formatCompact(totalContributions)}</span> saved
                 </span>
                 {totalPayments > 0 && (
                   <span className="text-muted-foreground">
-                    <span className="text-[#F97316]">−{formatGHSCompact(totalPayments)}</span> paid
+                    <span className="text-[#F97316]">−{formatCompact(totalPayments)}</span> paid
                   </span>
                 )}
               </div>
@@ -255,7 +256,7 @@ export default function GoalDetailPage() {
               <StatTile label="Days left" value={`${days_remaining}d`} color={accentColor} />
             )}
             {required_monthly_pace != null && (
-              <StatTile label="Monthly pace" value={formatGHSCompact(required_monthly_pace)} color={accentColor} />
+              <StatTile label="Monthly pace" value={formatCompact(required_monthly_pace)} color={accentColor} />
             )}
             {is_on_track != null && !goal.completed_at && (
               <StatTile
@@ -363,6 +364,7 @@ function StatTile({ label, value, color }: { label: string; value: string; color
 }
 
 function TxRow({ tx, goal, type, accentColor }: { tx: Transaction; goal: Goal; type: 'contribution' | 'payment'; accentColor: string }) {
+  const { format: formatMoney } = useCurrency();
   const label = type === 'contribution'
     ? (tx.note || `Contribution to ${goal.name}`)
     : (tx.note || (tx as { category?: { name?: string } }).category?.name || `Payment from ${goal.name}`);
@@ -383,7 +385,7 @@ function TxRow({ tx, goal, type, accentColor }: { tx: Transaction; goal: Goal; t
         </p>
       </div>
       <span className="font-semibold text-sm tabular-nums" style={{ color: accentColor }}>
-        {type === 'contribution' ? '+' : '−'}{formatGHS(tx.amount)}
+        {type === 'contribution' ? '+' : '−'}{formatMoney(tx.amount)}
       </span>
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus, ArrowLeftRight, Scale, X, AlertTriangle, ArrowRight } from 'lucide-react';
-import { formatGHS } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 
 interface InsufficientBalanceSheetProps {
   open: boolean;
@@ -24,6 +24,7 @@ export function InsufficientBalanceSheet({
   onChangeAccount,
   onReconcile,
 }: InsufficientBalanceSheetProps) {
+  const { format } = useCurrency();
   if (!open) return null;
 
   const isNegative = accountBalance < 0;
@@ -35,15 +36,15 @@ export function InsufficientBalanceSheet({
     : isEmpty
     ? `${accountName} is empty`
     : isInsufficient
-    ? `${accountName} only has ${formatGHS(accountBalance)}`
+    ? `${accountName} only has ${format(accountBalance)}`
     : `${accountName} is empty`;
 
   const description = isNegative
-    ? `Balance is ${formatGHS(accountBalance)} — you're already overspent.`
+    ? `Balance is ${format(accountBalance)} — you're already overspent.`
     : isEmpty
     ? `${accountName} has no money to spend right now.`
     : isInsufficient
-    ? `You're trying to spend ${formatGHS(amountRequested)}, but only ${formatGHS(accountBalance)} is available.`
+    ? `You're trying to spend ${format(amountRequested)}, but only ${format(accountBalance)} is available.`
     : `${accountName} has no money to spend right now.`;
 
   return (

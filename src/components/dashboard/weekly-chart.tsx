@@ -2,18 +2,20 @@
 
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { formatShortDate, formatGHS } from '@/lib/utils';
+import { formatShortDate } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 
 interface WeeklyChartProps {
   data: { date: string; amount: number }[];
 }
 
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
+  const { format } = useCurrency();
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-card border border-border rounded-xl px-3 py-2">
       <p className="text-muted-foreground text-xs mb-0.5">{label}</p>
-      <p className="amount text-[#D4A017] text-sm font-semibold">{formatGHS(payload[0].value)}</p>
+      <p className="amount text-[#D4A017] text-sm font-semibold">{format(payload[0].value)}</p>
     </div>
   );
 }

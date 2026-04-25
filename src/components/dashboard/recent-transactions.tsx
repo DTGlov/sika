@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { formatGHS, formatTransactionDate } from '@/lib/utils';
+import { formatTransactionDate } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import type { Transaction } from '@/types';
 
 interface RecentTransactionsProps {
@@ -11,6 +12,7 @@ interface RecentTransactionsProps {
 }
 
 export function RecentTransactions({ transactions }: RecentTransactionsProps) {
+  const { format } = useCurrency();
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -59,7 +61,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                 </div>
               </div>
               <p className={`amount text-sm font-semibold ${txn.type === 'income' ? 'text-[#D4A017]' : 'text-foreground'}`}>
-                {txn.type === 'income' ? '+' : '-'}{formatGHS(txn.amount)}
+                {txn.type === 'income' ? '+' : '-'}{format(txn.amount)}
               </p>
             </div>
           ))}

@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
-import { formatGHS, formatGHSCompact } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { CYCLE_CARD_THEMES, type CycleCardTheme } from '@/types/card-theme';
 import { MOTIF_COMPONENTS } from '@/components/cycle-card/motifs';
 import { EmvChip } from '@/components/cycle-card/chip';
@@ -19,6 +19,7 @@ interface CardSurfaceProps {
 }
 
 export function CardSurface({ themeId, cycleNet, userName, amountKey, mounted }: CardSurfaceProps) {
+  const { format } = useCurrency();
   const config = CYCLE_CARD_THEMES[themeId] ?? CYCLE_CARD_THEMES.sankofa;
   const { palette } = config;
   const Motif = MOTIF_COMPONENTS[themeId] ?? MOTIF_COMPONENTS.sankofa;
@@ -36,7 +37,7 @@ export function CardSurface({ themeId, cycleNet, userName, amountKey, mounted }:
       }}
       className="text-3xl md:text-4xl tabular-nums sika-sensitive"
     >
-      {prefix}{formatGHS(Math.abs(cycleNet))}
+      {prefix}{format(Math.abs(cycleNet))}
     </span>
   );
 
@@ -131,6 +132,7 @@ export function CycleCard({
   spent,
   expected,
 }: CycleCardProps) {
+  const { formatCompact } = useCurrency();
   const cardRef = useRef<HTMLDivElement>(null);
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
@@ -175,11 +177,11 @@ export function CycleCard({
 
       {/* Supporting stats */}
       <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-muted-foreground tabular-nums px-1">
-        <span>Received <span className="text-muted-foreground">{formatGHSCompact(received)}</span></span>
+        <span>Received <span className="text-muted-foreground">{formatCompact(received)}</span></span>
         <span className="text-muted-foreground/60">·</span>
-        <span>Spent <span className="text-muted-foreground">{formatGHSCompact(spent)}</span></span>
+        <span>Spent <span className="text-muted-foreground">{formatCompact(spent)}</span></span>
         <span className="text-muted-foreground/60">·</span>
-        <span>Expected <span className="text-muted-foreground">{formatGHSCompact(expected)}/mo</span></span>
+        <span>Expected <span className="text-muted-foreground">{formatCompact(expected)}/mo</span></span>
       </div>
     </div>
   );

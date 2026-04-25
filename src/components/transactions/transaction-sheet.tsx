@@ -18,8 +18,8 @@ import { CategoryGrid } from './category-grid';
 import { IncomeCategoryPicker, INCOME_PRESETS } from './income-category-picker';
 import type { IncomePresetKey } from './income-category-picker';
 import { ACCOUNT_TYPE_CONFIG } from '@/lib/accounts';
-import { formatGHS } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { revalidateForEntity } from '@/lib/revalidation';
 import { HintCard } from '@/components/hint-card';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -50,6 +50,7 @@ export function TransactionSheet() {
     openReconcileSheet,
   } = useTransactionStore();
   const { user, accounts, setStreaks, setMomentum, enqueueBadgeCelebrations } = useAuthStore();
+  const { format: formatMoney, symbol } = useCurrency();
   const { medium: hapticMedium } = useHaptics();
   const [momentumFloats, setMomentumFloats] = useState<Array<{ id: string; points: number }>>([]);
   const [tierUpTier, setTierUpTier] = useState<TierConfig | null>(null);
@@ -372,7 +373,7 @@ export function TransactionSheet() {
       category_id: null,
       account_id: accountId,
       to_account_id: null,
-      note: note || `Reconciled to ${formatGHS(parseFloat(reconcileActual) || 0)}`,
+      note: note || `Reconciled to ${formatMoney(parseFloat(reconcileActual) || 0)}`,
       transaction_date: format(new Date(), 'yyyy-MM-dd'),
     };
 
@@ -400,7 +401,7 @@ export function TransactionSheet() {
     }
 
     revalidateForEntity('adjustment');
-    toast.success(`Reconciled to ${formatGHS(parseFloat(reconcileActual) || 0)}`);
+    toast.success(`Reconciled to ${formatMoney(parseFloat(reconcileActual) || 0)}`);
     handleMomentumAward('account_reconciled');
     checkAndUnlockBadges(supabase, user.id, 'account_reconciled').then(({ newlyUnlocked }) => {
       if (newlyUnlocked.length > 0) enqueueBadgeCelebrations(newlyUnlocked);
@@ -657,7 +658,7 @@ export function TransactionSheet() {
             {accountId && (
               <div className="bg-muted border border-border rounded-xl px-4 py-3 flex items-center justify-between">
                 <span className="text-muted-foreground text-sm">Sika shows</span>
-                <span className="text-foreground font-semibold tabular-nums">{formatGHS(sikaBalance)}</span>
+                <span className="text-foreground font-semibold tabular-nums">{formatMoney(sikaBalance)}</span>
               </div>
             )}
 
@@ -665,7 +666,7 @@ export function TransactionSheet() {
             <div className="space-y-1.5">
               <label className="text-muted-foreground text-sm">Actual current balance</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">₵</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{symbol}</span>
                 <Input
                   type="number"
                   min="0"
@@ -689,7 +690,7 @@ export function TransactionSheet() {
                   className="font-semibold tabular-nums text-sm"
                   style={{ color: reconcileIsPositive ? '#00D9A3' : '#F43F5E' }}
                 >
-                  {reconcileIsPositive ? '+' : ''}{formatGHS(reconcileDiff)}
+                  {reconcileIsPositive ? '+' : ''}{formatMoney(reconcileDiff)}
                 </span>
               </div>
             )}
@@ -720,7 +721,7 @@ export function TransactionSheet() {
                 {saving
                   ? <Loader2 className="w-4 h-4 animate-spin" />
                   : reconcileActual
-                  ? `Reconcile to ${formatGHS(parseFloat(reconcileActual) || 0)}`
+                  ? `Reconcile to ${formatMoney(parseFloat(reconcileActual) || 0)}`
                   : 'Reconcile'}
               </Button>
             </div>
@@ -831,12 +832,12 @@ export function TransactionSheet() {
                             </div>
                             <p className="text-muted-foreground text-xs leading-relaxed">
                               Goal has{' '}
-                              <span className="text-foreground font-medium">{formatGHS(sfBalance)}</span>{' '}
+                              <span className="text-foreground font-medium">{formatMoney(sfBalance)}</span>{' '}
                               saved. You can either:
                             </p>
                             <ul className="text-muted-foreground text-xs space-y-0.5 ml-2">
-                              <li>• Reduce this payment to {formatGHS(sfBalance)} or less</li>
-                              <li>• Contribute {formatGHS(numAmount - sfBalance)} more to the goal first</li>
+                              <li>• Reduce this payment to {formatMoney(sfBalance)} or less</li>
+                              <li>• Contribute {formatMoney(numAmount - sfBalance)} more to the goal first</li>
                               <li>• Uncheck &ldquo;Paid from target&rdquo; and log as a regular expense</li>
                             </ul>
                           </div>
@@ -853,15 +854,15 @@ export function TransactionSheet() {
                           <div className="rounded-xl bg-muted border border-border px-3 py-2.5 space-y-1">
                             <div className="flex justify-between text-xs">
                               <span className="text-muted-foreground">Goal balance</span>
-                              <span className="text-foreground tabular-nums">{formatGHS(sfBalance)}</span>
+                              <span className="text-foreground tabular-nums">{formatMoney(sfBalance)}</span>
                             </div>
                             {numAmount > 0 && (
                               <div className="flex justify-between text-xs">
                                 <span className="text-muted-foreground">After this payment</span>
                                 <span className={cn('tabular-nums font-medium', sfWillFulfill ? 'text-[#D4A017]' : 'text-foreground')}>
                                   {sfWillFulfill
-                                    ? '₵0 — goal will be fulfilled'
-                                    : formatGHS(Math.max(0, sfAfterBalance ?? 0)) + ' remaining'}
+                                    ? `${symbol}0 — goal will be fulfilled`
+                                    : formatMoney(Math.max(0, sfAfterBalance ?? 0)) + ' remaining'}
                                 </span>
                               </div>
                             )}

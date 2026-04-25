@@ -22,7 +22,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useProfile } from "@/hooks/use-profile";
 import { useTransactionStore } from "@/stores/transaction-store";
 import { totalMonthlyIncome } from "@/lib/income";
-import { formatGHS } from "@/lib/utils";
+import { useCurrency } from "@/hooks/use-currency";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -66,6 +66,7 @@ function getIconEmoji(icon: string | null): string {
 export default function SettingsPage() {
   const router = useRouter();
   const { user, profile, incomeSources, reset } = useAuthStore();
+  const { format, symbol } = useCurrency();
   const { setCategories, categories, bumpMutation } = useTransactionStore();
   const { refetch } = useProfile();
   const supabase = createClient();
@@ -205,6 +206,20 @@ export default function SettingsPage() {
         {/* Appearance */}
         <AppearanceSection />
 
+        {/* Currency */}
+        <div className="bg-card border border-border rounded-2xl p-5 mb-4">
+          <h2 className="text-foreground font-semibold mb-1">Currency</h2>
+          <p className="text-muted-foreground text-xs mb-4">All amounts display in your chosen currency.</p>
+          <button
+            type="button"
+            onClick={() => router.push('/settings/currency')}
+            className="w-full flex items-center justify-between px-4 py-3 bg-input border border-border rounded-xl hover:bg-muted/50 transition-colors"
+          >
+            <span className="text-foreground text-sm">Currency</span>
+            <span className="text-muted-foreground text-sm font-medium">{profile?.currency ?? 'GHS'}</span>
+          </button>
+        </div>
+
         {/* Haptics */}
         <HapticsSection />
 
@@ -244,7 +259,7 @@ export default function SettingsPage() {
               Computed from your active income sources above
             </p>
             <div className="h-12 px-4 bg-muted border border-border rounded-xl flex items-center">
-              <span className="text-muted-foreground font-mono mr-2">₵</span>
+              <span className="text-muted-foreground font-mono mr-2">{symbol}</span>
               <span className="text-foreground font-semibold text-base">
                 {totalIncome > 0
                   ? totalIncome.toLocaleString("en-GH", {
@@ -318,7 +333,7 @@ export default function SettingsPage() {
                     />
                     {totalIncome > 0 && (
                       <p className="text-muted-foreground/70 text-[10px] text-center">
-                        {formatGHS((totalIncome * pct) / 100)}
+                        {format((totalIncome * pct) / 100)}
                       </p>
                     )}
                   </div>

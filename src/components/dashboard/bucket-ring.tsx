@@ -2,7 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
-import { clampPercent, formatGHS, formatGHSCompact, getProgressColor } from '@/lib/utils';
+import { clampPercent, getProgressColor } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import type { BucketName } from '@/types';
 import { BUCKET_CONFIG } from '@/lib/constants';
 
@@ -19,6 +20,7 @@ const RADIUS = 36;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRingProps) {
+  const { format, formatCompact } = useCurrency();
   const config = BUCKET_CONFIG[bucket];
   const rawPercent = limit > 0 ? (spent / limit) * 100 : 0;
   const percent = clampPercent(rawPercent);
@@ -67,15 +69,15 @@ export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRin
         <p className="font-semibold text-sm mb-0.5" style={{ color: config.color }}>
           {config.label}
         </p>
-        <p className="amount text-xs text-foreground font-medium">{formatGHS(spent)}</p>
-        <p className="text-xs text-muted-foreground">of {formatGHS(limit)}</p>
+        <p className="amount text-xs text-foreground font-medium">{format(spent)}</p>
+        <p className="text-xs text-muted-foreground">of {format(limit)}</p>
 
         {/* Sinking fund earmarked breakdown — Future bucket only, desktop only */}
         {bucket === 'savings' && earmarked != null && earmarked > 0 && (
           <div className="hidden md:block mt-2 pt-2 border-t border-border space-y-1.5 text-xs text-left">
             <div>
               <div className="text-muted-foreground">Earmarked</div>
-              <div className="text-muted-foreground tabular-nums">{formatGHSCompact(earmarked)}/mo</div>
+              <div className="text-muted-foreground tabular-nums">{formatCompact(earmarked)}/mo</div>
             </div>
             <div>
               <div style={{ color: limit - earmarked < 0 ? '#F97316' : 'var(--muted-foreground)' }}>Uncommitted</div>
@@ -83,7 +85,7 @@ export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRin
                 className="tabular-nums"
                 style={{ color: limit - earmarked < 0 ? '#F97316' : 'var(--muted-foreground)' }}
               >
-                {formatGHSCompact(limit - earmarked)}/mo
+                {formatCompact(limit - earmarked)}/mo
               </div>
             </div>
             {limit - earmarked < 0 && (

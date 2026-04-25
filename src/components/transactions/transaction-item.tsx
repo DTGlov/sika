@@ -6,7 +6,8 @@ import { Trash2, Pencil, Scale } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useTransactionStore } from '@/stores/transaction-store';
-import { formatGHS, formatTransactionDate } from '@/lib/utils';
+import { formatTransactionDate } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { revalidateForEntity } from '@/lib/revalidation';
 import type { Transaction } from '@/types';
 
@@ -29,6 +30,7 @@ interface TransactionItemProps {
 export function TransactionItem({ transaction: txn }: TransactionItemProps) {
   const { removeTransaction, openLogSheet } = useTransactionStore();
   const supabase = createClient();
+  const { format } = useCurrency();
   const [deleting, setDeleting] = useState(false);
 
   async function handleDelete() {
@@ -113,7 +115,7 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
               {txn.type === 'income' ? '+' :
                txn.type === 'transfer' ? '' :
                txn.type === 'adjustment' ? (txn.amount >= 0 ? '+' : '') :
-               '-'}{formatGHS(Math.abs(txn.amount))}
+               '-'}{format(Math.abs(txn.amount))}
             </p>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
