@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { ACCOUNT_TYPE_CONFIG } from '@/lib/accounts';
-import { formatGHS } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { revalidateForEntity } from '@/lib/revalidation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { CURRENCY_SYMBOL } from '@/lib/constants';
 import type { Account, AccountType } from '@/types/account';
 
 const ACCOUNT_TYPES: AccountType[] = ['bank', 'momo', 'cash', 'savings', 'investment', 'other'];
@@ -48,6 +47,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
   const { user, accounts, setAccounts } = useAuthStore();
   const { addTransaction, openReconcileSheet } = useTransactionStore();
   const supabase = createClient();
+  const { format, symbol } = useCurrency();
   const [reconcileMode, setReconcileMode] = useState(false);
   const [reconcileActual, setReconcileActual] = useState('');
   const [reconcileSaving, setReconcileSaving] = useState(false);
@@ -172,7 +172,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
         category_id: null,
         account_id: editAccount.id,
         to_account_id: null,
-        note: `Reconciled to ${formatGHS(parseFloat(reconcileActual) || 0)}`,
+        note: `Reconciled to ${format(parseFloat(reconcileActual) || 0)}`,
         transaction_date: new Date().toISOString().slice(0, 10),
       })
       .select('*, category:categories(*, bucket:budget_buckets(*)), account:accounts!account_id(id,name,type,color,icon), to_account:accounts!to_account_id(id,name,type,color,icon)')
@@ -181,7 +181,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
     if (error) { toast.error('Failed to reconcile'); return; }
     addTransaction(data);
     revalidateForEntity('adjustment');
-    toast.success(`Reconciled to ${formatGHS(parseFloat(reconcileActual) || 0)}`);
+    toast.success(`Reconciled to ${format(parseFloat(reconcileActual) || 0)}`);
     reset();
     onClose();
   }
@@ -241,7 +241,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
                 {editAccount ? 'Opening balance' : 'Current balance — RIGHT NOW'}
               </Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{CURRENCY_SYMBOL}</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{symbol}</span>
                 <Input
                   type="number"
                   min="0"
@@ -315,10 +315,10 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Sika shows</span>
-                    <span className="text-foreground font-semibold tabular-nums">{formatGHS(currentBalance)}</span>
+                    <span className="text-foreground font-semibold tabular-nums">{format(currentBalance)}</span>
                   </div>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{CURRENCY_SYMBOL}</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{symbol}</span>
                     <Input
                       type="number"
                       min="0"
@@ -337,7 +337,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
                         style={{ backgroundColor: isPos ? '#00D9A318' : '#F43F5E18' }}>
                         <span className="text-muted-foreground">Adjustment</span>
                         <span style={{ color: isPos ? '#00D9A3' : '#F43F5E' }} className="font-semibold tabular-nums">
-                          {isPos ? '+' : ''}{formatGHS(diff)}
+                          {isPos ? '+' : ''}{format(diff)}
                         </span>
                       </div>
                     );
@@ -370,5 +370,3 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
   );
 }
 
-// Re-exported for use on accounts page balance display
-export { formatGHS };

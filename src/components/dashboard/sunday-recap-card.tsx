@@ -6,7 +6,7 @@ import { X } from 'lucide-react';
 import { getISOWeek, getISOWeekYear, startOfISOWeek, endOfISOWeek, format } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
-import { formatGHS } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { dismissHint } from '@/lib/hints';
 import type { HintId } from '@/lib/hints';
 
@@ -26,6 +26,7 @@ interface RecapData {
 export function SundayRecapCard() {
   const { user, dismissedHints, addDismissedHint } = useAuthStore();
   const supabase = createClient();
+  const { format: formatMoney } = useCurrency();
   const hintId = getRecapHintId();
 
   const [data, setData] = useState<RecapData | null>(null);
@@ -111,7 +112,7 @@ export function SundayRecapCard() {
             <span>💰</span>
             <span className="text-muted-foreground">Saved:</span>
             <span className="text-foreground font-medium">
-              {formatGHS(data.savedTotal)}
+              {formatMoney(data.savedTotal)}
               {data.goalsCount > 0 && (
                 <span className="text-muted-foreground font-normal">
                   {' '}to {data.goalsCount} goal{data.goalsCount !== 1 ? 's' : ''}

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTransactionStore } from '@/stores/transaction-store';
-import { formatGHS } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { BUCKET_CONFIG } from '@/lib/constants';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { BucketName } from '@/types';
@@ -11,6 +11,7 @@ const BUCKETS: BucketName[] = ['needs', 'wants', 'savings'];
 
 export function BucketStrip() {
   const dashboardStats = useTransactionStore((s) => s.dashboardStats);
+  const { format } = useCurrency();
 
   if (!dashboardStats) {
     return <Skeleton className="h-40 rounded-2xl bg-card" />;
@@ -40,7 +41,7 @@ export function BucketStrip() {
               <div className="flex justify-between items-baseline mb-1.5">
                 <span className="text-sm text-foreground">{config.label}</span>
                 <span className="text-xs text-muted-foreground sika-sensitive">
-                  {formatGHS(spent)} of {formatGHS(limit)}
+                  {format(spent)} of {format(limit)}
                 </span>
               </div>
               <div className="h-1 bg-muted rounded-full overflow-hidden">

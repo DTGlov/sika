@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Target } from 'lucide-react';
-import { formatGHSCompact } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import type { GoalProgress } from '@/types/goal';
 
 interface GoalsWidgetProps {
@@ -11,6 +11,7 @@ interface GoalsWidgetProps {
 }
 
 export function GoalsWidget({ goals }: GoalsWidgetProps) {
+  const { formatCompact } = useCurrency();
   if (goals.length === 0) return null;
 
   const top3 = goals.slice(0, 3);
@@ -37,9 +38,9 @@ export function GoalsWidget({ goals }: GoalsWidgetProps) {
                 <span className="text-base shrink-0">{gp.goal.icon ?? '🎯'}</span>
                 <p className="text-foreground text-sm font-medium flex-1 truncate">{gp.goal.name}</p>
                 <span className="text-muted-foreground text-xs tabular-nums shrink-0">
-                  {formatGHSCompact(gp.current_amount)}
+                  {formatCompact(gp.current_amount)}
                   {gp.goal.target_amount && (
-                    <span className="text-muted-foreground/70"> / {formatGHSCompact(gp.goal.target_amount)}</span>
+                    <span className="text-muted-foreground/70"> / {formatCompact(gp.goal.target_amount)}</span>
                   )}
                 </span>
               </div>

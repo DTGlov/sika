@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { useProfile } from '@/hooks/use-profile';
 import { useTransactionStore } from '@/stores/transaction-store';
-import { formatGHS } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { revalidateForEntity } from '@/lib/revalidation';
 import {
   formatScheduleSummary, getNextDueDate, generateDueTransactions, FREQUENCY_LABELS,
@@ -91,6 +91,7 @@ interface RecurringCardProps {
 }
 
 function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDelete }: RecurringCardProps) {
+  const { format } = useCurrency();
   const dueInfo = getDueDateInfo(item, today);
   const name = item.note ?? item.category?.name ?? FREQUENCY_LABELS[item.frequency];
 
@@ -132,7 +133,7 @@ function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDele
 
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           <p className="text-lg font-bold tabular-nums" style={{ color: accentColor }}>
-            {formatGHS(item.amount)}
+            {format(item.amount)}
           </p>
           <div className="flex items-center gap-0.5">
             <button

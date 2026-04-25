@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, X } from 'lucide-react';
-import { formatGHS } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import type { IncomeNudge } from '@/types';
 
 interface IncomeNudgeCardProps {
@@ -13,6 +13,7 @@ interface IncomeNudgeCardProps {
 }
 
 export function IncomeNudgeCard({ nudge, onLog, onSnooze, onDismiss }: IncomeNudgeCardProps) {
+  const { format } = useCurrency();
   const { incomeSource } = nudge;
 
   return (
@@ -30,7 +31,7 @@ export function IncomeNudgeCard({ nudge, onLog, onSnooze, onDismiss }: IncomeNud
             {incomeSource.name} expected today
           </p>
           <p className="text-muted-foreground text-xs mt-0.5">
-            Did you receive {formatGHS(incomeSource.amount)}?
+            Did you receive {format(incomeSource.amount)}?
           </p>
 
           <div className="flex items-center gap-2 mt-3">
@@ -71,6 +72,7 @@ interface PendingRecurringCardProps {
 }
 
 export function PendingRecurringCard({ name, amount, dueDate, onConfirm, onSkip }: PendingRecurringCardProps) {
+  const { format } = useCurrency();
   return (
     <motion.div
       initial={{ opacity: 0, y: -8 }}
@@ -84,7 +86,7 @@ export function PendingRecurringCard({ name, amount, dueDate, onConfirm, onSkip 
         <div className="flex-1 min-w-0">
           <p className="text-foreground text-sm font-semibold">{name} due</p>
           <p className="text-muted-foreground text-xs mt-0.5">
-            {formatGHS(amount)} · {dueDate}
+            {format(amount)} · {dueDate}
           </p>
           <div className="flex items-center gap-2 mt-3">
             <button

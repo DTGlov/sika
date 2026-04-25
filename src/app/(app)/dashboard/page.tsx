@@ -32,7 +32,7 @@ import { useDashboardData } from '@/hooks/use-dashboard-data';
 import { useProfile } from '@/hooks/use-profile';
 import { useStreakHealth } from '@/hooks/use-streaks';
 import { totalMonthlyIncome, FREQUENCY_LABELS } from '@/lib/income';
-import { formatGHS, formatGHSCompact } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { ACCOUNT_TYPE_CONFIG } from '@/lib/accounts';
 import { getCycleForDate, getCycleAtOffset, parseCycleParam, getCycleFromStartDate } from '@/lib/cycle';
 import { getDueIncomeNudges, recordNudgeDismissal } from '@/lib/income-nudges';
@@ -53,6 +53,7 @@ function DashboardContent() {
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
+  const { format: formatMoney, formatCompact } = useCurrency();
 
   const { profile, incomeSources, accounts, user, enqueueBadgeCelebrations } = useAuthStore();
   useStreakHealth();
@@ -208,7 +209,7 @@ function DashboardContent() {
     await recordNudgeDismissal(supabase, user.id, nudge.incomeSource.id, nudge.dueDate, 'logged');
     setNudges(prev => prev.filter(n => n.incomeSource.id !== nudge.incomeSource.id));
     revalidateForEntity('transaction');
-    toast.success(`Logged ${formatGHS(nudge.incomeSource.amount)} income`);
+    toast.success(`Logged ${formatMoney(nudge.incomeSource.amount)} income`);
   }
 
   async function handleSnoozeNudge(nudge: IncomeNudge) {
@@ -391,7 +392,7 @@ function DashboardContent() {
               onClick={() => setShowIncomeBreakdown(v => !v)}
               className="flex items-center gap-1.5 text-sm transition-colors"
             >
-              <span className="text-foreground font-semibold tabular-nums">{formatGHS(monthlyIncome)}</span>
+              <span className="text-foreground font-semibold tabular-nums">{formatMoney(monthlyIncome)}</span>
               <span className="text-muted-foreground">/mo</span>
               {activeSources.length > 1 && (
                 <span className="text-muted-foreground/70 text-[10px] ml-0.5">
@@ -406,7 +407,7 @@ function DashboardContent() {
                   {activeSources.map(s => (
                     <span key={s.id} className="text-muted-foreground text-xs whitespace-nowrap">
                       {s.name}{' '}
-                      <span className="text-foreground">{formatGHSCompact(s.amount)}</span>
+                      <span className="text-foreground">{formatCompact(s.amount)}</span>
                       {s.frequency !== 'monthly' && (
                         <span className="text-muted-foreground/70"> {FREQUENCY_LABELS[s.frequency].toLowerCase()}</span>
                       )}
@@ -506,7 +507,7 @@ function DashboardContent() {
                       <span className="text-muted-foreground text-xs truncate">{acc.name}</span>
                     </div>
                     <p className="text-sm font-bold tabular-nums" style={{ color: cfg.color }}>
-                      {formatGHSCompact(balance)}
+                      {formatCompact(balance)}
                     </p>
                     </div>
                   </Link>

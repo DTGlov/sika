@@ -8,6 +8,7 @@ import { Loader2, X, TrendingUp, AlertTriangle, CheckCircle, HelpCircle } from '
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useCurrency } from '@/hooks/use-currency';
 import type { DecisionData, PurchaseDecisionBucket, PurchaseUrgency } from '@/types/decision';
 
 type Phase = 'input' | 'loading' | 'result' | 'error';
@@ -39,6 +40,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
   useEffect(() => { analytics.decisionOpened(); }, []);
   const router = useRouter();
   const { medium: hapticMedium } = useHaptics();
+  const { symbol } = useCurrency();
   const [phase, setPhase] = useState<Phase>('input');
   const [itemName, setItemName] = useState('');
   const [amount, setAmount] = useState('');
@@ -147,9 +149,9 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-muted-foreground text-sm">How much? (₵)</label>
+              <label className="text-muted-foreground text-sm">How much? ({symbol})</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm pointer-events-none">₵</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm pointer-events-none">{symbol}</span>
                 <Input
                   type="number"
                   inputMode="decimal"

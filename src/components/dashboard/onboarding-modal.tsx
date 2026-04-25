@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,14 +9,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { analytics } from '@/lib/analytics/identify';
-import { CURRENCY_SYMBOL } from '@/lib/constants';
 import {
   calculateMonthlyEquivalent,
   totalMonthlyIncome,
   FREQUENCY_LABELS,
   FREQUENCY_COLORS,
 } from '@/lib/income';
-import { formatGHS } from '@/lib/utils';
+import { formatCurrency, formatCurrencyCompact } from '@/lib/format/currency';
+import { ALL_CURRENCIES, POPULAR_CURRENCIES, getCurrencySymbol } from '@/lib/currencies';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,12 +58,33 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
   const { user, setProfile, setIncomeSources } = useAuthStore();
   const supabase = createClient();
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [selectedCurrency, setSelectedCurrency] = useState('GHS');
+  const [currencySearch, setCurrencySearch] = useState('');
   const [primarySource, setPrimarySource] = useState<TempSource | null>(null);
   const [extraSources, setExtraSources] = useState<TempSource[]>([]);
   const [saving, setSaving] = useState(false);
   const [activeSourceKey, setActiveSourceKey] = useState<string | null>(null);
   const [inputAmount, setInputAmount] = useState('');
+
+  const currencySymbol = getCurrencySymbol(selectedCurrency);
+
+  const filteredCurrencies = useMemo(() => {
+    const lowered = currencySearch.toLowerCase();
+    if (!lowered) {
+      const popular = POPULAR_CURRENCIES
+        .map(code => ALL_CURRENCIES.find(c => c.code === code)!)
+        .filter(Boolean);
+      const rest = ALL_CURRENCIES.filter(c => !POPULAR_CURRENCIES.includes(c.code));
+      return [...popular, ...rest];
+    }
+    return ALL_CURRENCIES.filter(
+      c =>
+        c.code.toLowerCase().includes(lowered) ||
+        c.name.toLowerCase().includes(lowered) ||
+        c.symbol.toLowerCase().includes(lowered),
+    );
+  }, [currencySearch]);
 
   const {
     register,
@@ -103,7 +124,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
   function onPrimarySubmit(values: PrimaryForm) {
     setPrimarySource({ _key: 'primary', ...values, expected_day: null });
-    setStep(3);
+    setStep(4);
   }
 
   async function handleFinish() {
@@ -136,14 +157,14 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
     const { data: updatedProfile } = await supabase
       .from('profiles')
-      .update({ monthly_income: total, updated_at: new Date().toISOString() })
+      .update({ monthly_income: total, currency: selectedCurrency, updated_at: new Date().toISOString() })
       .eq('id', user.id)
       .select()
       .single();
 
     if (updatedProfile) setProfile(updatedProfile);
     setIncomeSources(sources);
-    analytics.onboardingCompleted({ stepsCompleted: 4 });
+    analytics.onboardingCompleted({ stepsCompleted: 5 });
     setSaving(false);
     onClose();
   }
@@ -156,6 +177,8 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
   function handleClose() {
     setStep(1);
+    setSelectedCurrency('GHS');
+    setCurrencySearch('');
     setPrimarySource(null);
     setExtraSources([]);
     setActiveSourceKey(null);
@@ -183,7 +206,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
           >
             {/* Step indicator */}
             <div className="flex items-center gap-1.5 mb-5">
-              {([1, 2, 3, 4] as const).map(s => (
+              {([1, 2, 3, 4, 5] as const).map(s => (
                 <div
                   key={s}
                   className="h-1 rounded-full transition-all"
@@ -214,6 +237,64 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                   onClick={() => setStep(2)}
                   className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
                 >
+                  Get started <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+                <button
+                  onClick={handleClose}
+                  className="w-full mt-3 text-muted-foreground/70 text-sm hover:text-muted-foreground transition-colors"
+                >
+                  I&apos;ll do this later
+                </button>
+              </div>
+            )}
+
+            {/* Step 2: Currency */}
+            {step === 2 && (
+              <div className="flex flex-col" style={{ minHeight: 360 }}>
+                <button
+                  onClick={() => setStep(1)}
+                  className="flex items-center gap-1 text-muted-foreground text-sm mb-4 hover:text-foreground transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back
+                </button>
+                <h2 className="text-lg font-bold text-foreground mb-1">Pick your currency</h2>
+                <p className="text-muted-foreground text-xs mb-4">
+                  All amounts will display in this currency. You can change it later in Settings.
+                </p>
+                <input
+                  type="text"
+                  value={currencySearch}
+                  onChange={e => setCurrencySearch(e.target.value)}
+                  placeholder="Search currencies…"
+                  className="w-full bg-input border border-border rounded-xl px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-accent mb-2"
+                />
+                <div className="flex-1 overflow-y-auto space-y-0.5 mb-4" style={{ maxHeight: 220 }}>
+                  {filteredCurrencies.map(currency => {
+                    const sel = currency.code === selectedCurrency;
+                    return (
+                      <button
+                        key={currency.code}
+                        onClick={() => setSelectedCurrency(currency.code)}
+                        className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-colors text-left ${
+                          sel ? 'bg-accent/10 border border-accent/40' : 'hover:bg-muted/50 border border-transparent'
+                        }`}
+                      >
+                        <div>
+                          <p className={`text-sm font-medium ${sel ? 'text-accent' : 'text-foreground'}`}>{currency.code}</p>
+                          <p className="text-muted-foreground text-xs">{currency.name}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground text-sm">{currency.symbol}</span>
+                          {sel && <Check className="w-4 h-4 text-accent" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                <Button
+                  onClick={() => setStep(3)}
+                  className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
+                >
                   Add my income <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
                 <button
@@ -225,11 +306,11 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
               </div>
             )}
 
-            {/* Step 2: Primary income */}
-            {step === 2 && (
+            {/* Step 3: Primary income */}
+            {step === 3 && (
               <div>
                 <button
-                  onClick={() => setStep(1)}
+                  onClick={() => setStep(2)}
                   className="flex items-center gap-1 text-muted-foreground text-sm mb-4 hover:text-foreground transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" /> Back
@@ -249,9 +330,9 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-muted-foreground text-sm">Amount ({CURRENCY_SYMBOL})</Label>
+                    <Label className="text-muted-foreground text-sm">Amount ({currencySymbol})</Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{CURRENCY_SYMBOL}</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{currencySymbol}</span>
                       <Input
                         type="number"
                         min="0.01"
@@ -294,11 +375,11 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
               </div>
             )}
 
-            {/* Step 3: Any other income? */}
-            {step === 3 && (
+            {/* Step 4: Any other income? */}
+            {step === 4 && (
               <div>
                 <button
-                  onClick={() => setStep(2)}
+                  onClick={() => setStep(3)}
                   className="flex items-center gap-1 text-muted-foreground text-sm mb-4 hover:text-foreground transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" /> Back
@@ -319,7 +400,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                           style={{ borderColor: '#00D9A3', backgroundColor: '#00D9A309' }}
                         >
                           <div className="flex-1 flex items-center gap-1 bg-input rounded-lg px-2.5 py-1.5">
-                            <span className="text-muted-foreground font-mono shrink-0" style={{ fontSize: 16 }}>{CURRENCY_SYMBOL}</span>
+                            <span className="text-muted-foreground font-mono shrink-0" style={{ fontSize: 16 }}>{currencySymbol}</span>
                             <input
                               type="number"
                               inputMode="decimal"
@@ -381,7 +462,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                       <div key={s._key} className="flex items-center justify-between px-3 py-2 bg-muted rounded-lg">
                         <div>
                           <span className="text-foreground text-xs font-medium">{s.name}</span>
-                          <span className="text-muted-foreground text-xs ml-2">{formatGHS(s.amount)} · {FREQUENCY_LABELS[s.frequency]}</span>
+                          <span className="text-muted-foreground text-xs ml-2">{formatCurrency(s.amount, selectedCurrency)} · {FREQUENCY_LABELS[s.frequency]}</span>
                         </div>
                         <button onClick={() => removeExtra(s._key)} className="text-muted-foreground/70 hover:text-[#F43F5E] ml-2 transition-colors">
                           <X className="w-3.5 h-3.5" />
@@ -392,7 +473,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                 )}
 
                 <Button
-                  onClick={() => setStep(4)}
+                  onClick={() => setStep(5)}
                   className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
                 >
                   {extraSources.length > 0 ? 'Continue' : 'Skip for now'} <ChevronRight className="w-4 h-4 ml-1" />
@@ -400,18 +481,18 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
               </div>
             )}
 
-            {/* Step 4: Review */}
-            {step === 4 && (
+            {/* Step 5: Review */}
+            {step === 5 && (
               <div>
                 <button
-                  onClick={() => setStep(3)}
+                  onClick={() => setStep(4)}
                   className="flex items-center gap-1 text-muted-foreground text-sm mb-4 hover:text-foreground transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" /> Back
                 </button>
                 <h2 className="text-lg font-bold text-foreground mb-1">Your monthly income</h2>
                 <div className="text-3xl font-bold text-[#D4A017] mb-5">
-                  {formatGHS(totalMonthly)}
+                  {formatCurrency(totalMonthly, selectedCurrency)}
                 </div>
 
                 <div className="space-y-1.5 mb-5">
@@ -424,9 +505,9 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                           <span className="text-muted-foreground text-xs ml-2">{FREQUENCY_LABELS[s.frequency]}</span>
                         </div>
                         <div className="text-right">
-                          <span className="text-foreground text-xs">{formatGHS(s.amount)}</span>
+                          <span className="text-foreground text-xs">{formatCurrency(s.amount, selectedCurrency)}</span>
                           {s.frequency !== 'monthly' && s.frequency !== 'irregular' && (
-                            <p className="text-muted-foreground/70 text-[10px]">≈ {formatGHS(eq)}/mo</p>
+                            <p className="text-muted-foreground/70 text-[10px]">≈ {formatCurrency(eq, selectedCurrency)}/mo</p>
                           )}
                         </div>
                       </div>
@@ -441,11 +522,11 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                     {([
                       { label: 'Needs', pct: 50, color: '#00D9A3' },
                       { label: 'Wants', pct: 30, color: '#FBBF24' },
-                      { label: 'Future', pct: 20, color: '#60A5FA' },
+                      { label: 'Savings', pct: 20, color: '#60A5FA' },
                     ] as const).map(b => (
                       <div key={b.label}>
                         <p className="text-[10px]" style={{ color: b.color }}>{b.label}</p>
-                        <p className="text-foreground text-xs font-semibold">{formatGHS((totalMonthly * b.pct) / 100)}</p>
+                        <p className="text-foreground text-xs font-semibold">{formatCurrency((totalMonthly * b.pct) / 100, selectedCurrency)}</p>
                       </div>
                     ))}
                   </div>

@@ -8,10 +8,10 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useProfile } from '@/hooks/use-profile';
 import { getCycleForDate } from '@/lib/cycle';
 import { createClient } from '@/lib/supabase/client';
-import { formatGHS } from '@/lib/utils';
 import { BUCKET_CONFIG } from '@/lib/constants';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { format } from 'date-fns';
 import type { BudgetBucket, BucketName } from '@/types';
 
@@ -67,6 +67,7 @@ export default function BucketsPage() {
   const user = useAuthStore((s) => s.user);
   const profile = useAuthStore((s) => s.profile);
   useProfile();
+  const { format: formatMoney } = useCurrency();
 
   const dashboardStats = useTransactionStore((s) => s.dashboardStats);
 
@@ -223,9 +224,9 @@ export default function BucketsPage() {
           <div className="mb-7">
             <p className="text-xs text-muted-foreground mb-1">{config.description}</p>
             <p className="text-3xl font-bold text-foreground sika-sensitive">
-              {formatGHS(spent)}
+              {formatMoney(spent)}
               <span className="text-sm text-muted-foreground font-normal ml-2">
-                of {formatGHS(limit)}
+                of {formatMoney(limit)}
               </span>
             </p>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-3 mb-2">
@@ -235,7 +236,7 @@ export default function BucketsPage() {
               />
             </div>
             <p className="text-xs text-muted-foreground sika-sensitive">
-              {formatGHS(remaining)} remaining
+              {formatMoney(remaining)} remaining
             </p>
           </div>
         )}
@@ -285,7 +286,7 @@ export default function BucketsPage() {
                       </p>
                     </div>
                     <span className="text-sm font-medium text-foreground tabular-nums shrink-0">
-                      {formatGHS(txn.amount)}
+                      {formatMoney(txn.amount)}
                     </span>
                   </div>
                 );
@@ -314,7 +315,7 @@ export default function BucketsPage() {
                     </p>
                   </div>
                   <span className="text-sm font-medium text-foreground tabular-nums shrink-0">
-                    {formatGHS(txn.amount)}
+                    {formatMoney(txn.amount)}
                   </span>
                 </div>
               );

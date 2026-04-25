@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { formatTransactionDate } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import { getCycleForDate } from '@/lib/cycle';
 import type { Transaction } from '@/types';
 
@@ -41,6 +42,7 @@ function TransactionsContent() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, profile, accounts } = useAuthStore();
+  const { symbol } = useCurrency();
   const { transactions, setTransactions, categories, mutationCount } = useTransactionStore();
   useProfile();
   const supabase = createClient();
@@ -389,7 +391,7 @@ function TransactionsContent() {
               <p className="text-muted-foreground text-xs font-medium mb-2">Amount range</p>
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 text-xs">₵</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 text-xs">{symbol}</span>
                   <Input
                     type="number" min="0" step="0.01" placeholder="Min"
                     value={urlAmountMin}
@@ -399,7 +401,7 @@ function TransactionsContent() {
                 </div>
                 <span className="text-muted-foreground/60 text-xs">–</span>
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 text-xs">₵</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 text-xs">{symbol}</span>
                   <Input
                     type="number" min="0" step="0.01" placeholder="Max"
                     value={urlAmountMax}

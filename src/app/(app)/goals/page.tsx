@@ -14,7 +14,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useTransactionStore } from '@/stores/transaction-store';
 import { createClient } from '@/lib/supabase/client';
 import { fetchGoals, fetchGoalAmounts, computeGoalProgress } from '@/lib/goals';
-import { formatGHS, formatGHSCompact } from '@/lib/utils';
+import { useCurrency } from '@/hooks/use-currency';
 import type { GoalProgress, Goal } from '@/types/goal';
 
 const SUGGESTION_PILLS = [
@@ -27,6 +27,7 @@ const SUGGESTION_PILLS = [
 export default function GoalsPage() {
   const supabase = createClient();
   const { user, accounts } = useAuthStore();
+  const { format } = useCurrency();
   const { mutationCount } = useTransactionStore();
 
   const [goalProgresses, setGoalProgresses] = useState<GoalProgress[]>([]);
@@ -74,7 +75,7 @@ export default function GoalsPage() {
             <h1 className="text-foreground font-bold text-xl">Goals</h1>
             {!loading && goalProgresses.length > 0 && (
               <p className="text-muted-foreground text-xs mt-0.5">
-                {formatGHS(totalSaved)} saved across {goalProgresses.length} goal{goalProgresses.length !== 1 ? 's' : ''}
+                {format(totalSaved)} saved across {goalProgresses.length} goal{goalProgresses.length !== 1 ? 's' : ''}
               </p>
             )}
           </div>
@@ -197,6 +198,7 @@ interface GoalCardProps {
 
 function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, onNextCycle }: GoalCardProps) {
   const router = useRouter();
+  const { format, formatCompact } = useCurrency();
   const { goal, current_amount, progress_percent, days_remaining, is_on_track } = gp;
   const accentColor = goal.color ?? '#00D9A3';
   const isPerpetual = goal.goal_type === 'perpetual';
@@ -275,9 +277,9 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, on
           </div>
           <div className="flex justify-between text-xs">
             <span style={{ color: accentColor }}>
-              {formatGHSCompact(current_amount)}
+              {formatCompact(current_amount)}
               {goal.target_amount && (
-                <span className="text-muted-foreground/70"> / {formatGHSCompact(goal.target_amount)}</span>
+                <span className="text-muted-foreground/70"> / {formatCompact(goal.target_amount)}</span>
               )}
             </span>
             <div className="flex items-center gap-2">
@@ -299,7 +301,7 @@ function GoalCard({ goalProgress: gp, index, completed, onEdit, onContribute, on
           <Repeat className="w-3 h-3" style={{ color: accentColor }} />
           <span>Perpetual · </span>
           <TrendingUp className="w-3 h-3" style={{ color: accentColor }} />
-          <span style={{ color: accentColor }}>{formatGHS(current_amount)} saved</span>
+          <span style={{ color: accentColor }}>{format(current_amount)} saved</span>
         </div>
       ) : null}
     </motion.div>
