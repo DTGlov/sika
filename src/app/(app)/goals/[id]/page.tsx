@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Pencil, Archive, Trash2, TrendingUp, Repeat, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { ArrowLeft, Pencil, Archive, Trash2, Repeat, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
@@ -113,7 +113,7 @@ export default function GoalDetailPage() {
   if (!goalProgress) return null;
 
   const { goal, current_amount, progress_percent, days_remaining, required_monthly_pace, is_on_track } = goalProgress;
-  const accentColor = goal.color ?? '#00D9A3';
+  const accentColor = goal.color ?? '#D4A017';
   const isPerpetual = goal.goal_type === 'perpetual';
   const isTarget = goal.goal_type === 'target';
   const totalContributions = contributions.reduce((s, t) => s + t.amount, 0);
@@ -284,7 +284,7 @@ export default function GoalDetailPage() {
           {!goal.completed_at && (
             <button
               onClick={() => setShowContribute(true)}
-              className="w-full h-11 rounded-xl font-semibold text-sm text-[#0A0A0B] transition-colors hover:opacity-90"
+              className="w-full h-11 rounded-xl font-semibold text-sm text-[#0E1A2E] transition-colors hover:opacity-90"
               style={{ background: accentColor }}
             >
               + Add Contribution

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { TrendingUp } from 'lucide-react';
+import { SikaMark } from '@/components/brand/sika-mark';
 
 export const metadata = {
   title: 'Privacy Policy — Sika',
@@ -11,8 +11,8 @@ export default function PrivacyPage() {
       <div className="max-w-2xl mx-auto px-4 py-12 md:py-16">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-10">
-          <div className="w-9 h-9 rounded-xl bg-[#00D9A3] flex items-center justify-center">
-            <TrendingUp className="w-4 h-4 text-[#0A0A0B]" />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center">
+            <SikaMark size={36} variant="gold-on-navy" />
           </div>
           <Link href="/" className="text-xl font-bold tracking-tight">Sika</Link>
         </div>
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
             <h2 className="text-foreground font-semibold text-base mb-2">5. Usage analytics</h2>
             <p className="mb-2">Sika uses PostHog to understand how features are used — which screens get engagement, where users get stuck, and which actions flow naturally. This includes session replay, which records the structure of your interactions (which screens you visit, which buttons you tap) to help us debug issues and improve the app.</p>
             <p className="mb-2">When you sign up, your name and email are associated with your activity in our analytics. This is used internally to understand user experience and debug issues. We do not share this information with any party other than PostHog, our analytics provider.</p>
-            <p>All financial data — transaction amounts, account balances, goal values, notes, and anything you type — is automatically masked and never captured in session replays. We see your navigation patterns, not your money. You can read PostHog&apos;s privacy policy at <a href="https://posthog.com/privacy" className="text-[#00D9A3] hover:text-[#00F5B8] transition-colors">posthog.com/privacy</a>.</p>
+            <p>All financial data — transaction amounts, account balances, goal values, notes, and anything you type — is automatically masked and never captured in session replays. We see your navigation patterns, not your money. You can read PostHog&apos;s privacy policy at <a href="https://posthog.com/privacy" className="text-[#D4A017] hover:text-[#E8B520] transition-colors">posthog.com/privacy</a>.</p>
           </section>
 
           <section>
@@ -100,7 +100,7 @@ export default function PrivacyPage() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-border">
-          <Link href="/login" className="text-sm text-[#00D9A3] hover:text-[#00F5B8] transition-colors">
+          <Link href="/login" className="text-sm text-[#D4A017] hover:text-[#E8B520] transition-colors">
             ← Back to app
           </Link>
         </div>

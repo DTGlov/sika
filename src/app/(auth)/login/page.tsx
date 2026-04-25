@@ -7,12 +7,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Loader2, TrendingUp } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SikaMark } from '@/components/brand/sika-mark';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -61,8 +62,8 @@ export default function LoginPage() {
     >
       <div className="mb-8 text-center">
         <div className="inline-flex items-center gap-2 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-[#00D9A3] flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-[#0A0A0B]" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+            <SikaMark size={40} variant="gold-on-navy" />
           </div>
           <span className="text-2xl font-bold tracking-tight">Sika</span>
         </div>
@@ -120,7 +121,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 bg-[#00D9A3] hover:bg-[#00B088] text-[#0A0A0B] font-semibold text-base rounded-xl transition-colors"
+            className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold text-base rounded-xl transition-colors"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign in'}
           </Button>
@@ -128,7 +129,7 @@ export default function LoginPage() {
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-[#00D9A3] hover:text-[#00F5B8] font-medium transition-colors">
+          <Link href="/signup" className="text-[#D4A017] hover:text-[#E8B520] font-medium transition-colors">
             Sign up
           </Link>
         </p>
