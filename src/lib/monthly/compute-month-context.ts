@@ -15,7 +15,7 @@ export type MonthContext = {
   by_bucket: {
     needs: { spent: number; budget: number; pct: number };
     wants: { spent: number; budget: number; pct: number };
-    future: { spent: number; commitment: number; pct: number };
+    savings: { spent: number; commitment: number; pct: number };
   };
   top_categories: Array<{
     name: string;
@@ -38,7 +38,7 @@ export type MonthContext = {
   };
   prev_month: {
     total_out: number;
-    by_bucket_out: { needs: number; wants: number; future: number };
+    by_bucket_out: { needs: number; wants: number; savings: number };
   };
 };
 
@@ -67,7 +67,7 @@ export async function computeMonthContext(
   prevEnd.setUTCDate(prevEnd.getUTCDate() - 1);
 
   const [profileRes, bucketsRes, txnsRes, prevTxnsRes, goalsRes, streakRes] = await Promise.all([
-    supabase.from('profiles').select('full_name, monthly_income, needs_percent, wants_percent, future_percent').eq('id', userId).single(),
+    supabase.from('profiles').select('full_name, monthly_income, needs_percent, wants_percent, savings_percent').eq('id', userId).single(),
     supabase.from('budget_buckets').select('id, name, display_name').eq('user_id', userId),
     supabase.from('transactions')
       .select('amount, type, transaction_date, category:categories(name, icon, bucket_id)')
@@ -104,11 +104,11 @@ export async function computeMonthContext(
   // Bucket budgets
   const needsPct = (profile?.needs_percent ?? 50) / 100;
   const wantsPct = (profile?.wants_percent ?? 30) / 100;
-  const futurePct = (profile?.future_percent ?? 20) / 100;
+  const futurePct = (profile?.savings_percent ?? 20) / 100;
 
   // Aggregate current month
   let totalIn = 0, totalOut = 0;
-  const bucketSpend: Record<string, number> = { needs: 0, wants: 0, future: 0 };
+  const bucketSpend: Record<string, number> = { needs: 0, wants: 0, savings: 0 };
   const catMap: Record<string, { name: string; emoji: string; bucket: string; total: number; count: number }> = {};
   const loggedDates = new Set<string>();
 
@@ -142,7 +142,7 @@ export async function computeMonthContext(
   // Aggregate prev month for deltas
   const prevCatTotals: Record<string, number> = {};
   let prevTotalOut = 0;
-  const prevBucketSpend: Record<string, number> = { needs: 0, wants: 0, future: 0 };
+  const prevBucketSpend: Record<string, number> = { needs: 0, wants: 0, savings: 0 };
 
   for (const tx of prevTxns) {
     const cat = (Array.isArray(tx.category) ? tx.category[0] : tx.category) as { name: string; icon: string | null; bucket_id: string | null } | null;
@@ -168,7 +168,7 @@ export async function computeMonthContext(
 
   const needsBudget = weeklyBudget * needsPct;
   const wantsBudget = weeklyBudget * wantsPct;
-  const futureCommitment = weeklyBudget * futurePct;
+  const savingsCommitment = weeklyBudget * futurePct;
 
   return {
     user: {
@@ -193,10 +193,10 @@ export async function computeMonthContext(
         budget: wantsBudget,
         pct: wantsBudget > 0 ? Math.round((bucketSpend.wants / wantsBudget) * 100) : 0,
       },
-      future: {
-        spent: bucketSpend.future,
-        commitment: futureCommitment,
-        pct: futureCommitment > 0 ? Math.round((bucketSpend.future / futureCommitment) * 100) : 0,
+      savings: {
+        spent: bucketSpend.savings,
+        commitment: savingsCommitment,
+        pct: savingsCommitment > 0 ? Math.round((bucketSpend.savings / savingsCommitment) * 100) : 0,
       },
     },
     top_categories: topCategories,
@@ -216,7 +216,7 @@ export async function computeMonthContext(
       by_bucket_out: {
         needs: prevBucketSpend.needs,
         wants: prevBucketSpend.wants,
-        future: prevBucketSpend.future,
+        savings: prevBucketSpend.savings,
       },
     },
   };

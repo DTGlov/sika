@@ -8,7 +8,7 @@ import { z } from 'zod';
 const askSchema = z.object({
   item_name: z.string().min(1).max(120),
   amount: z.number().positive().max(10_000_000),
-  bucket: z.enum(['needs', 'wants', 'future']),
+  bucket: z.enum(['needs', 'wants', 'savings']),
   urgency: z.enum(['now', 'can_wait', 'not_sure']).optional(),
 });
 

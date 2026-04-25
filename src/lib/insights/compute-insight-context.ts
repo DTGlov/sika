@@ -11,7 +11,7 @@ type InsightContext = {
   buckets: {
     needs: { spent: number; budget: number; pct: number; pct_time: number };
     wants: { spent: number; budget: number; pct: number; pct_time: number };
-    future: { spent: number; commitment: number; pct: number };
+    savings: { spent: number; commitment: number; pct: number };
   };
   recent: {
     last_24h_spend: number;
@@ -60,7 +60,7 @@ export async function computeInsightContext(
   const [profileRes, bucketsRes, recentTxnsRes, goalsRes, streakRes] = await Promise.all([
     supabase
       .from('profiles')
-      .select('full_name, monthly_income, needs_percent, wants_percent, future_percent, cycle_start_day')
+      .select('full_name, monthly_income, needs_percent, wants_percent, savings_percent, cycle_start_day')
       .eq('id', userId)
       .single(),
     supabase.from('budget_buckets').select('id, name').eq('user_id', userId),
@@ -99,7 +99,7 @@ export async function computeInsightContext(
   const cycleStartDay = profile?.cycle_start_day ?? 1;
   const needsPct = (profile?.needs_percent ?? 50) / 100;
   const wantsPct = (profile?.wants_percent ?? 30) / 100;
-  const futurePct = (profile?.future_percent ?? 20) / 100;
+  const futurePct = (profile?.savings_percent ?? 20) / 100;
 
   // Cycle position
   const todayDay = now.getUTCDate();
@@ -124,7 +124,7 @@ export async function computeInsightContext(
   }
 
   // Aggregate
-  const bucketSpend: Record<string, number> = { needs: 0, wants: 0, future: 0 };
+  const bucketSpend: Record<string, number> = { needs: 0, wants: 0, savings: 0 };
   const catMap: Record<string, { name: string; emoji: string; total: number }> = {};
   let last24hSpend = 0, last24hCount = 0, yesterdaySpend = 0;
   let subCount = 0, subTotal = 0;
@@ -178,7 +178,7 @@ export async function computeInsightContext(
 
   const needsBudget = monthlyIncome * needsPct;
   const wantsBudget = monthlyIncome * wantsPct;
-  const futureCommitment = monthlyIncome * futurePct;
+  const savingsCommitment = monthlyIncome * futurePct;
 
   return {
     today,
@@ -197,10 +197,10 @@ export async function computeInsightContext(
         pct: wantsBudget > 0 ? Math.round((bucketSpend.wants / wantsBudget) * 100) : 0,
         pct_time: pctTime,
       },
-      future: {
-        spent: bucketSpend.future,
-        commitment: futureCommitment,
-        pct: futureCommitment > 0 ? Math.round((bucketSpend.future / futureCommitment) * 100) : 0,
+      savings: {
+        spent: bucketSpend.savings,
+        commitment: savingsCommitment,
+        pct: savingsCommitment > 0 ? Math.round((bucketSpend.savings / savingsCommitment) * 100) : 0,
       },
     },
     recent: {

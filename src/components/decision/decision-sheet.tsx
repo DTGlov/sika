@@ -15,7 +15,7 @@ type Phase = 'input' | 'loading' | 'result' | 'error';
 const BUCKET_CONFIG: Record<PurchaseDecisionBucket, { label: string; color: string; bg: string }> = {
   needs: { label: 'Needs', color: '#00D9A3', bg: '#00D9A318' },
   wants: { label: 'Wants', color: '#FBBF24', bg: '#FBBF2418' },
-  future: { label: 'Future', color: '#60A5FA', bg: '#60A5FA18' },
+  savings: { label: 'Savings', color: '#60A5FA', bg: '#60A5FA18' },
 };
 
 const URGENCY_CONFIG: Record<PurchaseUrgency, { label: string }> = {

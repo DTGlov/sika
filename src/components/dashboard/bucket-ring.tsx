@@ -71,7 +71,7 @@ export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRin
         <p className="text-xs text-muted-foreground">of {formatGHS(limit)}</p>
 
         {/* Sinking fund earmarked breakdown — Future bucket only, desktop only */}
-        {bucket === 'future' && earmarked != null && earmarked > 0 && (
+        {bucket === 'savings' && earmarked != null && earmarked > 0 && (
           <div className="hidden md:block mt-2 pt-2 border-t border-border space-y-1.5 text-xs text-left">
             <div>
               <div className="text-muted-foreground">Earmarked</div>

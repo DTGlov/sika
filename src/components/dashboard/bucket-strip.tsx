@@ -7,7 +7,7 @@ import { BUCKET_CONFIG } from '@/lib/constants';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { BucketName } from '@/types';
 
-const BUCKETS: BucketName[] = ['needs', 'wants', 'future'];
+const BUCKETS: BucketName[] = ['needs', 'wants', 'savings'];
 
 export function BucketStrip() {
   const dashboardStats = useTransactionStore((s) => s.dashboardStats);

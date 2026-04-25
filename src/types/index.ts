@@ -1,5 +1,5 @@
 export type TransactionType = 'expense' | 'income' | 'transfer' | 'adjustment';
-export type BucketName = 'needs' | 'wants' | 'future';
+export type BucketName = 'needs' | 'wants' | 'savings';
 export type CategoryType = 'expense' | 'income' | 'adjustment' | 'transfer' | 'system';
 export type IncomeFrequency = 'monthly' | 'weekly' | 'biweekly' | 'irregular';
 export type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly';
@@ -29,7 +29,7 @@ export interface Profile {
   currency: string;
   needs_percent: number;
   wants_percent: number;
-  future_percent: number;
+  savings_percent: number;
   cycle_start_day?: number;
   accounts_banner_dismissed?: boolean;
   card_theme?: import('./card-theme').CardTheme;
