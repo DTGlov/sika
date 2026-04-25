@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Loader2, TrendingUp } from 'lucide-react';
+import { Eye, EyeOff, Loader2, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ type FormValues = z.infer<typeof schema>;
 export default function LoginPage() {
   const router = useRouter();
   const [serverError, setServerError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const supabase = createClient();
 
   const {
@@ -88,14 +89,25 @@ export default function LoginPage() {
 
           <div className="space-y-1.5">
             <Label htmlFor="password" className="text-muted-foreground text-sm">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="current-password"
-              className="h-12 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-accent focus-visible:border-accent text-base"
-              {...register('password')}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                className="h-12 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-accent focus-visible:border-accent text-base pr-11"
+                {...register('password')}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-[#F43F5E] text-xs">{errors.password.message}</p>
             )}
