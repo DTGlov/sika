@@ -340,6 +340,31 @@ function DashboardContent() {
         {/* Section divider — separates card+stats from rest of dashboard */}
         <div className="my-6 border-t border-border/40" />
 
+        {/* Spend summary cards */}
+        <div className="grid grid-cols-2 gap-3">
+          {loading ? (
+            <>
+              <Skeleton className="h-24 rounded-2xl bg-card" />
+              <Skeleton className="h-24 rounded-2xl bg-card" />
+            </>
+          ) : (
+            <>
+              <SpendCard
+                title={cycle.isCurrent ? 'Today' : 'Last day'}
+                amount={dashboardStats?.totalSpentToday ?? 0}
+                index={0}
+              />
+              <SpendCard
+                title={cycle.isCurrent ? 'This Month' : cycle.label.split(' ')[0]}
+                amount={dashboardStats?.totalSpentThisMonth ?? 0}
+                compareAmount={dashboardStats?.totalSpentLastMonth}
+                compareLabel="prev month"
+                index={1}
+              />
+            </>
+          )}
+        </div>
+
         {/* Should I buy it? */}
         {loading ? (
           <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-card border border-border">
@@ -450,31 +475,6 @@ function DashboardContent() {
             })()}
           </div>
           </div>
-        </div>
-
-        {/* Spend summary cards */}
-        <div className="grid grid-cols-2 gap-3">
-          {loading ? (
-            <>
-              <Skeleton className="h-24 rounded-2xl bg-card" />
-              <Skeleton className="h-24 rounded-2xl bg-card" />
-            </>
-          ) : (
-            <>
-              <SpendCard
-                title={cycle.isCurrent ? 'Today' : 'Last day'}
-                amount={dashboardStats?.totalSpentToday ?? 0}
-                index={0}
-              />
-              <SpendCard
-                title={cycle.isCurrent ? 'This Month' : cycle.label.split(' ')[0]}
-                amount={dashboardStats?.totalSpentThisMonth ?? 0}
-                compareAmount={dashboardStats?.totalSpentLastMonth}
-                compareLabel="prev month"
-                index={1}
-              />
-            </>
-          )}
         </div>
 
         {/* Account strip — desktop only */}
