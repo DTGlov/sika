@@ -36,7 +36,10 @@ export function AppShell({ user, children }: AppShellProps) {
       {/* Main content — indented right to clear the side rail on md+ */}
       <div
         className="md:pl-16 lg:pl-60 md:pb-0"
-        style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))',
+        }}
       >
         {children}
       </div>
