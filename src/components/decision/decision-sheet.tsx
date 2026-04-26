@@ -120,7 +120,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           {phase === 'result' ? (
-            <h2 className="text-foreground font-display text-lg font-bold">Here's the read</h2>
+            <h2 className="text-foreground text-lg font-bold">Here's the read</h2>
           ) : (
             <div />
           )}
@@ -244,9 +244,9 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
               <div className="flex items-start gap-3">
                 <AccentIcon className="w-5 h-5 shrink-0 mt-0.5" style={{ color: accent.text }} />
                 <div>
-                  <p className="text-foreground font-display font-bold text-base leading-snug">{decision.verdict_line}</p>
+                  <p className="text-foreground font-bold text-base leading-snug">{decision.verdict_line}</p>
                   <p
-                    className="text-xs font-display font-semibold mt-1 uppercase tracking-wider"
+                    className="text-xs font-semibold mt-1 uppercase tracking-wider"
                     style={{ color: accent.text }}
                   >
                     {decision.verdict.replace('_', ' ')}

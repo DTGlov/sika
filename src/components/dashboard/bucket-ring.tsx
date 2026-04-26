@@ -59,7 +59,7 @@ export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRin
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="amount font-display text-base font-bold" style={{ color: progressColor }}>
+          <span className="amount text-base font-bold" style={{ color: progressColor }}>
             {Math.round(percent)}%
           </span>
         </div>
@@ -69,7 +69,7 @@ export function BucketRing({ bucket, spent, limit, index, earmarked }: BucketRin
         <p className="font-semibold text-sm mb-0.5" style={{ color: config.color }}>
           {config.label}
         </p>
-        <p className="amount font-display text-xs text-foreground font-medium">{format(spent)}</p>
+        <p className="amount text-xs text-foreground font-medium">{format(spent)}</p>
         <p className="text-xs text-muted-foreground">of {format(limit)}</p>
 
         {/* Sinking fund earmarked breakdown — Future bucket only, desktop only */}

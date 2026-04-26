@@ -32,7 +32,7 @@ export function CardSurface({ themeId, cycleNet, userName, amountKey, mounted }:
     <span
       style={{
         color: balanceColor,
-        fontFamily: 'var(--font-sora)',
+        fontFamily: 'var(--font-geist-mono)',
         fontWeight: 700,
       }}
       className="text-3xl md:text-4xl tabular-nums sika-sensitive"
@@ -97,7 +97,7 @@ export function CardSurface({ themeId, cycleNet, userName, amountKey, mounted }:
           <span
             style={{
               color: palette.brandText,
-              fontFamily: 'var(--font-sora)',
+              fontFamily: 'var(--font-geist-sans)',
               fontSize: 13,
               fontWeight: 700,
               letterSpacing: '0.18em',
@@ -177,11 +177,11 @@ export function CycleCard({
 
       {/* Supporting stats */}
       <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-muted-foreground tabular-nums px-1">
-        <span>Received <span className="font-display text-muted-foreground">{formatCompact(received)}</span></span>
+        <span>Received <span className="text-muted-foreground">{formatCompact(received)}</span></span>
         <span className="text-muted-foreground/60">·</span>
-        <span>Spent <span className="font-display text-muted-foreground">{formatCompact(spent)}</span></span>
+        <span>Spent <span className="text-muted-foreground">{formatCompact(spent)}</span></span>
         <span className="text-muted-foreground/60">·</span>
-        <span>Expected <span className="font-display text-muted-foreground">{formatCompact(expected)}/mo</span></span>
+        <span>Expected <span className="text-muted-foreground">{formatCompact(expected)}/mo</span></span>
       </div>
     </div>
   );

@@ -262,7 +262,7 @@ function DashboardContent() {
           </button>
 
           <div className="text-center">
-            <h2 className="text-foreground font-display font-bold text-lg leading-tight tabular-nums">
+            <h2 className="text-foreground font-bold text-lg leading-tight tabular-nums">
               {cycle.label}
             </h2>
             {!cycle.isCurrent && (

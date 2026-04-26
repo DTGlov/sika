@@ -62,7 +62,7 @@ export function PwaSplash() {
           </motion.div>
 
           {/* Wordmark */}
-          <p style={{ marginTop: 24, color: '#F8ECC2', fontSize: 14, letterSpacing: '0.2em', fontWeight: 500, fontFamily: 'var(--font-sora)' }}>
+          <p style={{ marginTop: 24, color: '#F8ECC2', fontSize: 14, letterSpacing: '0.2em', fontWeight: 500 }}>
             SIKA
           </p>
         </motion.div>

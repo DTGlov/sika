@@ -490,8 +490,8 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                 >
                   <ChevronLeft className="w-4 h-4" /> Back
                 </button>
-                <h2 className="text-lg font-display font-bold text-foreground mb-1">Your monthly income</h2>
-                <div className="text-3xl font-display font-bold text-[#D4A017] mb-5">
+                <h2 className="text-lg font-bold text-foreground mb-1">Your monthly income</h2>
+                <div className="text-3xl font-bold text-[#D4A017] mb-5">
                   {formatCurrency(totalMonthly, selectedCurrency)}
                 </div>
 
