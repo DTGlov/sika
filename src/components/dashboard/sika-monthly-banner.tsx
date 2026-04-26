@@ -31,7 +31,7 @@ export function SikaMonthlyBanner({ recapId }: SikaMonthlyBannerProps) {
       >
         <div className="text-xl shrink-0">🔥</div>
         <div>
-          <div className="text-sm font-semibold text-foreground">Your month in money is ready</div>
+          <div className="text-sm font-display font-semibold text-foreground">Your month in money is ready</div>
           <div className="text-xs text-muted-foreground">5–7 takeaways from your last budget cycle →</div>
         </div>
       </button>

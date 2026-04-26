@@ -42,14 +42,14 @@ function StoryCard({ story }: { story: DailyStory }) {
       )}
       <div className="px-4 py-4 space-y-2">
         <p
-          className="text-[10px] font-bold uppercase tracking-wider"
+          className="text-[10px] font-display font-bold uppercase tracking-wider"
           style={{ color }}
         >
           {label}
         </p>
         <div className="flex items-start gap-2">
           <span className="text-xl leading-none mt-0.5 shrink-0">{story.emoji}</span>
-          <h3 className="text-foreground font-semibold text-sm leading-snug">{story.title}</h3>
+          <h3 className="text-foreground font-display font-semibold text-sm leading-snug">{story.title}</h3>
         </div>
         <p className="text-muted-foreground text-sm leading-relaxed">{story.summary}</p>
         <p className="text-muted-foreground/70 text-xs">— {story.source_name}</p>
@@ -135,7 +135,7 @@ export default function DailyPage() {
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-foreground font-semibold text-base">Sika Daily</h1>
+          <h1 className="text-foreground font-display font-semibold text-base">Sika Daily</h1>
         </div>
       </div>
 

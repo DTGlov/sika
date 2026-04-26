@@ -106,6 +106,7 @@ export function ThemePicker() {
                       <span
                         style={{
                           color: palette.brandText,
+                          fontFamily: 'var(--font-sora)',
                           fontSize: 8,
                           fontWeight: 700,
                           letterSpacing: '1px',

@@ -40,7 +40,7 @@ export function BucketStrip() {
             <div key={bucket}>
               <div className="flex justify-between items-baseline mb-1.5">
                 <span className="text-sm text-foreground">{config.label}</span>
-                <span className="text-xs text-muted-foreground sika-sensitive">
+                <span className="text-xs font-display text-muted-foreground sika-sensitive tabular-nums">
                   {format(spent)} of {format(limit)}
                 </span>
               </div>
