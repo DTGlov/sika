@@ -72,6 +72,27 @@ export function formatCurrencyCompact(
   return formatCurrency(amount, currencyCode, { compact: true });
 }
 
+export function formatAmountCompact(
+  amount: number,
+  currencyCode: string = "GHS",
+): string {
+  const locale = CURRENCY_LOCALES[currencyCode] ?? "en-US";
+  try {
+    if (Math.abs(amount) >= 1000) {
+      return new Intl.NumberFormat(locale, {
+        notation: "compact",
+        maximumFractionDigits: 1,
+      }).format(amount);
+    }
+    return new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return amount.toFixed(2);
+  }
+}
+
 export function currencySymbol(currencyCode: string = "GHS"): string {
   // GHS displays as the ISO code throughout the app — match the formatter
   if (currencyCode === "GHS") return "GHS";
