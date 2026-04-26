@@ -412,8 +412,8 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                                 if (e.key === 'Escape') handleChipCancel();
                               }}
                               placeholder="0.00"
-                              className="flex-1 bg-transparent text-foreground outline-none min-w-0"
-                              style={{ fontSize: 16 }}
+                              className="flex-1 bg-transparent text-foreground outline-none min-w-0 text-base"
+                              style={{ fontSize: '16px' }}
                             />
                           </div>
                           <button
