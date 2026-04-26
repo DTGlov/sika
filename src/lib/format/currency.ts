@@ -71,3 +71,18 @@ export function formatCurrencyCompact(
 ): string {
   return formatCurrency(amount, currencyCode, { compact: true });
 }
+
+export function currencySymbol(currencyCode: string = "GHS"): string {
+  // GHS displays as the ISO code throughout the app — match the formatter
+  if (currencyCode === "GHS") return "GHS";
+  try {
+    const parts = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currencyCode,
+      currencyDisplay: "narrowSymbol",
+    }).formatToParts(0);
+    return parts.find(p => p.type === "currency")?.value ?? currencyCode;
+  } catch {
+    return currencyCode;
+  }
+}
