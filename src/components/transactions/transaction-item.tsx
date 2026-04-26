@@ -55,9 +55,9 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="flex items-center justify-between px-4 py-3.5 hover:bg-muted transition-colors group"
+          className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-muted transition-colors group"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
               style={{
@@ -70,9 +70,9 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
             >
               {txn.type === 'adjustment' ? <Scale className="w-5 h-5 text-muted-foreground" /> : getIconEmoji(txn.category?.icon ?? null)}
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <p className="text-foreground text-sm font-medium">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <p className="text-foreground text-sm font-medium truncate">
                   {txn.type === 'transfer'
                     ? `${txn.account?.name ?? '?'} → ${txn.to_account?.name ?? '?'}`
                     : txn.type === 'adjustment'
@@ -80,33 +80,33 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
                     : (txn.category?.name ?? 'Uncategorized')}
                 </p>
                 {txn.type === 'adjustment' && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium shrink-0">
                     adj
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex items-center gap-1.5 min-w-0">
                 {txn.type !== 'transfer' && txn.account && (
-                  <span className="text-muted-foreground/70 text-xs">{txn.account.name}</span>
+                  <span className="text-muted-foreground/70 text-xs truncate">{txn.account.name}</span>
                 )}
                 {txn.generated_from_recurring && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#60A5FA18] text-[#60A5FA] font-medium">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#60A5FA18] text-[#60A5FA] font-medium shrink-0">
                     Auto
                   </span>
                 )}
                 {txn.paid_from_goal_id && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#00D9A318] text-[#D4A017] font-medium">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#00D9A318] text-[#D4A017] font-medium shrink-0">
                     🎯 From fund
                   </span>
                 )}
-                {txn.note && <p className="text-muted-foreground text-xs">{txn.note}</p>}
+                {txn.note && <p className="text-muted-foreground text-xs truncate">{txn.note}</p>}
               </div>
-              <p className="text-muted-foreground text-xs">{formatTransactionDate(txn.transaction_date)}</p>
+              <p className="text-muted-foreground text-xs truncate">{formatTransactionDate(txn.transaction_date)}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <p className={`amount text-sm font-semibold ${
+          <div className="flex items-center gap-2 shrink-0">
+            <p className={`amount text-sm font-semibold whitespace-nowrap ${
               txn.type === 'income' ? 'text-[#D4A017]' :
               txn.type === 'transfer' ? 'text-muted-foreground' :
               txn.type === 'adjustment' ? (txn.amount >= 0 ? 'text-[#D4A017]' : 'text-[#F43F5E]') :
@@ -117,7 +117,7 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
                txn.type === 'adjustment' ? (txn.amount >= 0 ? '+' : '') :
                '-'}{format(Math.abs(txn.amount))}
             </p>
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="hidden sm:flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => openLogSheet(txn)}
                 className="w-8 h-8 rounded-lg bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors"

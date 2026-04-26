@@ -20,7 +20,6 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CURRENCY_SYMBOL } from '@/lib/constants';
 import type { RecurringTransaction, RecurringFrequency } from '@/types';
 
 const FREQUENCIES: { value: RecurringFrequency; label: string }[] = [
@@ -202,14 +201,11 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
           {/* Amount */}
           <div className="space-y-1.5">
             <Label className="text-muted-foreground text-sm">Amount</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{CURRENCY_SYMBOL}</span>
-              <Input
-                type="number" min="0.01" step="0.01" placeholder="0.00"
-                className="h-11 pl-7 bg-input border-border text-foreground focus-visible:ring-accent amount"
-                {...register('amount', { valueAsNumber: true })}
-              />
-            </div>
+            <Input
+              type="number" inputMode="decimal" min="0.01" step="0.01" placeholder="0.00"
+              className="h-11 px-3 bg-input border-border text-foreground focus-visible:ring-accent amount"
+              {...register('amount', { valueAsNumber: true })}
+            />
             {errors.amount && <p className="text-[#F43F5E] text-xs">{errors.amount.message}</p>}
           </div>
 
