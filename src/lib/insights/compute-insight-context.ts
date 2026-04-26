@@ -2,11 +2,16 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 type InsightContext = {
   today: string;
+  currency_code: string;
   user: { name: string };
   cycle: {
     day_of_cycle: number;
     cycle_length: number;
     days_remaining: number;
+    cycle_start: string;
+    cycle_end: string;
+    is_last_day: boolean;
+    pct_time: number;
   };
   buckets: {
     needs: { spent: number; budget: number; pct: number; pct_time: number };
@@ -60,7 +65,7 @@ export async function computeInsightContext(
   const [profileRes, bucketsRes, recentTxnsRes, goalsRes, streakRes] = await Promise.all([
     supabase
       .from('profiles')
-      .select('full_name, monthly_income, needs_percent, wants_percent, savings_percent, cycle_start_day')
+      .select('full_name, monthly_income, needs_percent, wants_percent, savings_percent, cycle_start_day, currency')
       .eq('id', userId)
       .single(),
     supabase.from('budget_buckets').select('id, name').eq('user_id', userId),
@@ -101,27 +106,28 @@ export async function computeInsightContext(
   const wantsPct = (profile?.wants_percent ?? 30) / 100;
   const futurePct = (profile?.savings_percent ?? 20) / 100;
 
-  // Cycle position
+  // Cycle position — anchor to the actual cycle start date, then derive the rest
   const todayDay = now.getUTCDate();
-  let dayOfCycle: number;
-  if (todayDay >= cycleStartDay) {
-    dayOfCycle = todayDay - cycleStartDay + 1;
-  } else {
-    // We're in next calendar month but same cycle
-    const daysInPrevMonth = new Date(now.getUTCFullYear(), now.getUTCMonth(), 0).getUTCDate();
-    dayOfCycle = daysInPrevMonth - cycleStartDay + todayDay + 1;
-  }
-  const cycleLength = 30; // approximate
-  const daysRemaining = Math.max(0, cycleLength - dayOfCycle);
+  const cycleStartDate = todayDay >= cycleStartDay
+    ? new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), cycleStartDay))
+    : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, cycleStartDay));
+  const nextCycleStartDate = new Date(Date.UTC(
+    cycleStartDate.getUTCFullYear(),
+    cycleStartDate.getUTCMonth() + 1,
+    cycleStartDay,
+  ));
+  const cycleEndDate = new Date(nextCycleStartDate);
+  cycleEndDate.setUTCDate(cycleEndDate.getUTCDate() - 1);
+
+  const MS_PER_DAY = 1000 * 60 * 60 * 24;
+  const cycleLength = Math.round((nextCycleStartDate.getTime() - cycleStartDate.getTime()) / MS_PER_DAY);
+  const dayOfCycle = Math.round((now.getTime() - cycleStartDate.getTime()) / MS_PER_DAY) + 1;
+  const daysRemaining = Math.max(0, Math.round((cycleEndDate.getTime() - now.getTime()) / MS_PER_DAY));
   const pctTime = Math.round((dayOfCycle / cycleLength) * 100);
 
-  // Determine cycle start date for budget aggregation
-  let cycleStartStr: string;
-  if (todayDay >= cycleStartDay) {
-    cycleStartStr = toDateStr(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), cycleStartDay)));
-  } else {
-    cycleStartStr = toDateStr(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, cycleStartDay)));
-  }
+  const cycleStartStr = toDateStr(cycleStartDate);
+  const cycleEndStr = toDateStr(cycleEndDate);
+  const isLastDay = today === cycleEndStr;
 
   // Aggregate
   const bucketSpend: Record<string, number> = { needs: 0, wants: 0, savings: 0 };
@@ -182,8 +188,17 @@ export async function computeInsightContext(
 
   return {
     today,
+    currency_code: profile?.currency ?? 'GHS',
     user: { name: profile?.full_name ?? 'Sika User' },
-    cycle: { day_of_cycle: dayOfCycle, cycle_length: cycleLength, days_remaining: daysRemaining },
+    cycle: {
+      day_of_cycle: dayOfCycle,
+      cycle_length: cycleLength,
+      days_remaining: daysRemaining,
+      cycle_start: cycleStartStr,
+      cycle_end: cycleEndStr,
+      is_last_day: isLastDay,
+      pct_time: pctTime,
+    },
     buckets: {
       needs: {
         spent: bucketSpend.needs,

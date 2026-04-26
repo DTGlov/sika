@@ -1,8 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { X, TrendingUp, Flame, Eye, Target, Sparkles, ArrowRight, Zap, RefreshCw } from 'lucide-react';
+import { X, Clock, TrendingUp, Flame, Eye, Target, Sparkles, ArrowRight, Zap, RefreshCw } from 'lucide-react';
 import type { DailyInsightRow } from '@/types/insight';
+
+function formatGeneratedAt(iso: string): string {
+  const generated = new Date(iso);
+  const diffMs = Date.now() - generated.getTime();
+  const diffMin = Math.round(diffMs / 60000);
+  if (diffMin < 1) return 'just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.round(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.round(diffHr / 24);
+  return diffDay === 1 ? 'yesterday' : `${diffDay}d ago`;
+}
 
 const ICON_MAP: Record<string, React.ElementType> = {
   TrendingUp, Flame, Eye, Target, Sparkles, ArrowRight, Zap, RefreshCw,
@@ -54,6 +66,10 @@ export function InsightStrip({ row, onDismiss }: InsightStripProps) {
               {insight.stat.label}: {insight.stat.value}
             </p>
           )}
+          <p className="flex items-center gap-1 text-[10px] text-muted-foreground/70 mt-1.5" title={`Generated ${new Date(row.generated_at).toLocaleString()}`}>
+            <Clock className="w-2.5 h-2.5" />
+            <span>Generated {formatGeneratedAt(row.generated_at)} · not live</span>
+          </p>
         </div>
       </div>
       <button
