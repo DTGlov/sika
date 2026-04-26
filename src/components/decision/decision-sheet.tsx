@@ -150,20 +150,17 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
 
             <div className="space-y-2">
               <label className="text-muted-foreground text-sm">How much? ({symbol})</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm pointer-events-none">{symbol}</span>
-                <Input
-                  type="number"
-                  inputMode="decimal"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && canSubmit && handleAsk()}
-                  className="h-12 pl-7 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-1 focus-visible:ring-accent focus-visible:outline-none"
-                />
-              </div>
+              <Input
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && canSubmit && handleAsk()}
+                className="h-12 px-3 bg-input border-border text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-1 focus-visible:ring-accent focus-visible:outline-none"
+              />
             </div>
 
             <div className="space-y-1.5">

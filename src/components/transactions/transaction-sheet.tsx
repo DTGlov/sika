@@ -664,19 +664,17 @@ export function TransactionSheet() {
 
             {/* Actual balance input */}
             <div className="space-y-1.5">
-              <label className="text-muted-foreground text-sm">Actual current balance</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{symbol}</span>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={reconcileActual}
-                  onChange={(e) => setReconcileActual(e.target.value)}
-                  className="h-12 pl-7 bg-muted border-border text-foreground focus-visible:ring-[#D4A017] amount"
-                />
-              </div>
+              <label className="text-muted-foreground text-sm">Actual current balance ({symbol})</label>
+              <Input
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={reconcileActual}
+                onChange={(e) => setReconcileActual(e.target.value)}
+                className="h-12 px-3 bg-muted border-border text-foreground focus-visible:ring-[#D4A017] amount"
+              />
             </div>
 
             {/* Diff preview */}

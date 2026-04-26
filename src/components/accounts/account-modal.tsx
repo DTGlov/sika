@@ -238,19 +238,17 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
           {!reconcileMode && (
             <div className="space-y-1.5">
               <Label className="text-muted-foreground text-sm">
-                {editAccount ? 'Opening balance' : 'Current balance — RIGHT NOW'}
+                {editAccount ? `Opening balance (${symbol})` : `Current balance — RIGHT NOW (${symbol})`}
               </Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{symbol}</span>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  className="h-11 pl-7 bg-input border-border text-foreground focus-visible:ring-accent amount"
-                  {...register('opening_balance', { valueAsNumber: true })}
-                />
-              </div>
+              <Input
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                className="h-11 px-3 bg-input border-border text-foreground focus-visible:ring-accent amount"
+                {...register('opening_balance', { valueAsNumber: true })}
+              />
               {!editAccount && (
                 <p className="text-muted-foreground/70 text-[11px]">
                   Enter the actual balance in this account today — not zero, unless it's empty.
@@ -317,18 +315,16 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
                     <span className="text-muted-foreground">Sika shows</span>
                     <span className="text-foreground font-semibold tabular-nums">{format(currentBalance)}</span>
                   </div>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{symbol}</span>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="Actual current balance"
-                      value={reconcileActual}
-                      onChange={(e) => setReconcileActual(e.target.value)}
-                      className="h-10 pl-7 bg-input border-border text-foreground focus-visible:ring-accent amount"
-                    />
-                  </div>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    step="0.01"
+                    placeholder="Actual current balance"
+                    value={reconcileActual}
+                    onChange={(e) => setReconcileActual(e.target.value)}
+                    className="h-10 px-3 bg-input border-border text-foreground focus-visible:ring-accent amount"
+                  />
                   {reconcileActual !== '' && (() => {
                     const diff = (parseFloat(reconcileActual) || 0) - currentBalance;
                     const isPos = diff >= 0;

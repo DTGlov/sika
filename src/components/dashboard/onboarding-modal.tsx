@@ -68,7 +68,6 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
   const [inputAmount, setInputAmount] = useState('');
 
   const currencySymbol = getDisplaySymbol(selectedCurrency);
-  const symbolPaddingClass = currencySymbol.length > 1 ? 'pl-14' : 'pl-7';
 
   const filteredCurrencies = useMemo(() => {
     const lowered = currencySearch.toLowerCase();
@@ -340,23 +339,15 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
                   <div className="space-y-1.5">
                     <Label className="text-muted-foreground text-sm">Amount ({currencySymbol})</Label>
-                    <div className="relative">
-                      <span
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm pointer-events-none"
-                        aria-hidden="true"
-                      >
-                        {currencySymbol}
-                      </span>
-                      <Input
-                        type="number"
-                        inputMode="decimal"
-                        min="0.01"
-                        step="0.01"
-                        placeholder="0.00"
-                        className={`h-11 ${symbolPaddingClass} bg-input border-border text-foreground focus-visible:ring-accent amount`}
-                        {...register('amount', { valueAsNumber: true })}
-                      />
-                    </div>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      min="0.01"
+                      step="0.01"
+                      placeholder="0.00"
+                      className="h-11 px-3 bg-input border-border text-foreground focus-visible:ring-accent amount"
+                      {...register('amount', { valueAsNumber: true })}
+                    />
                     {errors.amount && <p className="text-[#F43F5E] text-xs">{errors.amount.message}</p>}
                   </div>
 
@@ -416,23 +407,20 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                           className="col-span-2 flex items-center gap-2 p-2.5 rounded-xl border"
                           style={{ borderColor: '#00D9A3', backgroundColor: '#00D9A309' }}
                         >
-                          <div className="flex-1 flex items-center gap-1 bg-input rounded-lg px-2.5 py-1.5">
-                            <span className="text-muted-foreground font-mono shrink-0" style={{ fontSize: 16 }}>{currencySymbol}</span>
-                            <input
-                              type="number"
-                              inputMode="decimal"
-                              autoFocus
-                              value={inputAmount}
-                              onChange={e => setInputAmount(e.target.value)}
-                              onKeyDown={e => {
-                                if (e.key === 'Enter') handleChipConfirm(t);
-                                if (e.key === 'Escape') handleChipCancel();
-                              }}
-                              placeholder="0.00"
-                              className="flex-1 bg-transparent text-foreground outline-none min-w-0 text-base"
-                              style={{ fontSize: '16px' }}
-                            />
-                          </div>
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            autoFocus
+                            value={inputAmount}
+                            onChange={e => setInputAmount(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') handleChipConfirm(t);
+                              if (e.key === 'Escape') handleChipCancel();
+                            }}
+                            placeholder="0.00"
+                            className="flex-1 bg-input rounded-lg px-2.5 py-1.5 text-foreground outline-none min-w-0 text-base"
+                            style={{ fontSize: '16px' }}
+                          />
                           <button
                             onClick={() => handleChipConfirm(t)}
                             disabled={!inputAmount || parseFloat(inputAmount) <= 0}
