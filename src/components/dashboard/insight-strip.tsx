@@ -47,10 +47,10 @@ export function InsightStrip({ row, onDismiss }: InsightStripProps) {
           <IconComponent className="w-4 h-4" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground leading-snug">{insight.headline}</p>
+          <p className="text-sm font-display font-semibold text-foreground leading-snug">{insight.headline}</p>
           <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{insight.body}</p>
           {insight.stat && (
-            <p className={`text-xs font-semibold mt-1 tabular-nums ${accent.text}`}>
+            <p className={`text-xs font-display font-semibold mt-1 tabular-nums ${accent.text}`}>
               {insight.stat.label}: {insight.stat.value}
             </p>
           )}

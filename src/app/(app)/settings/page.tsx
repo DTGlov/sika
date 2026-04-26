@@ -201,7 +201,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto pb-24">
       <div className="px-4 pt-6 md:px-8">
-        <h1 className="text-2xl font-bold text-foreground mb-6">Settings</h1>
+        <h1 className="text-2xl font-display font-bold text-foreground mb-6">Settings</h1>
 
         {/* Appearance */}
         <AppearanceSection />
