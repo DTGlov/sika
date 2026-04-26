@@ -15,8 +15,8 @@ import {
   FREQUENCY_LABELS,
   FREQUENCY_COLORS,
 } from '@/lib/income';
-import { formatCurrency, formatCurrencyCompact } from '@/lib/format/currency';
-import { ALL_CURRENCIES, POPULAR_CURRENCIES, getCurrencySymbol } from '@/lib/currencies';
+import { formatCurrency, formatCurrencyCompact, currencySymbol as getDisplaySymbol } from '@/lib/format/currency';
+import { ALL_CURRENCIES, POPULAR_CURRENCIES } from '@/lib/currencies';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -67,7 +67,8 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
   const [activeSourceKey, setActiveSourceKey] = useState<string | null>(null);
   const [inputAmount, setInputAmount] = useState('');
 
-  const currencySymbol = getCurrencySymbol(selectedCurrency);
+  const currencySymbol = getDisplaySymbol(selectedCurrency);
+  const symbolPaddingClass = currencySymbol.length > 1 ? 'pl-14' : 'pl-7';
 
   const filteredCurrencies = useMemo(() => {
     const lowered = currencySearch.toLowerCase();
@@ -94,10 +95,18 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
     formState: { errors },
   } = useForm<PrimaryForm>({
     resolver: zodResolver(primarySchema),
-    defaultValues: { name: 'Salary', amount: 9000, frequency: 'monthly' },
+    defaultValues: { name: '', frequency: 'monthly' },
   });
 
   const frequency = watch('frequency');
+  const primaryName = watch('name');
+  const primaryAmount = watch('amount');
+  const canSubmitPrimary =
+    typeof primaryName === 'string' &&
+    primaryName.trim().length > 0 &&
+    typeof primaryAmount === 'number' &&
+    !Number.isNaN(primaryAmount) &&
+    primaryAmount > 0;
 
   function handleChipTap(t: ExtraTemplate) {
     if (extraSources.some(s => s._key === t._key)) return;
@@ -332,12 +341,19 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                   <div className="space-y-1.5">
                     <Label className="text-muted-foreground text-sm">Amount ({currencySymbol})</Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">{currencySymbol}</span>
+                      <span
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm pointer-events-none"
+                        aria-hidden="true"
+                      >
+                        {currencySymbol}
+                      </span>
                       <Input
                         type="number"
+                        inputMode="decimal"
                         min="0.01"
                         step="0.01"
-                        className="h-11 pl-7 bg-input border-border text-foreground focus-visible:ring-accent amount"
+                        placeholder="0.00"
+                        className={`h-11 ${symbolPaddingClass} bg-input border-border text-foreground focus-visible:ring-accent amount`}
                         {...register('amount', { valueAsNumber: true })}
                       />
                     </div>
@@ -367,7 +383,8 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
                   <Button
                     type="submit"
-                    className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
+                    disabled={!canSubmitPrimary}
+                    className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Continue <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
