@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { RecurringTransaction, RecurringFrequency } from '@/types';
@@ -126,6 +126,26 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
   const autoLog = watch('auto_log');
   const isPaused = watch('is_paused');
   const endDate = watch('end_date');
+
+  const [showIncomeWarning, setShowIncomeWarning] = useState(false);
+
+  function handleAutoLogToggle() {
+    const next = !autoLog;
+    if (next && txType === 'income') {
+      setShowIncomeWarning(true);
+      return;
+    }
+    setValue('auto_log', next);
+  }
+
+  function confirmIncomeAutoLog() {
+    setValue('auto_log', true);
+    setShowIncomeWarning(false);
+  }
+
+  const autoLogHelperText = txType === 'income'
+    ? 'Income arrival can be unpredictable. Recommended: keep this off and confirm via the reminder card when money arrives.'
+    : 'Auto-log for fixed obligations (rent, subscriptions). Turn off if amount varies — Sika will nudge you to confirm instead.';
 
   const filteredCategories = categories.filter(c => {
     const ct = c.category_type ?? (c.bucket_id ? 'expense' : 'income');
@@ -378,12 +398,12 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
             <div>
               <Label className="text-muted-foreground text-sm">Auto-log</Label>
               <p className="text-muted-foreground/70 text-[11px] mt-0.5">
-                Auto-log for fixed amounts (rent, salary). Turn off for variable amounts — Sika will nudge you to confirm instead.
+                {autoLogHelperText}
               </p>
             </div>
             <button
               type="button"
-              onClick={() => setValue('auto_log', !autoLog)}
+              onClick={handleAutoLogToggle}
               className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 mt-0.5"
               style={{ backgroundColor: autoLog ? '#00D9A3' : 'var(--border)' }}
             >
@@ -421,6 +441,36 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
           </Button>
         </form>
       </DialogContent>
+
+      <Dialog open={showIncomeWarning} onOpenChange={setShowIncomeWarning}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Auto-log income?</DialogTitle>
+            <DialogDescription>
+              Income often arrives late or skips a cycle. Auto-logging means Sika will count this money before it actually lands — your balance may show more than what&apos;s really in your accounts.
+            </DialogDescription>
+            <p className="text-sm text-muted-foreground">
+              <strong className="text-foreground">Recommended:</strong> Keep auto-log off for income, and tap the reminder card to confirm when the money arrives.
+            </p>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowIncomeWarning(false)}
+            >
+              Keep it manual
+            </Button>
+            <Button
+              type="button"
+              onClick={confirmIncomeAutoLog}
+              className="bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E]"
+            >
+              Auto-log anyway
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
