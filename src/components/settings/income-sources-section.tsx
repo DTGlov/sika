@@ -234,7 +234,12 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
                   defaultValue={editSource?.expected_day != null ? String(editSource.expected_day) : undefined}
                 >
                   <SelectTrigger className="h-11 bg-input border-border text-foreground focus:ring-accent">
-                    <SelectValue placeholder="Select day" />
+                    <SelectValue placeholder="Select day">
+                      {(value: string) => {
+                        const idx = parseInt(value);
+                        return Number.isNaN(idx) ? 'Select day' : (DAY_OF_WEEK[idx] ?? 'Select day');
+                      }}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border">
                     {DAY_OF_WEEK.map((day, i) => (
