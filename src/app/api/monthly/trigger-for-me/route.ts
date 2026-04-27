@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { computeMonthContext } from '@/lib/monthly/compute-month-context';
 import { generateRecapCards } from '@/lib/monthly/generate-recap';
-import { getCycleMonthBounds } from '@/lib/monthly/dates';
+import { getCycleMonthBounds, isCycleEndDate } from '@/lib/monthly/dates';
 
 export async function POST() {
   const supabase = await createClient();
@@ -21,7 +21,14 @@ export async function POST() {
   }
 
   const today = new Date();
-  const { start, end } = getCycleMonthBounds(today, profile.cycle_start_day);
+  // getCycleMonthBounds expects today to be the first day of the new cycle.
+  // If the user triggers this on their cycle's last day, advance to tomorrow
+  // so we recap the cycle ending today rather than the previous one.
+  const refDate = new Date(today);
+  if (isCycleEndDate(today, profile.cycle_start_day)) {
+    refDate.setUTCDate(refDate.getUTCDate() + 1);
+  }
+  const { start, end } = getCycleMonthBounds(refDate, profile.cycle_start_day);
 
   const service = createServiceClient();
   const ctx = await computeMonthContext(service, user.id, start, end);

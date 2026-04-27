@@ -32,9 +32,15 @@ export async function GET(request: Request) {
     errors: [] as string[],
   };
 
+  // isCycleEndDate detects today as the cycle's last day (e.g., Apr 27 when
+  // cycle_start_day=28), but getCycleMonthBounds expects today to be the
+  // first day of the new cycle (Apr 28). Pass tomorrow so they align.
+  const tomorrow = new Date(today);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+
   for (const profile of eligibleProfiles) {
     try {
-      const { start: monthStart, end: monthEnd } = getCycleMonthBounds(today, profile.cycle_start_day);
+      const { start: monthStart, end: monthEnd } = getCycleMonthBounds(tomorrow, profile.cycle_start_day);
 
       const { data: existing } = await supabase
         .from('monthly_recaps')
