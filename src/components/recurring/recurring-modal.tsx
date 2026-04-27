@@ -237,7 +237,12 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
               onValueChange={(v) => { if (v) setValue('account_id', v); }}
             >
               <SelectTrigger className="h-11 bg-input border-border text-foreground">
-                <SelectValue placeholder="Select account" />
+                <SelectValue placeholder="Select account">
+                  {(value: string) => {
+                    const acc = accounts.find(a => a.id === value);
+                    return acc ? `${ACCOUNT_TYPE_CONFIG[acc.type].emoji} ${acc.name}` : 'Select account';
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-card border-border">
                 {accounts.map(a => (
@@ -258,7 +263,13 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
               onValueChange={(v) => setValue('category_id', v === 'none' ? null : v)}
             >
               <SelectTrigger className="h-11 bg-input border-border text-foreground">
-                <SelectValue placeholder="No category" />
+                <SelectValue placeholder="No category">
+                  {(value: string) => {
+                    if (!value || value === 'none') return 'No category';
+                    const cat = filteredCategories.find(c => c.id === value);
+                    return cat ? cat.name : 'No category';
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-card border-border">
                 <SelectItem value="none">No category</SelectItem>
