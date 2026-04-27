@@ -238,6 +238,63 @@ export async function skipPendingRecurring(
     .eq('id', recurringId);
 }
 
+/**
+ * The window of dates that count as "this instance" for a recurring entry.
+ * Used by the detail page so the user can log/skip the current cycle's
+ * occurrence regardless of whether the actual receipt arrives early or late.
+ *
+ * Monthly: schedule_day → schedule_day-1 of next month (period containing today)
+ * Weekly/biweekly: ISO week containing today (Mon → Sun)
+ * Yearly: calendar year containing today
+ * Daily: today only
+ */
+export function getCurrentInstancePeriod(
+  recurring: RecurringTransaction,
+  today: Date = new Date(),
+): { start: Date; end: Date } {
+  const ref = startOfDay(today);
+
+  if (recurring.frequency === 'monthly') {
+    const day = recurring.schedule_day === -1
+      ? getDaysInMonth(ref)
+      : (recurring.schedule_day ?? getDate(parseISO(recurring.start_date)));
+    const todayDay = getDate(ref);
+    const start = todayDay >= day
+      ? new Date(ref.getFullYear(), ref.getMonth(), Math.min(day, getDaysInMonth(ref)))
+      : new Date(ref.getFullYear(), ref.getMonth() - 1, Math.min(day, getDaysInMonth(new Date(ref.getFullYear(), ref.getMonth() - 1, 1))));
+    const end = addDays(addMonths(start, 1), -1);
+    return { start: startOfDay(start), end: startOfDay(end) };
+  }
+
+  if (recurring.frequency === 'weekly' || recurring.frequency === 'biweekly') {
+    const dow = getDay(ref); // 0 = Sun, 1 = Mon, ...
+    const daysSinceMon = (dow + 6) % 7;
+    const start = addDays(ref, -daysSinceMon);
+    const end = addDays(start, 6);
+    return { start: startOfDay(start), end: startOfDay(end) };
+  }
+
+  if (recurring.frequency === 'yearly') {
+    const start = new Date(ref.getFullYear(), 0, 1);
+    const end = new Date(ref.getFullYear(), 11, 31);
+    return { start: startOfDay(start), end: startOfDay(end) };
+  }
+
+  // daily
+  return { start: ref, end: ref };
+}
+
+/** Has this recurring already been logged or skipped within the current period? */
+export function isHandledThisInstance(
+  recurring: RecurringTransaction,
+  today: Date = new Date(),
+): boolean {
+  if (!recurring.last_generated_date) return false;
+  const period = getCurrentInstancePeriod(recurring, today);
+  const lastGen = parseDate(recurring.last_generated_date);
+  return !isBefore(lastGen, period.start) && !isAfter(lastGen, period.end);
+}
+
 export function formatScheduleSummary(rec: RecurringTransaction): string {
   switch (rec.frequency) {
     case 'daily':

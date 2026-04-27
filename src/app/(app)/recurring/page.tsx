@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { Plus, Pencil, Pause, Play, Trash2, RefreshCw } from 'lucide-react';
+import { Plus, Pencil, Pause, Play, Trash2, RefreshCw, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   format, differenceInCalendarDays, startOfDay, isBefore, addDays, parse,
@@ -15,6 +15,7 @@ import { useCurrency } from '@/hooks/use-currency';
 import { revalidateForEntity } from '@/lib/revalidation';
 import {
   formatScheduleSummary, getNextDueDate, generateDueTransactions, FREQUENCY_LABELS,
+  isHandledThisInstance,
 } from '@/lib/recurring';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -85,15 +86,17 @@ interface RecurringCardProps {
   item: RecurringTransaction;
   accentColor: string;
   today: Date;
+  onOpen: (id: string) => void;
   onTogglePause: (item: RecurringTransaction) => void;
   onEdit: (item: RecurringTransaction) => void;
   onDelete: (id: string) => void;
 }
 
-function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDelete }: RecurringCardProps) {
+function RecurringCard({ item, accentColor, today, onOpen, onTogglePause, onEdit, onDelete }: RecurringCardProps) {
   const { format } = useCurrency();
   const dueInfo = getDueDateInfo(item, today);
   const name = item.note ?? item.category?.name ?? FREQUENCY_LABELS[item.frequency];
+  const handled = !item.auto_log && isHandledThisInstance(item, today);
 
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
@@ -106,7 +109,12 @@ function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDele
           {item.is_paused ? 'Paused' : `Next due: ${dueInfo.label}`}
         </p>
         <div className="flex items-center gap-1">
-          {!item.auto_log && (
+          {handled && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#00D9A318] text-[#00D9A3] font-medium flex items-center gap-1">
+              <Check className="w-2.5 h-2.5" /> Handled
+            </span>
+          )}
+          {!item.auto_log && !handled && (
             <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">
               Nudge
             </span>
@@ -118,18 +126,24 @@ function RecurringCard({ item, accentColor, today, onTogglePause, onEdit, onDele
 
       {/* Name + amount + actions */}
       <div className="px-4 py-3 flex items-center gap-3">
-        <div
-          className="w-2 h-2 rounded-full shrink-0 self-center"
-          style={{ backgroundColor: accentColor }}
-        />
-        <div className="min-w-0 flex-1">
-          <p className="text-foreground font-bold text-base truncate">{name}</p>
-          <p className="text-muted-foreground/70 text-xs mt-0.5">
-            {item.account?.name}
-            {item.category ? ` · ${item.category.name}` : ''}
-            {' · '}{formatScheduleSummary(item)}
-          </p>
-        </div>
+        <button
+          type="button"
+          onClick={() => onOpen(item.id)}
+          className="flex items-center gap-3 min-w-0 flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
+        >
+          <div
+            className="w-2 h-2 rounded-full shrink-0 self-center"
+            style={{ backgroundColor: accentColor }}
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-foreground font-bold text-base truncate">{name}</p>
+            <p className="text-muted-foreground/70 text-xs mt-0.5 truncate">
+              {item.account?.name}
+              {item.category ? ` · ${item.category.name}` : ''}
+              {' · '}{formatScheduleSummary(item)}
+            </p>
+          </div>
+        </button>
 
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           <p className="text-lg font-bold tabular-nums" style={{ color: accentColor }}>
@@ -368,6 +382,7 @@ function RecurringContent() {
               item={item}
               accentColor={item.type === 'income' ? '#00D9A3' : '#F43F5E'}
               today={today}
+              onOpen={(id) => router.push(`/recurring/${id}`)}
               onTogglePause={handleTogglePause}
               onEdit={(i) => { setEditItem(i); setModalOpen(true); }}
               onDelete={handleDelete}
