@@ -274,7 +274,7 @@ export default function GoalDetailPage() {
             )}
             {goalProgress.funding_account && (
               <StatTile
-                label="Funding Account"
+                label="Save to"
                 value={goalProgress.funding_account.name}
                 color={accentColor}
               />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { useCurrency } from '@/hooks/use-currency';
 import { CYCLE_CARD_THEMES, type CycleCardTheme } from '@/types/card-theme';
@@ -133,6 +134,8 @@ export function CycleCard({
   expected,
 }: CycleCardProps) {
   const { formatCompact } = useCurrency();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const cardRef = useRef<HTMLDivElement>(null);
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
@@ -140,6 +143,14 @@ export function CycleCard({
   const springY = useSpring(rotateY, { stiffness: 180, damping: 22 });
   const mounted = useRef(false);
   useEffect(() => { mounted.current = true; }, []);
+
+  function handleOpenDetail() {
+    const cycleParam = searchParams.get('cycle');
+    const target = cycleParam
+      ? `/dashboard/cycle-detail?cycle=${cycleParam}`
+      : '/dashboard/cycle-detail';
+    router.push(target);
+  }
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     const card = cardRef.current;
@@ -159,11 +170,21 @@ export function CycleCard({
       <div style={{ perspective: '1200px' }}>
         <motion.div
           ref={cardRef}
+          role="button"
+          tabIndex={0}
+          aria-label="View cycle details"
+          onClick={handleOpenDetail}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleOpenDetail();
+            }
+          }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           whileTap={{ scale: 0.985 }}
           style={{ rotateX: springX, rotateY: springY }}
-          className="w-full max-w-[440px]"
+          className="w-full max-w-[440px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-[20px]"
         >
           <CardSurface
             themeId={theme}

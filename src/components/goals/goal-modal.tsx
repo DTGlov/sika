@@ -68,7 +68,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
     e.preventDefault();
     if (!user) return;
     if (!name.trim()) { toast.error('Name is required'); return; }
-    if (!fundingAccountId) { toast.error('Select a funding account'); return; }
+    if (!fundingAccountId) { toast.error('Select an account to save to'); return; }
     if (needsTarget && (!targetAmount || parseFloat(targetAmount) <= 0)) {
       toast.error('Target amount is required'); return;
     }
@@ -264,7 +264,7 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
 
               {/* Funding account */}
               <div>
-                <label className="text-muted-foreground text-xs font-medium block mb-1.5">Funding Account *</label>
+                <label className="text-muted-foreground text-xs font-medium block mb-1.5">Save to *</label>
                 <select
                   value={fundingAccountId}
                   onChange={e => setFundingAccountId(e.target.value)}
@@ -275,6 +275,9 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
                     <option key={a.id} value={a.id}>{a.name}</option>
                   ))}
                 </select>
+                <p className="text-muted-foreground/70 text-[11px] mt-1">
+                  The account where this goal&apos;s money will be tracked.
+                </p>
               </div>
 
               {/* Priority */}
