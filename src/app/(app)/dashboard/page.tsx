@@ -243,7 +243,11 @@ function DashboardContent() {
     : profile?.monthly_income ?? 0;
 
   const activeSources = incomeSources.filter(s => s.is_active);
-  const hasNudges = nudges.length > 0 || pendingRecurring.length > 0;
+  // Income lives in income_sources (rendered via IncomeNudgeCard). Any
+  // type='income' rows still in recurring_transactions are legacy data —
+  // hide them from the dashboard so the same money event isn't prompted twice.
+  const pendingExpenseRecurring = pendingRecurring.filter(p => p.recurring.type !== 'income');
+  const hasNudges = nudges.length > 0 || pendingExpenseRecurring.length > 0;
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
@@ -432,7 +436,7 @@ function DashboardContent() {
                   onDismiss={handleDismissNudge}
                 />
               ))}
-              {pendingRecurring.map(({ recurring, dueDates }) => (
+              {pendingExpenseRecurring.map(({ recurring, dueDates }) => (
                 <PendingRecurringCard
                   key={recurring.id}
                   name={recurring.note ?? recurring.category?.name ?? 'Recurring'}

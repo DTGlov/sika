@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { Plus, Pencil, Pause, Play, Trash2, RefreshCw, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -25,16 +26,19 @@ import type { RecurringTransaction, RecurringFrequency } from '@/types';
 
 type TabValue = 'expense' | 'income' | 'paused';
 
+// Recurring templates are expense-only by design. Income lives in
+// income_sources (managed via Settings → Income) so it doesn't get
+// double-modeled and double-prompt the user on the dashboard.
 const TEMPLATES: Array<{
   label: string;
   emoji: string;
-  defaults: { type: 'expense' | 'income'; frequency: RecurringFrequency; schedule_day?: number; auto_log: boolean; note: string };
+  defaults: { type: 'expense'; frequency: RecurringFrequency; schedule_day?: number; auto_log: boolean; note: string };
 }> = [
   { label: 'Monthly rent', emoji: '🏠', defaults: { type: 'expense', frequency: 'monthly', auto_log: true, note: 'Monthly rent' } },
   { label: 'Subscription', emoji: '📱', defaults: { type: 'expense', frequency: 'monthly', auto_log: true, note: 'Subscription' } },
-  { label: 'Monthly salary', emoji: '💼', defaults: { type: 'income', frequency: 'monthly', auto_log: false, note: 'Monthly salary' } },
-  { label: 'Weekly allowance', emoji: '💰', defaults: { type: 'income', frequency: 'weekly', schedule_day: 1, auto_log: false, note: 'Weekly allowance' } },
   { label: 'Utility bill', emoji: '⚡', defaults: { type: 'expense', frequency: 'monthly', auto_log: false, note: 'Utility bill' } },
+  { label: 'Gym membership', emoji: '🏋️', defaults: { type: 'expense', frequency: 'monthly', auto_log: true, note: 'Gym membership' } },
+  { label: 'Internet', emoji: '📶', defaults: { type: 'expense', frequency: 'monthly', auto_log: true, note: 'Internet' } },
 ];
 
 function parseDateStr(str: string): Date {
@@ -391,10 +395,10 @@ function RecurringContent() {
         </div>
       )}
 
-      {/* Quick templates strip */}
+      {/* Quick templates strip — expense only */}
       {!loading && (
         <div className="mt-8">
-          <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-3">Quick templates</p>
+          <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-3">Quick expense templates</p>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             {TEMPLATES.map(tmpl => (
               <button
@@ -407,6 +411,13 @@ function RecurringContent() {
               </button>
             ))}
           </div>
+          <p className="text-xs text-muted-foreground/70 mt-3">
+            For income, manage your sources in{' '}
+            <Link href="/settings" className="text-accent underline-offset-2 hover:underline">
+              Settings → Income
+            </Link>
+            .
+          </p>
         </div>
       )}
 
@@ -430,20 +441,33 @@ function EmptyState({ tab, onAdd }: { tab: TabValue; onAdd: () => void }) {
     );
   }
 
-  const isExpense = tab === 'expense';
+  if (tab === 'income') {
+    return (
+      <div className="text-center py-16 px-4">
+        <p className="text-muted-foreground text-sm mb-4">
+          Income lives in your sources, not here. Add salary, allowances, and side hustles in Settings → Income — Sika will nudge you on the dashboard when each is due.
+        </p>
+        <Link
+          href="/settings"
+          className="inline-flex items-center gap-1.5 h-9 px-4 text-sm bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl transition-colors"
+        >
+          Go to Settings
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="text-center py-16 px-4">
       <p className="text-muted-foreground text-sm mb-4">
-        {isExpense
-          ? 'No recurring expenses yet. Add things like rent, subscriptions, or bills.'
-          : 'No recurring income yet. Add your salary or regular allowances.'}
+        No recurring expenses yet. Add things like rent, subscriptions, or bills.
       </p>
       <Button
         onClick={onAdd}
         className="h-9 px-4 text-sm bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
       >
         <Plus className="w-4 h-4 mr-1.5" />
-        Add {isExpense ? 'expense' : 'income'}
+        Add expense
       </Button>
     </div>
   );
