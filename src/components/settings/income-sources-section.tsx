@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Pencil, Trash2, Wallet, Loader2 } from 'lucide-react';
+import { AlertCircle, Plus, Pencil, Trash2, Wallet, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
@@ -52,6 +52,16 @@ const sourceSchema = z.object({
   expected_day: z.number().int().min(0).max(31).nullable().optional(),
   notes: z.string().max(200).optional(),
   is_active: z.boolean(),
+}).superRefine((data, ctx) => {
+  if (data.frequency !== 'irregular' && data.expected_day == null) {
+    ctx.addIssue({
+      code: 'custom',
+      message: data.frequency === 'monthly'
+        ? 'Pick the day of month this lands'
+        : 'Pick the day of week this lands',
+      path: ['expected_day'],
+    });
+  }
 });
 
 type SourceForm = z.infer<typeof sourceSchema>;
@@ -104,6 +114,9 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
 
   const frequency = watch('frequency');
   const isActive = watch('is_active');
+  const expectedDay = watch('expected_day');
+  const isFixedFrequency = frequency === 'monthly' || frequency === 'weekly' || frequency === 'biweekly';
+  const expectedDayMissing = isFixedFrequency && (expectedDay == null);
 
   async function onSubmit(values: SourceForm) {
     if (!user) return;
@@ -152,8 +165,6 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
     onClose();
     toast.success(editSource ? 'Income source updated' : 'Income source added');
   }
-
-  const showExpectedDay = frequency === 'monthly' || frequency === 'weekly' || frequency === 'biweekly';
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onClose(); } }}>
@@ -213,25 +224,27 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
             </div>
           </div>
 
-          {/* Expected day (conditional) */}
-          {showExpectedDay && (
+          {/* Expected day — required for fixed frequencies */}
+          {isFixedFrequency ? (
             <div className="space-y-1.5">
               <Label className="text-muted-foreground text-sm">
-                {frequency === 'monthly' ? 'Day of month (optional)' : 'Day of week (optional)'}
+                {frequency === 'monthly' ? 'Day of month' : 'Day of week'}
+                <span className="text-[#F43F5E] ml-0.5">*</span>
               </Label>
               {frequency === 'monthly' ? (
                 <Input
                   type="number"
+                  inputMode="numeric"
                   min="1"
                   max="31"
-                  placeholder="1–31"
+                  placeholder="e.g. 25"
                   className="h-11 bg-input border-border text-foreground focus-visible:ring-accent"
                   {...register('expected_day', { valueAsNumber: true })}
                 />
               ) : (
                 <Select
-                  onValueChange={(v) => setValue('expected_day', v != null ? parseInt(v) : undefined)}
-                  defaultValue={editSource?.expected_day != null ? String(editSource.expected_day) : undefined}
+                  value={expectedDay != null ? String(expectedDay) : ''}
+                  onValueChange={(v) => setValue('expected_day', v != null && v !== '' ? parseInt(v) : null, { shouldValidate: true })}
                 >
                   <SelectTrigger className="h-11 bg-input border-border text-foreground focus:ring-accent">
                     <SelectValue placeholder="Select day">
@@ -250,7 +263,18 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
                   </SelectContent>
                 </Select>
               )}
+              {errors.expected_day ? (
+                <p className="text-[#F43F5E] text-xs">{errors.expected_day.message}</p>
+              ) : (
+                <p className="text-muted-foreground/70 text-[11px]">
+                  Sika will nudge you on this day to confirm the money arrived.
+                </p>
+              )}
             </div>
+          ) : (
+            <p className="text-muted-foreground/70 text-[11px]">
+              Irregular income — Sika won&apos;t send reminders. Log it manually when received.
+            </p>
           )}
 
           {/* Notes */}
@@ -284,8 +308,8 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
 
           <Button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
+            disabled={isSubmitting || expectedDayMissing}
+            className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editSource ? 'Save changes' : 'Add source'}
           </Button>
@@ -369,6 +393,7 @@ export function IncomeSourcesSection() {
             {incomeSources.map((source) => {
               const monthlyEq = calculateMonthlyEquivalent(source.amount, source.frequency);
               const showEq = source.frequency !== 'monthly' && source.frequency !== 'irregular';
+              const missingDay = source.frequency !== 'irregular' && source.expected_day == null;
               return (
                 <div
                   key={source.id}
@@ -397,6 +422,16 @@ export function IncomeSourcesSection() {
                         <span className="text-muted-foreground/70 text-[11px]">≈ {format(monthlyEq)}/mo</span>
                       )}
                     </div>
+                    {missingDay && (
+                      <button
+                        type="button"
+                        onClick={() => openEdit(source)}
+                        className="flex items-center gap-1 mt-1 text-[11px] text-[#FBBF24] hover:underline"
+                      >
+                        <AlertCircle className="w-3 h-3" />
+                        <span>No reminder day set — tap to add one</span>
+                      </button>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-1 ml-2 shrink-0">

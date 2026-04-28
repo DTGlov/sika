@@ -24,7 +24,7 @@ import { RecurringModal } from '@/components/recurring/recurring-modal';
 import { HintCard } from '@/components/hint-card';
 import type { RecurringTransaction, RecurringFrequency } from '@/types';
 
-type TabValue = 'expense' | 'income' | 'paused';
+type TabValue = 'expense' | 'paused';
 
 // Recurring templates are expense-only by design. Income lives in
 // income_sources (managed via Settings → Income) so it doesn't get
@@ -189,7 +189,8 @@ function RecurringContent() {
   useProfile();
   const supabase = createClient();
 
-  const tab = (searchParams.get('tab') ?? 'expense') as TabValue;
+  const rawTab = searchParams.get('tab');
+  const tab: TabValue = rawTab === 'paused' ? 'paused' : 'expense';
 
   const [items, setItems] = useState<RecurringTransaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -222,17 +223,11 @@ function RecurringContent() {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
+  // Income recurrings are legacy — they still get sorted into Paused if
+  // is_paused, otherwise Active expense — never surfaced as a tab.
   const expenseItems = useMemo(
     () => items
       .filter(i => i.type === 'expense' && !i.is_paused)
-      .sort((a, b) => getNextDueTimestamp(a, today) - getNextDueTimestamp(b, today)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items]
-  );
-
-  const incomeItems = useMemo(
-    () => items
-      .filter(i => i.type === 'income' && !i.is_paused)
       .sort((a, b) => getNextDueTimestamp(a, today) - getNextDueTimestamp(b, today)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [items]
@@ -246,15 +241,11 @@ function RecurringContent() {
   );
 
   const TABS: { value: TabValue; label: string; count: number }[] = [
-    { value: 'expense', label: 'Expense', count: expenseItems.length },
-    { value: 'income', label: 'Income', count: incomeItems.length },
+    { value: 'expense', label: 'Recurring', count: expenseItems.length },
     { value: 'paused', label: 'Paused', count: pausedItems.length },
   ];
 
-  const visibleItems =
-    tab === 'expense' ? expenseItems :
-    tab === 'income' ? incomeItems :
-    pausedItems;
+  const visibleItems = tab === 'expense' ? expenseItems : pausedItems;
 
   async function handleSync() {
     if (!user) return;
@@ -300,7 +291,7 @@ function RecurringContent() {
     setModalOpen(true);
   }
 
-  const accentColor = tab === 'income' ? '#00D9A3' : tab === 'expense' ? '#F43F5E' : '#FBBF24';
+  const accentColor = tab === 'expense' ? '#F43F5E' : '#FBBF24';
 
   return (
     <div className="max-w-2xl mx-auto pb-8 px-4 pt-6 md:px-8">
@@ -437,22 +428,6 @@ function EmptyState({ tab, onAdd }: { tab: TabValue; onAdd: () => void }) {
     return (
       <div className="text-center py-16 text-muted-foreground text-sm">
         Nothing paused right now.
-      </div>
-    );
-  }
-
-  if (tab === 'income') {
-    return (
-      <div className="text-center py-16 px-4">
-        <p className="text-muted-foreground text-sm mb-4">
-          Income lives in your sources, not here. Add salary, allowances, and side hustles in Settings → Income — Sika will nudge you on the dashboard when each is due.
-        </p>
-        <Link
-          href="/settings"
-          className="inline-flex items-center gap-1.5 h-9 px-4 text-sm bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl transition-colors"
-        >
-          Go to Settings
-        </Link>
       </div>
     );
   }
