@@ -14,6 +14,7 @@ import {
   totalMonthlyIncome,
   FREQUENCY_LABELS,
   FREQUENCY_COLORS,
+  DAY_OF_WEEK,
 } from '@/lib/income';
 import { formatCurrency, formatCurrencyCompact, currencySymbol as getDisplaySymbol } from '@/lib/format/currency';
 import { ALL_CURRENCIES, POPULAR_CURRENCIES } from '@/lib/currencies';
@@ -45,6 +46,17 @@ const primarySchema = z.object({
   name: z.string().min(1, 'Required').max(50),
   amount: z.number().positive('Must be greater than 0'),
   frequency: z.enum(['monthly', 'weekly', 'biweekly', 'irregular']),
+  expected_day: z.number().int().min(0).max(31).nullable().optional(),
+}).superRefine((data, ctx) => {
+  if (data.frequency !== 'irregular' && data.expected_day == null) {
+    ctx.addIssue({
+      code: 'custom',
+      message: data.frequency === 'monthly'
+        ? 'Pick the day of month this lands'
+        : 'Pick the day of week this lands',
+      path: ['expected_day'],
+    });
+  }
 });
 
 type PrimaryForm = z.infer<typeof primarySchema>;
@@ -100,12 +112,15 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
   const frequency = watch('frequency');
   const primaryName = watch('name');
   const primaryAmount = watch('amount');
+  const expectedDay = watch('expected_day');
+  const isFixedFrequency = frequency === 'monthly' || frequency === 'weekly' || frequency === 'biweekly';
   const canSubmitPrimary =
     typeof primaryName === 'string' &&
     primaryName.trim().length > 0 &&
     typeof primaryAmount === 'number' &&
     !Number.isNaN(primaryAmount) &&
-    primaryAmount > 0;
+    primaryAmount > 0 &&
+    (!isFixedFrequency || (typeof expectedDay === 'number' && !Number.isNaN(expectedDay)));
 
   function handleChipTap(t: ExtraTemplate) {
     if (extraSources.some(s => s._key === t._key)) return;
@@ -131,7 +146,13 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
   }
 
   function onPrimarySubmit(values: PrimaryForm) {
-    setPrimarySource({ _key: 'primary', ...values, expected_day: null });
+    setPrimarySource({
+      _key: 'primary',
+      name: values.name,
+      amount: values.amount,
+      frequency: values.frequency,
+      expected_day: values.frequency === 'irregular' ? null : (values.expected_day ?? null),
+    });
     setStep(4);
   }
 
@@ -358,7 +379,10 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                         <button
                           key={f}
                           type="button"
-                          onClick={() => setValue('frequency', f)}
+                          onClick={() => {
+                            setValue('frequency', f);
+                            setValue('expected_day', undefined, { shouldValidate: false });
+                          }}
                           className="h-9 rounded-lg text-xs font-medium transition-colors"
                           style={
                             frequency === f
@@ -371,6 +395,55 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                       ))}
                     </div>
                   </div>
+
+                  {isFixedFrequency ? (
+                    <div className="space-y-1.5">
+                      <Label className="text-muted-foreground text-sm">
+                        {frequency === 'monthly' ? 'Day of month' : 'Day of week'}
+                        <span className="text-[#F43F5E] ml-0.5">*</span>
+                      </Label>
+                      {frequency === 'monthly' ? (
+                        <Input
+                          type="number"
+                          inputMode="numeric"
+                          min="1"
+                          max="31"
+                          placeholder="e.g. 25"
+                          className="h-11 px-3 bg-input border-border text-foreground focus-visible:ring-accent"
+                          {...register('expected_day', { valueAsNumber: true })}
+                        />
+                      ) : (
+                        <div className="grid grid-cols-7 gap-1">
+                          {DAY_OF_WEEK.map((day, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => setValue('expected_day', i, { shouldValidate: true })}
+                              className="h-9 rounded-lg text-xs font-medium transition-colors"
+                              style={
+                                expectedDay === i
+                                  ? { backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)', borderWidth: 1, borderColor: 'var(--accent)' }
+                                  : { backgroundColor: 'var(--input)', color: 'var(--muted-foreground)', borderWidth: 1, borderColor: 'var(--border)' }
+                              }
+                            >
+                              {day.charAt(0)}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {errors.expected_day ? (
+                        <p className="text-[#F43F5E] text-xs">{errors.expected_day.message}</p>
+                      ) : (
+                        <p className="text-muted-foreground/70 text-[11px]">
+                          Sika will nudge you on this day to confirm the money arrived.
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground/70 text-[11px]">
+                      Irregular income — Sika won&apos;t send reminders. Log it manually when received.
+                    </p>
+                  )}
 
                   <Button
                     type="submit"
