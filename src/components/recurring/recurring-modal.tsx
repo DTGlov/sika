@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -76,7 +77,8 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
       auto_log: editItem.auto_log,
       is_paused: editItem.is_paused,
     } : {
-      type: defaultValues?.type ?? 'expense',
+      // New recurrings are always expense — income lives in income_sources.
+      type: 'expense',
       amount: undefined as unknown as number,
       account_id: defaultValues?.account_id ?? defaultAccount?.id ?? '',
       category_id: defaultValues?.category_id ?? null,
@@ -105,7 +107,7 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
       auto_log: editItem.auto_log,
       is_paused: editItem.is_paused,
     } : {
-      type: defaultValues?.type ?? 'expense',
+      type: 'expense',
       amount: undefined as unknown as number,
       account_id: defaultValues?.account_id ?? defaultAccount?.id ?? '',
       category_id: defaultValues?.category_id ?? null,
@@ -200,23 +202,27 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
-          {/* Type toggle */}
-          <div className="grid grid-cols-2 gap-1 bg-muted rounded-xl p-1">
-            {(['expense', 'income'] as const).map(t => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => { setValue('type', t); setValue('category_id', null); }}
-                className="h-9 rounded-lg text-sm font-medium transition-colors capitalize"
-                style={{
-                  backgroundColor: txType === t ? (t === 'expense' ? '#F43F5E18' : '#00D9A318') : 'transparent',
-                  color: txType === t ? (t === 'expense' ? '#F43F5E' : '#00D9A3') : 'var(--muted-foreground)',
-                }}
-              >
-                {t.charAt(0).toUpperCase() + t.slice(1)}
-              </button>
-            ))}
-          </div>
+          {/* Type. Recurring is expense-only — no selector for new rows.
+              Editing a legacy income row shows a locked Income pill with
+              a pointer to Settings → Income (the canonical place for
+              income now). */}
+          {editItem && editItem.type === 'income' && (
+            <div className="flex items-start justify-between gap-3 bg-muted rounded-xl px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <Label className="text-muted-foreground text-sm">Type</Label>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[#00D9A318] text-[#00D9A3] font-medium uppercase tracking-wider">
+                  Income
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground/70 text-right max-w-[60%]">
+                Recurring income is no longer created here. Manage in{' '}
+                <Link href="/settings" className="text-accent underline-offset-2 hover:underline">
+                  Settings → Income
+                </Link>
+                .
+              </p>
+            </div>
+          )}
 
           {/* Amount */}
           <div className="space-y-1.5">
