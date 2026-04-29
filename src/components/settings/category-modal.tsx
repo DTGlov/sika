@@ -97,6 +97,8 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
 
   const categoryType = watch('category_type');
   const bucketId = watch('bucket_id');
+  const nameValue = watch('name');
+  const canSubmitCategory = typeof nameValue === 'string' && nameValue.trim().length > 0;
   const icon = watch('icon');
 
   useEffect(() => {
@@ -270,8 +272,8 @@ export function CategoryModal({ open, onClose, editCategory, onSaved }: Category
 
           <Button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
+            disabled={isSubmitting || !canSubmitCategory}
+            className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editCategory ? 'Save changes' : 'Add category'}
           </Button>

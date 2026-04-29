@@ -513,7 +513,7 @@ export function TransactionSheet() {
             <Button
               onClick={handleNext}
               disabled={!canProceedAmount}
-              className="w-full h-13 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold text-base rounded-xl flex items-center justify-center gap-2"
+              className="w-full h-13 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold text-base rounded-xl flex items-center justify-center gap-2 disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
             >
               Next <ChevronRight className="w-4 h-4" />
             </Button>
@@ -547,7 +547,7 @@ export function TransactionSheet() {
               <Button
                 onClick={() => setStep('details')}
                 disabled={txType === 'income' && !incomeCategoryValid}
-                className="flex-1 h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl">
+                className="flex-1 h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed">
                 Next
               </Button>
             </div>
@@ -615,7 +615,7 @@ export function TransactionSheet() {
                   setStep('details');
                 }}
                 disabled={!accountId || !toAccountId}
-                className="flex-1 h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl">
+                className="flex-1 h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed">
                 Next
               </Button>
             </div>
@@ -714,7 +714,7 @@ export function TransactionSheet() {
               <Button
                 onClick={handleReconcileSave}
                 disabled={saving || reconcileActual === '' || !accountId || reconcileDiff === 0}
-                className="flex-1 h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
+                className="flex-1 h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
               >
                 {saving
                   ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -888,7 +888,7 @@ export function TransactionSheet() {
                 Back
               </Button>
               <Button onClick={handleSave} disabled={saving || !canProceedAmount || !!sfOverpayment}
-                className="flex-1 h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl">
+                className="flex-1 h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editingTransaction ? 'Update' : 'Save'}
               </Button>
             </div>

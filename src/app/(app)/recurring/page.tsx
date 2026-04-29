@@ -324,7 +324,7 @@ function RecurringContent() {
       <HintCard
         hintId="recurring_intro"
         title="Automate your money rhythm"
-        body="Recurring transactions auto-log on a schedule — set up subscriptions, salary, and bills once and Sika handles the rest. Use nudges for variable amounts (utilities, side hustles)."
+        body="Recurring expenses auto-log on a schedule — set up subscriptions, rent, and bills once and Sika handles the rest. Use the toggle for variable amounts (utilities, gym, side gigs)."
         icon={RefreshCw}
         variant="banner"
         className="mb-4"

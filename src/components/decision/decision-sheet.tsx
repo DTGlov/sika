@@ -215,7 +215,7 @@ export function DecisionSheet({ onClose }: DecisionSheetProps) {
             <Button
               onClick={handleAsk}
               disabled={!canSubmit}
-              className="w-full h-13 bg-[#D4A017] hover:bg-[#B8891A] disabled:opacity-40 text-[#0E1A2E] font-semibold text-base rounded-xl"
+              className="w-full h-13 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold text-base rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
             >
               Let Sika decide
             </Button>

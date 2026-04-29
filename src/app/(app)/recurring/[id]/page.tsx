@@ -195,7 +195,7 @@ export default function RecurringDetailPage() {
               <button
                 onClick={handleLog}
                 disabled={submitting}
-                className="h-11 px-4 rounded-xl bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                className="h-11 px-4 rounded-xl bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold text-sm flex items-center justify-center gap-2 disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 Log this instance now
@@ -237,7 +237,7 @@ export default function RecurringDetailPage() {
               type="button"
               onClick={handleSkip}
               disabled={submitting}
-              className="bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E]"
+              className="bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
             >
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Yes, skip'}
             </Button>
