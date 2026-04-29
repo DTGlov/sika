@@ -23,6 +23,16 @@ if (typeof window !== 'undefined') {
 
     autocapture: false,
     enable_heatmaps: false,
+
+    // Feature flags: ship empty initial values so consumers can read
+    // synchronously, and reload after init so the first identify call
+    // refreshes targeting rules without a UI flash.
+    bootstrap: {
+      featureFlags: {},
+    },
+    loaded: (ph) => {
+      ph.reloadFeatureFlags();
+    },
   });
 }
 
