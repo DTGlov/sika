@@ -128,6 +128,17 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
   const autoLog = watch('auto_log');
   const isPaused = watch('is_paused');
   const endDate = watch('end_date');
+  const amountValue = watch('amount');
+  const accountIdValue = watch('account_id');
+  const fixedFrequency = frequency === 'monthly' || frequency === 'weekly' || frequency === 'biweekly';
+  const scheduleDayValid = !fixedFrequency || (scheduleDay != null && !Number.isNaN(scheduleDay));
+  const canSubmitRecurring =
+    typeof amountValue === 'number' &&
+    !Number.isNaN(amountValue) &&
+    amountValue > 0 &&
+    !!accountIdValue &&
+    scheduleDayValid;
+  const disableRecurringSubmit = isSubmitting || !canSubmitRecurring;
 
   const [showIncomeWarning, setShowIncomeWarning] = useState(false);
 
@@ -451,8 +462,8 @@ export function RecurringModal({ open, onClose, editItem, onSaved, defaultValues
 
           <Button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
+            disabled={disableRecurringSubmit}
+            className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editItem ? 'Save changes' : 'Create'}
           </Button>

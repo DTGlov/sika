@@ -190,7 +190,7 @@ export function TransactionItem({ transaction: txn }: TransactionItemProps) {
               type="button"
               onClick={handleDelete}
               disabled={isDeleting}
-              className="bg-[#F43F5E] text-white hover:bg-[#E11D48]"
+              className="bg-[#F43F5E] text-white hover:bg-[#E11D48] disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
             >
               {isDeleting ? 'Deleting…' : 'Delete'}
             </Button>

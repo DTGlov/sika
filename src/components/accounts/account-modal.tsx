@@ -93,6 +93,15 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
   const type = watch('type');
   const isDefault = watch('is_default');
   const isActive = watch('is_active');
+  const nameValue = watch('name');
+  const openingBalanceValue = watch('opening_balance');
+  const canSubmit =
+    typeof nameValue === 'string' &&
+    nameValue.trim().length > 0 &&
+    typeof openingBalanceValue === 'number' &&
+    !Number.isNaN(openingBalanceValue) &&
+    openingBalanceValue >= 0;
+  const disableSubmit = isSubmitting || !canSubmit;
 
   async function onSubmit(values: AccountForm) {
     if (!user) return;
@@ -342,7 +351,7 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
                     type="button"
                     onClick={handleReconcileFromModal}
                     disabled={reconcileSaving || reconcileActual === '' || (parseFloat(reconcileActual) || 0) === currentBalance}
-                    className="w-full h-10 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl text-sm"
+                    className="w-full h-10 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl text-sm disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
                   >
                     {reconcileSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create adjustment & close'}
                   </Button>
@@ -354,8 +363,8 @@ export function AccountModal({ open, onClose, editAccount, currentBalance, onSav
           {!reconcileMode && (
             <Button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
+              disabled={disableSubmit}
+              className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
             >
               {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editAccount ? 'Save changes' : 'Add account'}
             </Button>

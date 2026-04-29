@@ -64,6 +64,11 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
 
   const needsTarget = goalType === 'target';
 
+  const targetAmountValid = !needsTarget || (parseFloat(targetAmount) > 0);
+  const deadlineValid = !needsTarget || !!deadline;
+  const canSubmit = !!name.trim() && !!fundingAccountId && targetAmountValid && deadlineValid;
+  const disableSubmit = saving || !canSubmit;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
@@ -298,9 +303,12 @@ export function GoalModal({ open, onClose, goal }: GoalModalProps) {
 
               <button
                 type="submit"
-                disabled={saving}
-                className="w-full h-11 rounded-xl font-semibold text-sm text-[#0E1A2E] transition-colors disabled:opacity-50"
-                style={{ background: color }}
+                disabled={disableSubmit}
+                className="w-full h-11 rounded-xl font-semibold text-sm transition-colors disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+                style={{
+                  background: disableSubmit ? undefined : color,
+                  color: disableSubmit ? undefined : '#0E1A2E',
+                }}
               >
                 {saving ? 'Saving…' : goal ? 'Save Changes' : 'Create Goal'}
               </button>

@@ -448,7 +448,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                   <Button
                     type="submit"
                     disabled={!canSubmitPrimary}
-                    className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
                   >
                     Continue <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
@@ -613,7 +613,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                 <Button
                   onClick={handleFinish}
                   disabled={saving}
-                  className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
+                  className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Looks good, let's start →"}
                 </Button>

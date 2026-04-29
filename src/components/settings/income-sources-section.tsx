@@ -115,8 +115,17 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
   const frequency = watch('frequency');
   const isActive = watch('is_active');
   const expectedDay = watch('expected_day');
+  const nameValue = watch('name');
+  const amountValue = watch('amount');
   const isFixedFrequency = frequency === 'monthly' || frequency === 'weekly' || frequency === 'biweekly';
   const expectedDayMissing = isFixedFrequency && (expectedDay == null);
+  const canSubmitSource =
+    typeof nameValue === 'string' &&
+    nameValue.trim().length > 0 &&
+    typeof amountValue === 'number' &&
+    !Number.isNaN(amountValue) &&
+    amountValue > 0 &&
+    !expectedDayMissing;
 
   async function onSubmit(values: SourceForm) {
     if (!user) return;
@@ -308,8 +317,8 @@ function IncomeSourceModal({ open, onClose, editSource, onSaved }: IncomeSourceM
 
           <Button
             type="submit"
-            disabled={isSubmitting || expectedDayMissing}
-            className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSubmitting || !canSubmitSource}
+            className="w-full h-11 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editSource ? 'Save changes' : 'Add source'}
           </Button>

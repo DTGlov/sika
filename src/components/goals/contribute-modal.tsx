@@ -56,6 +56,8 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
   const afterAmount = current_amount + numAmount;
   const afterPercent = target_amount ? Math.min(100, (afterAmount / target_amount) * 100) : null;
   const accentColor = goal.color ?? '#00D9A3';
+  const canSubmit = numAmount > 0 && !!fromAccountId;
+  const disableSubmit = saving || !canSubmit;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -223,9 +225,12 @@ export function ContributeModal({ open, onClose, goalProgress }: ContributeModal
 
               <button
                 type="submit"
-                disabled={saving}
-                className="w-full h-11 rounded-xl font-semibold text-sm text-[#0E1A2E] transition-colors disabled:opacity-50"
-                style={{ background: accentColor }}
+                disabled={disableSubmit}
+                className="w-full h-11 rounded-xl font-semibold text-sm transition-colors disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+                style={{
+                  background: disableSubmit ? undefined : accentColor,
+                  color: disableSubmit ? undefined : '#0E1A2E',
+                }}
               >
                 {saving ? 'Adding…' : 'Add Contribution'}
               </button>
