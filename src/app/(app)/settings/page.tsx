@@ -35,6 +35,7 @@ import {
 import { CardThemePicker } from "@/components/settings/card-theme-picker";
 import { AppearanceSection } from "@/components/settings/appearance-section";
 import { HapticsSection } from "@/components/settings/haptics-section";
+import { NotificationSettings } from "@/components/settings/notification-settings";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { resetAnalytics } from "@/lib/analytics/identify";
 import type { Category } from "@/types";
@@ -222,6 +223,9 @@ export default function SettingsPage() {
 
         {/* Haptics */}
         <HapticsSection />
+
+        {/* Push notifications (gated by experimental_push_notifications) */}
+        <NotificationSettings />
 
         {/* Income Sources */}
         <div className="mb-6">
