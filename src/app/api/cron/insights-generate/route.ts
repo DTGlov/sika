@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { computeInsightContext } from '@/lib/insights/compute-insight-context';
 import { generateInsight } from '@/lib/insights/generate-insight';
+import { sendPushToUser } from '@/lib/push-sender';
 
 export const maxDuration = 300;
 
@@ -49,6 +50,13 @@ export async function GET(request: Request) {
       });
 
       results.generated++;
+
+      await sendPushToUser(supabase, profile.id, {
+        title: insight.headline || 'Sika has something for you today',
+        body: insight.body || "Tap to see today's insight.",
+        url: '/dashboard',
+        tag: 'daily-insight',
+      });
     } catch (err) {
       results.failed++;
       results.errors.push(`${profile.id}: ${err instanceof Error ? err.message : 'unknown'}`);
