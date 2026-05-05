@@ -11,6 +11,14 @@ import {
   subscribeToPush,
   unsubscribeFromPush,
 } from '@/lib/push-subscriptions';
+import { isInPWA } from '@/lib/pwa';
+import { PwaInstallGuide } from '@/components/onboarding/pwa-install-guide';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export function NotificationSettings() {
   const pushEnabled = useFeatureFlag('experimental_push_notifications');
@@ -20,6 +28,7 @@ export function NotificationSettings() {
   const [supported, setSupported] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [working, setWorking] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -35,6 +44,12 @@ export function NotificationSettings() {
 
   async function handleToggle(next: boolean) {
     if (!user || working) return;
+
+    if (next && !isInPWA()) {
+      setShowInstallModal(true);
+      return;
+    }
+
     setWorking(true);
     try {
       if (next) {
@@ -58,37 +73,53 @@ export function NotificationSettings() {
   }
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 mb-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3 flex-1">
-          <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-            <Bell className="w-4 h-4 text-accent" />
+    <>
+      <div className="bg-card border border-border rounded-2xl p-5 mb-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3 flex-1">
+            <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+              <Bell className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <h2 className="text-foreground font-semibold mb-1">Push notifications</h2>
+              <p className="text-muted-foreground text-xs">
+                {supported
+                  ? 'Income reminders and your daily insight, sent to this device.'
+                  : 'Not supported in this browser. Add Sika to your home screen and try again.'}
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-foreground font-semibold mb-1">Push notifications</h2>
-            <p className="text-muted-foreground text-xs">
-              {supported
-                ? 'Income reminders and your daily insight, sent to this device.'
-                : 'Not supported in this browser. Add Sika to your home screen and try again.'}
-            </p>
-          </div>
+          <button
+            onClick={() => handleToggle(!subscribed)}
+            disabled={!supported || working}
+            role="switch"
+            aria-checked={subscribed}
+            className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              subscribed ? 'bg-accent' : 'bg-muted'
+            } ${!supported || working ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                subscribed ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
         </div>
-        <button
-          onClick={() => handleToggle(!subscribed)}
-          disabled={!supported || working}
-          role="switch"
-          aria-checked={subscribed}
-          className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            subscribed ? 'bg-accent' : 'bg-muted'
-          } ${!supported || working ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              subscribed ? 'translate-x-6' : 'translate-x-1'
-            }`}
-          />
-        </button>
       </div>
-    </div>
+
+      <Dialog open={showInstallModal} onOpenChange={setShowInstallModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Install Sika first</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground mb-4">
+            Push notifications need Sika installed to your home screen.
+          </p>
+          <div className="max-h-[60vh] overflow-y-auto pr-1">
+            <PwaInstallGuide />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

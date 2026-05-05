@@ -6,9 +6,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2, Sparkles, ChevronRight, ChevronLeft, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
 import { analytics } from '@/lib/analytics/identify';
+import { PwaInstallGuide } from '@/components/onboarding/pwa-install-guide';
+import { isInPWA } from '@/lib/pwa';
 import {
   calculateMonthlyEquivalent,
   totalMonthlyIncome,
@@ -70,7 +73,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
   const { user, setProfile, setIncomeSources } = useAuthStore();
   const supabase = createClient();
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [selectedCurrency, setSelectedCurrency] = useState('GHS');
   const [currencySearch, setCurrencySearch] = useState('');
   const [primarySource, setPrimarySource] = useState<TempSource | null>(null);
@@ -193,7 +196,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
     if (updatedProfile) setProfile(updatedProfile);
     setIncomeSources(sources);
-    analytics.onboardingCompleted({ stepsCompleted: 5 });
+    analytics.onboardingCompleted({ stepsCompleted: 6 });
     setSaving(false);
     onClose();
   }
@@ -235,7 +238,7 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
           >
             {/* Step indicator */}
             <div className="flex items-center gap-1.5 mb-5">
-              {([1, 2, 3, 4, 5] as const).map(s => (
+              {([1, 2, 3, 4, 5, 6] as const).map(s => (
                 <div
                   key={s}
                   className="h-1 rounded-full transition-all"
@@ -611,12 +614,54 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
                 </div>
 
                 <Button
-                  onClick={handleFinish}
-                  disabled={saving}
-                  className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
+                  onClick={() => setStep(6)}
+                  className="w-full h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl"
                 >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Looks good, let's start →"}
+                  Looks good, let&apos;s start →
                 </Button>
+              </div>
+            )}
+
+            {/* Step 6: PWA install */}
+            {step === 6 && (
+              <div>
+                <button
+                  onClick={() => setStep(5)}
+                  className="flex items-center gap-1 text-muted-foreground text-sm mb-4 hover:text-foreground transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back
+                </button>
+                <h2 className="text-lg font-bold text-foreground mb-1">Add Sika to your home screen</h2>
+                <p className="text-muted-foreground text-xs mb-5">
+                  Get the best experience including push notifications.
+                </p>
+
+                <div className="max-h-[50vh] overflow-y-auto pr-1 mb-5">
+                  <PwaInstallGuide />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleFinish}
+                    disabled={saving}
+                    className="flex-1 py-3 rounded-xl text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Skip for now'}
+                  </button>
+                  <Button
+                    onClick={() => {
+                      if (isInPWA()) {
+                        handleFinish();
+                      } else {
+                        toast.info('Open Sika from your home screen to continue');
+                      }
+                    }}
+                    disabled={saving}
+                    className="flex-1 h-12 bg-[#D4A017] hover:bg-[#B8891A] text-[#0E1A2E] font-semibold rounded-xl disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted disabled:cursor-not-allowed"
+                  >
+                    I&apos;ve installed Sika
+                  </Button>
+                </div>
               </div>
             )}
           </motion.div>

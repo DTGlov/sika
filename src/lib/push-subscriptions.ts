@@ -69,6 +69,16 @@ export async function subscribeToPush(userId: string): Promise<boolean> {
       return false;
     }
 
+    // Best-effort welcome notification — don't fail subscription if it errors.
+    try {
+      await fetch('/api/push/welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (err) {
+      console.warn('[Push] Welcome notification failed', err);
+    }
+
     return true;
   } catch (error) {
     console.error('[Push] Subscribe failed', error);
