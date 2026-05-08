@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { getAuthedUser } from '@/lib/auth/get-authed-user';
 import { computeDecisionContext } from '@/lib/decisions/compute-decision-context';
 import { generateDecision } from '@/lib/decisions/generate-decision';
 import { z } from 'zod';
@@ -19,8 +19,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid input', details: parseResult.error }, { status: 400 });
   }
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthedUser(request);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const service = createServiceClient();
