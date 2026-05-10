@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
+import { getAuthedUser } from '@/lib/auth/get-authed-user';
 
 export async function PATCH(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthedUser(request);
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -13,7 +13,8 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
   }
 
-  const { error } = await supabase
+  const service = createServiceClient();
+  const { error } = await service
     .from('profiles')
     .update({ haptics_enabled: enabled })
     .eq('id', user.id);
