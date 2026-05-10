@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
+import { getAuthedUser } from '@/lib/auth/get-authed-user';
 import { ALL_CURRENCIES } from '@/lib/currencies';
 
 export async function PATCH(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthedUser(request);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { currency_code } = await request.json();
@@ -12,7 +12,8 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Invalid currency code' }, { status: 400 });
   }
 
-  const { error } = await supabase
+  const service = createServiceClient();
+  const { error } = await service
     .from('profiles')
     .update({ currency: currency_code })
     .eq('id', user.id);

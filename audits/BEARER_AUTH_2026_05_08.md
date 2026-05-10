@@ -81,3 +81,43 @@ Five paths exercised against the dev server (`pnpm dev` on `localhost:3001` — 
 ## Source-of-truth references
 
 - `audits/SHOULD_I_BUY_2026_05_08.md` — iOS Phase 8 spec; Section 9 + iOS Implementation Notes call out this prerequisite.
+- `audits/SETTINGS_TAB_2026_05_10.md` — iOS Settings spec; Sections 14 and 17 call out the four profile routes as the next consumers of this helper.
+
+---
+
+## Update — 2026-05-10: profile routes refactored for iOS Settings S1
+
+The four profile-mutation routes now use `getAuthedUser` instead of cookie-only auth, making the helper live across **5 route surfaces** (1 from decisions + 4 profile):
+
+| Route | Method | Persists | Used by |
+|---|---|---|---|
+| `/api/decisions/ask`     | POST   | `purchase_decisions` insert | iOS Phase 8 (Should I Buy) |
+| `/api/decisions/outcome` | POST   | `purchase_decisions` update | iOS Phase 8 (Should I Buy) |
+| `/api/profile/theme`     | PATCH  | `profiles.theme_preference` | iOS Settings S1 |
+| `/api/profile/haptics`   | PATCH  | `profiles.haptics_enabled`  | iOS Settings S1 |
+| `/api/profile/currency`  | PATCH  | `profiles.currency`         | iOS Settings S1 |
+| `/api/profile/delete`    | DELETE | 17-table cascade + `profiles` + `auth.users` | iOS Settings S1 |
+
+### Changes per route
+
+For the three PATCH routes (`theme`, `haptics`, `currency`):
+
+- Removed the cookie-bound `createClient` import.
+- Auth resolution: `const user = await getAuthedUser(request)` → 401 if null.
+- Switched the `UPDATE profiles` write from the cookie-bound client to `createServiceClient()` with the same explicit `.eq('id', user.id)` filter that was already there. Same security pattern as `/api/decisions/outcome`: `user.id` comes from a server-verified token, the explicit filter prevents cross-user mutations, RLS bypass is fine because the application-level filter is the gatekeeper.
+
+For `DELETE /api/profile/delete`:
+
+- Removed the cookie-bound `createClient` import.
+- Signature changed `DELETE()` → `DELETE(request: Request)` so the helper can read the `Authorization` header.
+- Auth resolution: `const user = await getAuthedUser(request)` → 401 if null.
+- Service client (`svc`) already in use for the cascade — unchanged.
+
+### Backward compatibility
+
+Cookie auth still works for every route. The helper falls through to `createServerClient().auth.getUser()` when the `Authorization` header is absent. Web browser callers see no behavioral change.
+
+### Test plan (manual)
+
+For Settings S1 testing, the same four-test matrix from the original audit applies (web cookie regression, Bearer happy path, invalid Bearer, no auth) plus DB-level verification that the right `profiles` column flipped. To be exercised once the iOS Settings screen is wired.
+
